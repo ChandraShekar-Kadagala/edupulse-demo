@@ -1,0 +1,6 @@
+jwt:
+  secret: ======================EduPulseSecretKeyForTestingPurpose======================
+  expiration: 86400000
+app:
+  seeder:
+    enabled: false

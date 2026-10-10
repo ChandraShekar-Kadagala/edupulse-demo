@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-risk-low: #10b981;
+  --color-risk-medium: #f59e0b;
+  --color-risk-high: #ef4444;
+  --color-accent: #6366f1;
+}
+
+body {
+  @apply bg-gray-900 text-gray-100 antialiased;
+}
