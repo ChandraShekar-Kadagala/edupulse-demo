@@ -3,6 +3,7 @@ services:
   - type: web
     name: edupulse-backend
     env: docker
+    plan: free
     region: singapore
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
