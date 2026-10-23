@@ -1,4 +1,6 @@
 spring:
+  datasource:
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:edupulse}?sslmode=require}
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -6,9 +8,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 app:
   seeder:
     enabled: false

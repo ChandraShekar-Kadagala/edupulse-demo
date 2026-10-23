@@ -6,24 +6,28 @@ services:
     region: singapore
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
+    healthCheckPath: /health
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      # The database password and JWT secret must be injected via the Render Dashboard
+      # The database password, JWT secret, and host must be configured in Render Dashboard
       - key: DB_PASSWORD
         sync: false
       - key: JWT_SECRET
         sync: false
       - key: DB_HOST
-        value: <your-neon-host>.aws.neon.tech
+        sync: false
       - key: DB_PORT
         value: 5432
       - key: DB_NAME
         value: edupulse
       - key: DB_USER
-        value: edupulse_user
+        value: edupulse_owner
       - key: APP_CORS_ALLOWED_ORIGINS
-        value: <your-frontend-url>
+        sync: false
+      # Optional: full JDBC connection string can be provided instead of individual DB_* variables
+      - key: JDBC_DATABASE_URL
+        sync: false
 
   # Frontend Static Site
   - type: web
@@ -34,4 +38,4 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
-        value: <your-backend-url>/api
+        sync: false
