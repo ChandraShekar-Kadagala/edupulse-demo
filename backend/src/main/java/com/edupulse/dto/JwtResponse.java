@@ -17,4 +17,8 @@ public class JwtResponse {
     private Long id;
     private String username;
     private String role;
+    private List<String> roles;
+    private String email;
+    @Builder.Default
+    private String authProvider = "LOCAL";
 }

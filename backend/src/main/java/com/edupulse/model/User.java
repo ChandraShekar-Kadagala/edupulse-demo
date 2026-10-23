@@ -27,8 +27,31 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
+    @Builder.Default
+    @Column(name = "token_version")
+    private Long tokenVersion = 1L;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider")
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        if (tokenVersion == null) {
+            tokenVersion = 1L;
+        }
+        if (authProvider == null) {
+            authProvider = AuthProvider.LOCAL;
+        }
+    }
+
+    public Long getTokenVersion() {
+        return tokenVersion != null ? tokenVersion : 1L;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider != null ? authProvider : AuthProvider.LOCAL;
     }
 }

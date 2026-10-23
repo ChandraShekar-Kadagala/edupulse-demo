@@ -26,6 +26,9 @@ public class JwtUtils {
 
         return Jwts.builder()
                 .subject((userPrincipal.getUsername()))
+                .claim("uid", userPrincipal.getId())
+                .claim("v", userPrincipal.getTokenVersion())
+                .claim("idp", userPrincipal.getAuthProvider())
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key())
@@ -38,6 +41,28 @@ public class JwtUtils {
 
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser().verifyWith((javax.crypto.SecretKey) key()).build().parseSignedClaims(token).getPayload().getSubject();
+    }
+
+    public Long getTokenVersionFromJwtToken(String token) {
+        try {
+            Claims claims = Jwts.parser().verifyWith((javax.crypto.SecretKey) key()).build().parseSignedClaims(token).getPayload();
+            Object v = claims.get("v");
+            if (v instanceof Number) {
+                return ((Number) v).longValue();
+            }
+            return 1L;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public String getAuthProviderFromJwtToken(String token) {
+        try {
+            Claims claims = Jwts.parser().verifyWith((javax.crypto.SecretKey) key()).build().parseSignedClaims(token).getPayload();
+            return claims.get("idp", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public boolean validateJwtToken(String authToken) {

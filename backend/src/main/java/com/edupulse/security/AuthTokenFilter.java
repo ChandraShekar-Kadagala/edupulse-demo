@@ -34,6 +34,18 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                // Token revocation / password reset check
+                if (userDetails instanceof UserDetailsImpl customUserDetails) {
+                    Long tokenVersionInJwt = jwtUtils.getTokenVersionFromJwtToken(jwt);
+                    if (tokenVersionInJwt != null && tokenVersionInJwt < customUserDetails.getTokenVersion()) {
+                        logger.warn("Revoked or superseded JWT presented for user '{}'. Token version: {}, user version: {}",
+                                username, tokenVersionInJwt, customUserDetails.getTokenVersion());
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                }
+
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,

@@ -23,6 +23,12 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
     
     private Collection<? extends GrantedAuthority> authorities;
+    private Long tokenVersion;
+    private String authProvider;
+
+    public UserDetailsImpl(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        this(id, username, password, authorities, 1L, "LOCAL");
+    }
 
     public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
@@ -31,7 +37,9 @@ public class UserDetailsImpl implements UserDetails {
                 user.getId(), 
                 user.getUsername(), 
                 user.getPasswordHash(), 
-                authorities);
+                authorities,
+                user.getTokenVersion(),
+                user.getAuthProvider() != null ? user.getAuthProvider().name() : "LOCAL");
     }
 
     @Override

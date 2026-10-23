@@ -10,6 +10,7 @@
 # Database and Backups
 edupulse-backup.sql
 *.sql
+!backend/src/main/resources/db/migration/*.sql
 *.dump
 *.db
 *.sqlite

@@ -1,5 +1,7 @@
 package com.edupulse.controller;
 
+import com.edupulse.dto.DashboardSummaryDto;
+import com.edupulse.service.AcademicAnalyticsService;
 import com.edupulse.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +14,18 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashboardController {
+
     @Autowired
     private DashboardService dashboardService;
+
+    @Autowired
+    private AcademicAnalyticsService academicAnalyticsService;
+
+    @GetMapping("/summary")
+    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
+    public ResponseEntity<DashboardSummaryDto> getSummary() {
+        return ResponseEntity.ok(academicAnalyticsService.getDashboardSummary());
+    }
 
     @GetMapping("/stats")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")

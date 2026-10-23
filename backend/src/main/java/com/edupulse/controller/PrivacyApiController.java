@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
 @RestController
-@RequestMapping("/api/v1/privacy")
+@RequestMapping({"/api/privacy", "/api/v1/privacy"})
 public class PrivacyApiController {
 
     @Autowired

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,14 +48,15 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
         long totalClasses = attendances.size();
         if (totalClasses > 0) {
             long presentClasses = attendances.stream().filter(a -> a.getStatus() == AttendanceStatus.PRESENT).count();
-            double attendancePercentage = (double) presentClasses / totalClasses * 100;
+            double attendancePercentage = (double) presentClasses / totalClasses * 100.0;
             if (attendancePercentage < 75.0) {
-                double risk = (75.0 - attendancePercentage) * 1.5; // Max ~40
+                double risk = Math.min((75.0 - attendancePercentage) * 1.5, 40.0);
                 totalRiskScore += risk;
                 assessment.addRiskFactor(RiskFactor.builder()
                         .factorName("Low Attendance")
-                        .impactLevel("MEDIUM")
-                        .description("Attendance is " + String.format("%.1f", attendancePercentage) + "%")
+                        .impactLevel(attendancePercentage < 60.0 ? "HIGH" : "MEDIUM")
+                        .description(String.format(Locale.US, "Attendance is %.1f%% (%d/%d sessions, threshold: 75.0%%)",
+                                attendancePercentage, presentClasses, totalClasses))
                         .build());
             }
         }
@@ -62,28 +64,43 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
         // 2. Marks Risk
         List<Mark> marks = markRepository.findByStudentId(studentId);
         if (!marks.isEmpty()) {
-            double avgMarks = marks.stream().mapToDouble(m -> (m.getMarksObtained() / m.getAssessment().getMaxMarks()) * 100).average().orElse(100.0);
+            double avgMarks = marks.stream()
+                    .filter(m -> m.getAssessment() != null && m.getAssessment().getMaxMarks() > 0)
+                    .mapToDouble(m -> (m.getMarksObtained() / m.getAssessment().getMaxMarks()) * 100.0)
+                    .average().orElse(100.0);
             if (avgMarks < 50.0) {
-                double risk = (50.0 - avgMarks) * 1.0; // Max 50
+                double risk = Math.min((50.0 - avgMarks) * 1.0, 50.0);
                 totalRiskScore += risk;
                 assessment.addRiskFactor(RiskFactor.builder()
                         .factorName("Low Grades")
                         .impactLevel("HIGH")
-                        .description("Average marks are " + String.format("%.1f", avgMarks) + "%")
+                        .description(String.format(Locale.US, "Average marks are %.1f%% across %d evaluations (threshold: 50.0%%)",
+                                avgMarks, marks.size()))
                         .build());
             }
         }
 
         // 3. Missing Assignments Risk
         List<AssignmentSubmission> submissions = submissionRepository.findByStudentId(studentId);
-        long lateOrMissing = submissions.stream().filter(s -> s.getSubmittedAt() == null || s.getSubmittedAt().isAfter(s.getAssignment().getDueDate())).count();
+        long lateOrMissing = submissions.stream()
+                .filter(s -> s.getSubmittedAt() == null || (s.getAssignment() != null && s.getSubmittedAt().isAfter(s.getAssignment().getDueDate())))
+                .count();
         if (lateOrMissing > 0) {
             double risk = lateOrMissing * 5.0; // 5 pts per missing
             totalRiskScore += risk;
             assessment.addRiskFactor(RiskFactor.builder()
                     .factorName("Missing Assignments")
-                    .impactLevel("MEDIUM")
-                    .description(lateOrMissing + " assignments missing or late")
+                    .impactLevel(lateOrMissing >= 3 ? "HIGH" : "MEDIUM")
+                    .description(lateOrMissing + " assignment(s) are overdue or missing submission")
+                    .build());
+        }
+
+        // 4. Missing data flag if completely empty
+        if (totalClasses == 0 && marks.isEmpty() && submissions.isEmpty()) {
+            assessment.addRiskFactor(RiskFactor.builder()
+                    .factorName("Data Status")
+                    .impactLevel("LOW")
+                    .description("Insufficient data: No attendance, marks, or assignment records are available.")
                     .build());
         }
 

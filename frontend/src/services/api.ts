@@ -16,7 +16,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     let errorMsg = null;
-    if (!navigator.onLine) {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new CustomEvent('auth-unauthorized'));
+    } else if (error.response && error.response.status === 429) {
+      errorMsg = "Too many requests. Please wait a moment before trying again.";
+    } else if (!navigator.onLine) {
       errorMsg = "You are currently offline. Please check your internet connection.";
     } else if (error.response && error.response.status >= 500) {
       errorMsg = "Server is currently unavailable. Please try again later.";
@@ -30,5 +36,32 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export function getSafeErrorMessage(error: any, fallback = 'An unexpected error occurred. Please try again.'): string {
+  if (!error) return fallback;
+  if (error.response?.data?.message && typeof error.response.data.message === 'string') {
+    const msg = error.response.data.message;
+    if (msg.includes('Exception') || msg.includes('at com.') || msg.includes('org.hibernate') || msg.includes('org.postgresql')) {
+      return fallback;
+    }
+    return msg;
+  }
+  if (error.response?.status === 401) {
+    return 'Your session has expired. Please log in again.';
+  }
+  if (error.response?.status === 403) {
+    return 'You do not have permission to access this resource.';
+  }
+  if (error.response?.status === 404) {
+    return 'Requested academic record was not found.';
+  }
+  if (error.response?.status === 429) {
+    return 'Too many requests. Please wait a moment before trying again.';
+  }
+  if (error.response?.status >= 500) {
+    return 'The server encountered an error. Please try again later.';
+  }
+  return fallback;
+}
 
 export default api;

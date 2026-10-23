@@ -28,13 +28,16 @@ public class AuthService {
         String jwt = jwtUtils.generateJwtToken(authentication);
         
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();    
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
         return JwtResponse.builder()
                 .token(jwt)
                 .type("Bearer")
                 .id(userDetails.getId())
                 .username(userDetails.getUsername())
-                .role(userDetails.getAuthorities().iterator().next().getAuthority())
+                .role(role)
+                .roles(java.util.List.of(role))
+                .authProvider(userDetails.getAuthProvider() != null ? userDetails.getAuthProvider() : "LOCAL")
                 .build();
     }
 
@@ -106,9 +109,19 @@ public class AuthService {
 
         com.edupulse.model.User user = resetToken.getUser();
         user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setTokenVersion(user.getTokenVersion() + 1);
         userRepository.save(user);
 
         resetToken.setUsed(true);
         tokenRepository.save(resetToken);
+    }
+
+    public void logoutUser(Long userId) {
+        if (userId != null) {
+            userRepository.findById(userId).ifPresent(user -> {
+                user.setTokenVersion(user.getTokenVersion() + 1);
+                userRepository.save(user);
+            });
+        }
     }
 }

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { AuthResponse, User } from '../types';
+import api from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -20,18 +21,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
+
+    const handleUnauthorized = () => {
+      setToken(null);
+      setUser(null);
+    };
+
+    window.addEventListener('auth-unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth-unauthorized', handleUnauthorized);
   }, []);
 
   const login = (data: AuthResponse) => {
+    const resolvedRole = (data.role || (data.roles && data.roles[0]) || 'STUDENT') as any;
     const u: User = {
       id: data.id,
       username: data.username,
-      email: data.email,
-      role: data.roles[0] as any,
-      name: data.username, // Defaulting for MVP
+      email: data.email || '',
+      role: resolvedRole,
+      name: data.username,
+      authProvider: data.authProvider || 'LOCAL',
     };
     
     setToken(data.token);
@@ -41,6 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    // Best effort server-side invalidation
+    api.post('/auth/logout').catch(() => {});
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');

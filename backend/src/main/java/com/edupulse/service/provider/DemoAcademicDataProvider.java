@@ -25,10 +25,27 @@ public class DemoAcademicDataProvider implements AcademicDataProvider {
     private AttendanceRepository attendanceRepository;
     @Autowired
     private RiskAssessmentService riskAssessmentService;
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+
+    @Override
+    public String getProviderName() {
+        return "Synthetic Demo Fixture Provider";
+    }
 
     @Override
     public String getProviderStatus() {
         return "AVAILABLE_FOR_TESTING";
+    }
+
+    @Override
+    public DataProvenance getProvenance() {
+        return DataProvenance.SYNTHETIC_TEST_FIXTURE;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return true;
     }
 
     @Override
@@ -39,18 +56,16 @@ public class DemoAcademicDataProvider implements AcademicDataProvider {
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         // Simulate fetching records from an external API (Fixture Data)
-        Course c = courseRepository.findById(1L).orElseGet(() -> {
-            Course newCourse = Course.builder().code("CS-DEMO").name("Integration Testing").credits(3).build();
+        Course c = courseRepository.findByCode("CS-DEMO").orElseGet(() -> {
+            Course newCourse = Course.builder().code("CS-DEMO").name("Integration Testing (Synthetic Demo)").credits(3).build();
             return courseRepository.save(newCourse);
         });
 
         // Create or find an assessment from the "external API"
-        Assessment assessment = assessmentRepository.findAll().stream()
-                .filter(a -> a.getName().equals("Demo Sync Exam") && a.getCourse().getId().equals(c.getId()))
-                .findFirst()
+        Assessment assessment = assessmentRepository.findByCourseIdAndName(c.getId(), "Demo Sync Exam (Synthetic)")
                 .orElseGet(() -> {
                     Assessment newAssessment = Assessment.builder()
-                            .name("Demo Sync Exam")
+                            .name("Demo Sync Exam (Synthetic)")
                             .maxMarks(100.0)
                             .course(c)
                             .type(AssessmentType.INTERNAL)
@@ -59,10 +74,7 @@ public class DemoAcademicDataProvider implements AcademicDataProvider {
                 });
 
         // Validate and prevent duplicates / handle updates
-        List<Mark> existingMarks = markRepository.findByStudentId(student.getId());
-        Optional<Mark> existingMarkOpt = existingMarks.stream()
-                .filter(m -> m.getAssessment().getId().equals(assessment.getId()))
-                .findFirst();
+        Optional<Mark> existingMarkOpt = markRepository.findByStudentIdAndAssessmentId(student.getId(), assessment.getId());
 
         if (existingMarkOpt.isPresent()) {
             // Update existing mark if different
@@ -82,19 +94,29 @@ public class DemoAcademicDataProvider implements AcademicDataProvider {
         }
             
         // Sync attendance idempotently
-        for(int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++) {
             LocalDate d = LocalDate.now().minusDays(i);
-            if (attendanceRepository.findByStudentIdAndCourseId(student.getId(), c.getId()).stream().noneMatch(a -> a.getDate().equals(d))) {
+            Optional<Attendance> existing = attendanceRepository.findByStudentIdAndCourseIdAndDate(student.getId(), c.getId(), d);
+            if (existing.isEmpty()) {
                 attendanceRepository.save(Attendance.builder().student(student).course(c).date(d).status(AttendanceStatus.PRESENT).build());
             }
         }
         LocalDate d9 = LocalDate.now().minusDays(9);
-        if (attendanceRepository.findByStudentIdAndCourseId(student.getId(), c.getId()).stream().noneMatch(a -> a.getDate().equals(d9))) {
+        Optional<Attendance> existing9 = attendanceRepository.findByStudentIdAndCourseIdAndDate(student.getId(), c.getId(), d9);
+        if (existing9.isEmpty()) {
             attendanceRepository.save(Attendance.builder().student(student).course(c).date(d9).status(AttendanceStatus.ABSENT).build());
         }
 
         // Trigger historical risk snapshot
         riskAssessmentService.calculateRiskForStudent(student.getId());
+
+        // Log synthetic fixture sync in audit log
+        auditLogRepository.save(AuditLog.builder()
+                .action("SYNTHETIC_DEMO_SYNC")
+                .userId(student.getId())
+                .details("Synthetic test fixture synced for student: " + student.getStudentNumber() + ", provenance=" + DataProvenance.SYNTHETIC_TEST_FIXTURE)
+                .timestamp(java.time.LocalDateTime.now())
+                .build());
     }
 
     @Override

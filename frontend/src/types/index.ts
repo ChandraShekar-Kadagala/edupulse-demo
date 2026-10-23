@@ -8,6 +8,7 @@ export interface User {
   role: Role;
   name: string;
   email: string;
+  authProvider?: string;
 }
 
 export interface Student {
@@ -63,6 +64,8 @@ export interface AuthResponse {
   token: string;
   id: number;
   username: string;
-  email: string;
-  roles: string[];
+  email?: string;
+  role?: string;
+  roles?: string[];
+  authProvider?: string;
 }

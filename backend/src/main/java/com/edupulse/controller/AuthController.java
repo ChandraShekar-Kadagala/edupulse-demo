@@ -47,4 +47,12 @@ public class AuthController {
             return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(@org.springframework.security.core.annotation.AuthenticationPrincipal com.edupulse.security.UserDetailsImpl userDetails) {
+        if (userDetails != null) {
+            authService.logoutUser(userDetails.getId());
+        }
+        return ResponseEntity.ok(java.util.Map.of("message", "User logged out successfully. Active tokens invalidated."));
+    }
 }

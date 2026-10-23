@@ -1,7 +1,13 @@
 package com.edupulse.controller;
 
+import com.edupulse.dto.InterventionDto;
 import com.edupulse.dto.RiskAssessmentResponse;
+import com.edupulse.dto.StudentAcademicAnalyticsDto;
+import com.edupulse.dto.StudentDto;
+import com.edupulse.model.Intervention;
 import com.edupulse.model.Student;
+import com.edupulse.service.AcademicAnalyticsService;
+import com.edupulse.service.InterventionService;
 import com.edupulse.service.RiskAssessmentService;
 import com.edupulse.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,26 +21,61 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
+
     @Autowired
     private StudentService studentService;
 
     @Autowired
     private RiskAssessmentService riskAssessmentService;
 
+    @Autowired
+    private AcademicAnalyticsService academicAnalyticsService;
+
+    @Autowired
+    private InterventionService interventionService;
+
     @GetMapping
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
-    public ResponseEntity<List<com.edupulse.dto.StudentDto>> getAllStudents() {
+    public ResponseEntity<List<StudentDto>> getAllStudents() {
         return ResponseEntity.ok(studentService.getAllStudents().stream().map(this::mapToDto).toList());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<com.edupulse.dto.StudentDto> getStudentById(@PathVariable Long id) {
+    public ResponseEntity<StudentDto> getStudentById(@PathVariable Long id) {
         return ResponseEntity.ok(mapToDto(studentService.getStudentById(id)));
     }
-    
-    private com.edupulse.dto.StudentDto mapToDto(Student student) {
-        return com.edupulse.dto.StudentDto.builder()
+
+    @GetMapping("/{id}/analytics")
+    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<StudentAcademicAnalyticsDto> getStudentAnalytics(@PathVariable Long id) {
+        return ResponseEntity.ok(academicAnalyticsService.getStudentAnalytics(id));
+    }
+
+    @GetMapping("/{id}/risk")
+    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<RiskAssessmentResponse> getStudentRisk(@PathVariable Long id) {
+        return ResponseEntity.ok(riskAssessmentService.getLatestRiskAssessment(id));
+    }
+
+    @PostMapping({"/{id}/risk/recalculate", "/{id}/risk/assess"})
+    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<?> recalculateStudentRisk(@PathVariable Long id) {
+        riskAssessmentService.calculateRiskForStudent(id);
+        return ResponseEntity.ok(riskAssessmentService.getLatestRiskAssessment(id));
+    }
+
+    @GetMapping("/{id}/interventions")
+    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<List<InterventionDto>> getStudentInterventions(@PathVariable Long id) {
+        List<InterventionDto> dtos = interventionService.getInterventionsForStudent(id).stream()
+                .map(this::mapInterventionToDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    private StudentDto mapToDto(Student student) {
+        return StudentDto.builder()
                 .id(student.getUser().getId())
                 .name(student.getUser().getName())
                 .email(student.getUser().getEmail())
@@ -44,17 +85,21 @@ public class StudentController {
                 .currentCgpa(student.getCurrentCgpa())
                 .build();
     }
-    
-    @GetMapping("/{id}/risk")
-    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<RiskAssessmentResponse> getStudentRisk(@PathVariable Long id) {
-        return ResponseEntity.ok(riskAssessmentService.getLatestRiskAssessment(id));
-    }
 
-    @PostMapping("/{id}/risk/recalculate")
-    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
-    public ResponseEntity<?> recalculateStudentRisk(@PathVariable Long id) {
-        riskAssessmentService.calculateRiskForStudent(id);
-        return ResponseEntity.ok(riskAssessmentService.getLatestRiskAssessment(id));
+    private InterventionDto mapInterventionToDto(Intervention i) {
+        return InterventionDto.builder()
+                .id(i.getId())
+                .studentId(i.getStudent() != null ? i.getStudent().getUser().getId() : null)
+                .studentName(i.getStudent() != null ? i.getStudent().getUser().getName() : null)
+                .assignedFacultyId(i.getAssignedFaculty() != null ? i.getAssignedFaculty().getUser().getId() : null)
+                .assignedFacultyName(i.getAssignedFaculty() != null ? i.getAssignedFaculty().getUser().getName() : null)
+                .type(i.getType())
+                .description(i.getDescription())
+                .status(i.getStatus())
+                .priority(i.getPriority())
+                .startDate(i.getStartDate())
+                .dueDate(i.getDueDate())
+                .createdAt(i.getCreatedAt())
+                .build();
     }
 }
