@@ -6,6 +6,7 @@ import com.edupulse.dto.StudentAcademicAnalyticsDto;
 import com.edupulse.model.*;
 import com.edupulse.repository.*;
 import com.edupulse.service.AcademicAnalyticsService;
+import com.edupulse.service.RiskAssessmentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,9 @@ public class SrmPortalIntegrationService {
     private AcademicAnalyticsService analyticsService;
 
     @Autowired
+    private RiskAssessmentService riskAssessmentService;
+
+    @Autowired
     private ResourceLoader resourceLoader;
 
     private LocalDateTime lastSyncTime = null;
@@ -66,12 +70,90 @@ public class SrmPortalIntegrationService {
         status.put("prototypeStatus", "CONFIGURED");
         status.put("liveAvailable", false);
         status.put("liveRequirement", "Official Institutional OAuth2/OIDC SSO Authorization");
+        status.put("liveBlocker", "No public API exists for SRM AP. The student portal gates access with image CAPTCHAs. Automated CAPTCHA bypass is prohibited for student privacy & policy compliance.");
         status.put("lastSync", lastSyncTime != null ? lastSyncTime.toString() : "N/A");
         status.put("lastSyncStatus", lastSyncStatus);
         status.put("lastSyncMessage", lastSyncMessage);
         status.put("provenance", DataProvenance.INSTITUTIONAL_PORTAL_FIXTURE.name());
+        status.put("availableDataStreams", List.of(
+                "Course Attendance (Conducted, Attended, Absent, OD/ML, Percentage)",
+                "Internal Assessment Marks (Granular Tests, Quizzes, Totals)",
+                "Semester Examination Ledger (Grades, Grade Points, Credits, Pass/Fail)",
+                "Cumulative Grade Point Average (CGPA)",
+                "Weekly Timetable & Classroom Allocation",
+                "Student Profile & Academic Registration"
+        ));
+        status.put("supportedModes", List.of(
+                "OFFICIAL_OAUTH2_READY (Pending University Agreement)",
+                "AUTHENTIC_REPORT_SYNC (Verified Student HTML Ingestion)",
+                "PORTAL_FIXTURE_PIPELINE (Verified DOM Test Suite)",
+                "DEMO_SANDBOX (Synthetic Simulation)"
+        ));
         status.put("message", "No official public API exists for SRM AP. Account linking is blocked. Verified HTML prototype pipeline is active.");
         return status;
+    }
+
+    @Transactional
+    public StudentAcademicAnalyticsDto synchronizeFromHtmlReport(Long studentUserId, String attendanceHtml, String marksHtml, String ledgerHtml) {
+        Student student = studentRepository.findById(studentUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with user ID: " + studentUserId));
+
+        log.info("Starting authentic SRM AP portal report synchronization for student: {} ({})", student.getStudentNumber(), studentUserId);
+
+        int attendanceCount = 0;
+        int marksCount = 0;
+
+        // 1. Process Exam Ledger if provided
+        if (ledgerHtml != null && !ledgerHtml.trim().isEmpty()) {
+            SrmPortalParserService.ExamLedgerParseResult ledgerResult = parserService.parseExamLedgerHtml(ledgerHtml);
+            if (ledgerResult.overallCgpa() != null && ledgerResult.overallCgpa() > 0.0) {
+                student.setCurrentCgpa(ledgerResult.overallCgpa());
+                studentRepository.save(student);
+            }
+        }
+
+        // 2. Process Attendance if provided
+        if (attendanceHtml != null && !attendanceHtml.trim().isEmpty()) {
+            SrmPortalParserService.AttendanceParseResult attResult = parserService.parseAttendanceHtml(attendanceHtml);
+            for (CourseAttendanceDto dto : attResult.records()) {
+                Course course = findOrCreateCourse(dto.getCourseCode(), dto.getCourseName());
+                syncAttendanceRecords(student, course, (int) dto.getTotalHours(), (int) dto.getAttendedHours());
+            }
+            attendanceCount = attResult.validCount();
+        }
+
+        // 3. Process Marks if provided
+        if (marksHtml != null && !marksHtml.trim().isEmpty()) {
+            SrmPortalParserService.MarksParseResult marksResult = parserService.parseMarksHtml(marksHtml);
+            for (AssessmentMarkDto dto : marksResult.records()) {
+                Course course = findOrCreateCourse(dto.getCourseCode(), dto.getCourseName());
+                Assessment assessment = findOrCreateAssessment(course, dto.getAssessmentName(), dto.getAssessmentType(), dto.getMaxMarks(), dto.getWeightage());
+                syncMarkRecord(student, assessment, dto.getMarksObtained());
+            }
+            marksCount = marksResult.validCount();
+        }
+
+        // 4. Calculate Risk Score using EduPulse's real risk engine
+        riskAssessmentService.calculateRiskForStudent(studentUserId);
+
+        // 5. Audit Log
+        AuditLog auditLog = AuditLog.builder()
+                .action("PORTAL_REPORT_SYNC")
+                .userId(studentUserId)
+                .details(String.format("Synchronized authentic SRM AP portal report: %d attendance courses, %d assessment marks. Provenance: %s",
+                        attendanceCount, marksCount, DataProvenance.INSTITUTIONAL_PORTAL_REPORT.name()))
+                .timestamp(LocalDateTime.now())
+                .build();
+        auditLogRepository.save(auditLog);
+
+        this.lastSyncTime = LocalDateTime.now();
+        this.lastSyncStatus = "SUCCESS";
+        this.lastSyncedAttendanceRows = attendanceCount;
+        this.lastSyncedMarksRows = marksCount;
+        this.lastSyncMessage = String.format("Successfully synchronized authentic report: %d courses and %d assessments.",
+                attendanceCount, marksCount);
+
+        return analyticsService.calculateStudentAnalytics(student.getStudentNumber(), DataProvenance.INSTITUTIONAL_PORTAL_REPORT);
     }
 
     @Transactional

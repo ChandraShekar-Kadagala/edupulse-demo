@@ -14,7 +14,7 @@ public class OfficialSrmDataProvider implements AcademicDataProvider, SrmApiCont
 
     @Override
     public String getProviderStatus() {
-        return "UNSUPPORTED_ACCESS_PENDING_OAUTH";
+        return "UNSUPPORTED_ACCESS_PORTAL_AUTH_REQUIRED";
     }
 
     @Override
@@ -34,17 +34,23 @@ public class OfficialSrmDataProvider implements AcademicDataProvider, SrmApiCont
 
     @Override
     public String getAuthenticationMechanism() {
-        return "OAUTH2_AUTHORIZATION_CODE_PKCE (PENDING_INSTITUTIONAL_APPROVAL)";
+        return "OAUTH2_AUTHORIZATION_CODE_PKCE (INSTITUTIONAL_APPROVAL_REQUIRED)";
     }
 
     @Override
     public String getBaseUrl() {
-        return null;
+        return "https://student.srmap.edu.in/srmapstudentcorner";
     }
 
     @Override
     public void synchronizeOfficialStudentRecords(String srmRegistrationNumber) {
-        throw new UnsupportedOperationException("Live SRM portal login requires official OAuth2/OIDC SSO credentials or institutional API authorization. Direct portal credential scraping is prohibited for student privacy.");
+        throw new UnsupportedOperationException(
+                "Live SRM portal login requires official OAuth2/OIDC SSO credentials or institutional API authorization. " +
+                "Direct portal credential scraping is prohibited for student privacy. " +
+                "Direct automated portal scraping against https://student.srmap.edu.in is blocked because SRM AP does not provide an official API and protects its legacy student portal with image CAPTCHAs. " +
+                "In compliance with EduPulse security principles, automated CAPTCHA bypassing and credential scraping are prohibited. " +
+                "Please use verified Institutional Portal Report ingestion or institutional OAuth2 authorization."
+        );
     }
 
     @Override
@@ -54,6 +60,6 @@ public class OfficialSrmDataProvider implements AcademicDataProvider, SrmApiCont
 
     @Override
     public boolean supportsAutoSync() {
-        return true;
+        return false;
     }
 }

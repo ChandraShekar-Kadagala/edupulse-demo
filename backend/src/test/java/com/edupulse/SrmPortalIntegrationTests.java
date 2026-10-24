@@ -286,4 +286,85 @@ public class SrmPortalIntegrationTests {
         // Confirm Student model has only academic attributes
         assertEquals("AP21110010001", testStudent.getStudentNumber());
     }
+
+    @Test
+    @DisplayName("Real SRM Portal DOM: Successfully parses table#tblSubjectWiseAttendance (StoreVia DOM reference)")
+    void testRealSrmPortalAttendanceTableParsing() throws Exception {
+        String html = loadResource("classpath:fixtures/srm_real_portal_attendance.html");
+        SrmPortalParserService.AttendanceParseResult result = parserService.parseAttendanceHtml(html);
+
+        assertNotNull(result);
+        assertEquals(3, result.validCount(), "Must parse all 3 courses from real SRM AP DOM");
+        assertTrue(result.errors().isEmpty());
+
+        CourseAttendanceDto cse201 = result.records().stream()
+                .filter(c -> "CSE201".equals(c.getCourseCode()))
+                .findFirst().orElseThrow();
+        assertEquals("Data Structures and Algorithms", cse201.getCourseName());
+        assertEquals(45, cse201.getTotalHours());
+        assertEquals(40, cse201.getAttendedHours());
+        assertEquals(88.89, cse201.getAttendancePercentage());
+        assertEquals("NORMAL", cse201.getStatus());
+
+        CourseAttendanceDto cse202 = result.records().stream()
+                .filter(c -> "CSE202".equals(c.getCourseCode()))
+                .findFirst().orElseThrow();
+        assertEquals(66.67, cse202.getAttendancePercentage());
+        assertEquals("CRITICAL", cse202.getStatus());
+    }
+
+    @Test
+    @DisplayName("Real SRM Portal DOM: Successfully parses Exam Ledger and extracts CGPA")
+    void testRealSrmPortalExamLedgerParsing() throws Exception {
+        String html = loadResource("classpath:fixtures/srm_real_portal_ledger.html");
+        SrmPortalParserService.ExamLedgerParseResult result = parserService.parseExamLedgerHtml(html);
+
+        assertNotNull(result);
+        assertEquals(3, result.validCount(), "Must parse 3 subject grades from ledger");
+        assertEquals(8.85, result.overallCgpa(), "Must correctly extract CGPA from portal text");
+        assertTrue(result.errors().isEmpty());
+
+        SrmPortalParserService.ExamLedgerRowDto cse101 = result.records().stream()
+                .filter(r -> "CSE101".equals(r.courseCode()))
+                .findFirst().orElseThrow();
+        assertEquals("A+", cse101.grade());
+        assertEquals(10.0, cse101.gradePoints());
+        assertEquals("PASS", cse101.result());
+    }
+
+    @Test
+    @DisplayName("Report Sync: Ingests authentic SRM AP report HTML, updates student CGPA, and recalculates risk")
+    void testAuthenticReportSynchronization() throws Exception {
+        String attHtml = loadResource("classpath:fixtures/srm_real_portal_attendance.html");
+        String ledgerHtml = loadResource("classpath:fixtures/srm_real_portal_ledger.html");
+
+        StudentAcademicAnalyticsDto analytics = integrationService.synchronizeFromHtmlReport(
+                testStudent.getId(), attHtml, null, ledgerHtml
+        );
+
+        assertNotNull(analytics);
+        assertEquals(DataProvenance.INSTITUTIONAL_PORTAL_REPORT.name(), analytics.getProvenance());
+        assertTrue(analytics.isHasAttendanceData());
+
+        // Verify Student CGPA was updated from exam ledger
+        Student updatedStudent = studentRepository.findById(testStudent.getId()).orElseThrow();
+        assertEquals(8.85, updatedStudent.getCurrentCgpa(), "Student CGPA should be updated from authentic ledger");
+
+        // Verify audit log
+        List<AuditLog> logs = auditLogRepository.findByUserId(testStudent.getId());
+        assertFalse(logs.isEmpty());
+        boolean hasReportLog = logs.stream().anyMatch(l -> "PORTAL_REPORT_SYNC".equals(l.getAction()));
+        assertTrue(hasReportLog, "Audit log should record PORTAL_REPORT_SYNC");
+    }
+
+    @Test
+    @DisplayName("Official Provider: Throws descriptive exception explaining why automated CAPTCHA scraping is blocked")
+    void testOfficialProvider_ExplainsInstitutionalBlocker() {
+        UnsupportedOperationException ex = assertThrows(
+                UnsupportedOperationException.class,
+                () -> officialSrmDataProvider.synchronizeOfficialStudentRecords("AP21110010001")
+        );
+        assertTrue(ex.getMessage().contains("CAPTCHA"));
+        assertTrue(ex.getMessage().contains("OAuth2"));
+    }
 }

@@ -25,7 +25,7 @@ services:
       - key: DB_USER
         value: edupulse_owner
       - key: APP_CORS_ALLOWED_ORIGINS
-        sync: false
+        value: https://edupulse-frontend-lpnl.onrender.com,http://localhost:5173,http://localhost:4173
       # Optional: full JDBC connection string can be provided instead of individual DB_* variables
       - key: JDBC_DATABASE_URL
         sync: false
@@ -38,4 +38,4 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
-        sync: false
+        value: https://edupulse-backend-iooh.onrender.com/api
