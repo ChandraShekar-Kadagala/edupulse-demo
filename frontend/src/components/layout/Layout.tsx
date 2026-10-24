@@ -66,7 +66,14 @@ export default function Layout() {
             </div>
             <div className="ml-3 flex-1 overflow-hidden">
               <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-              <p className="text-xs text-gray-400 truncate">{user?.role}</p>
+              <div className="flex items-center space-x-1.5 mt-0.5">
+                <p className="text-xs text-gray-400 truncate">{user?.role}</p>
+                {(user?.authProvider === 'DEMO' || user?.name?.includes('Demo')) && (
+                  <span className="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-1 rounded border border-amber-500/30 uppercase tracking-wide">
+                    DEMO
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <button
@@ -90,6 +97,12 @@ export default function Layout() {
           <div className="text-sm text-gray-400">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </div>
+          {(user?.authProvider === 'DEMO' || user?.name?.includes('Demo')) && (
+            <div className="flex items-center space-x-2 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-semibold text-amber-400">
+              <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+              <span>DEMO SHOWCASE ENVIRONMENT — Illustrative Sandbox Data</span>
+            </div>
+          )}
         </header>
         <div className="flex-1 overflow-y-auto p-8">
           <Outlet />

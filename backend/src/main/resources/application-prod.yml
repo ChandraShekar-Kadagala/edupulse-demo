@@ -12,5 +12,7 @@ app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:https://edupulse-frontend-lpnl.onrender.com,http://localhost:5173,http://localhost:4173}
   seeder:
-    enabled: false
+    enabled: ${SEED_DEMO_DATA:false}
+    demo-password: ${DEMO_USER_PASSWORD:DemoEduPulse2026!}
+
 

@@ -15,6 +15,22 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.seeder.enabled:false}")
+    private boolean demoModeEnabled;
+
+    @GetMapping("/demo-status")
+    public ResponseEntity<?> getDemoStatus() {
+        return ResponseEntity.ok(java.util.Map.of(
+                "demoModeEnabled", demoModeEnabled,
+                "demoMarker", "DEMO_SHOWCASE",
+                "defaultStudentUsername", "arun",
+                "defaultStudentRegNo", "STU-1001",
+                "defaultFacultyUsername", "faculty",
+                "defaultAdminUsername", "admin",
+                "disclaimer", "Illustrative sandbox demo data for evaluation and testing. Not affiliated with actual SRM University AP student records."
+        ));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         JwtResponse jwtResponse = authService.authenticateUser(loginRequest);

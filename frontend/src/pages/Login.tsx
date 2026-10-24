@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { Activity, Eye, EyeOff } from 'lucide-react';
+import { Activity, Eye, EyeOff, Sparkles, UserCheck, GraduationCap, Building2 } from 'lucide-react';
+
+interface DemoStatus {
+  demoModeEnabled: boolean;
+  demoMarker?: string;
+  defaultStudentUsername?: string;
+  defaultStudentRegNo?: string;
+  defaultFacultyUsername?: string;
+  defaultAdminUsername?: string;
+  disclaimer?: string;
+}
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -10,9 +20,24 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoStatus, setDemoStatus] = useState<DemoStatus | null>(null);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+    api.get('/auth/demo-status')
+      .then(res => {
+        if (isMounted && res.data?.demoModeEnabled) {
+          setDemoStatus(res.data);
+        }
+      })
+      .catch(() => {
+        // Silently keep demoStatus null if unavailable or endpoint fails
+      });
+    return () => { isMounted = false; };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,15 +58,29 @@ export default function Login() {
       navigate('/dashboard');
     } catch (err: any) {
       console.error("Login API failed:", err);
-      setError(err.response?.data?.message || 'Invalid credentials or API unreachable. Ensure the backend is running.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Invalid credentials or API unreachable. Ensure the backend is running.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleFillDemo = (role: 'student' | 'faculty' | 'admin') => {
+    setError('');
+    if (role === 'student') {
+      setUsername(demoStatus?.defaultStudentUsername || 'arun');
+      setPassword('DemoEduPulse2026!');
+    } else if (role === 'faculty') {
+      setUsername(demoStatus?.defaultFacultyUsername || 'faculty');
+      setPassword('DemoEduPulse2026!');
+    } else if (role === 'admin') {
+      setUsername(demoStatus?.defaultAdminUsername || 'admin');
+      setPassword('DemoEduPulse2026!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:px-6 lg:px-8 font-sans">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-6">
         
         {/* Branding Header */}
         <div className="flex flex-col items-center">
@@ -93,7 +132,7 @@ export default function Login() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 disabled:bg-gray-50 transition-colors duration-200"
-                  placeholder="e.g. AP25110070436"
+                  placeholder="e.g. AP25110070436 or arun"
                 />
               </div>
             </div>
@@ -166,6 +205,67 @@ export default function Login() {
             </div>
           </form>
         </div>
+
+        {/* Explicit Demo Credentials Panel (Rendered only when Demo Mode is explicitly enabled) */}
+        {demoStatus?.demoModeEnabled && (
+          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-4 shadow-sm text-amber-900">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-1.5">
+                <Sparkles className="h-4 w-4 text-amber-600" />
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                  Demo Showcase Mode Active
+                </span>
+              </div>
+              <span className="text-[10px] font-semibold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">
+                SANDBOX
+              </span>
+            </div>
+
+            <p className="text-xs text-amber-800 mb-3 leading-relaxed">
+              {demoStatus.disclaimer || 'Illustrative demonstration accounts only. Synthetic data for evaluation; not affiliated with real SRM student records.'}
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleFillDemo('student')}
+                className="flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-amber-200 hover:border-amber-400 hover:bg-amber-100/50 transition-colors text-left"
+              >
+                <GraduationCap className="h-4 w-4 text-indigo-600 mb-1" />
+                <span className="text-xs font-semibold text-gray-900">Student</span>
+                <span className="text-[10px] text-gray-500 font-mono">arun</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleFillDemo('faculty')}
+                className="flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-amber-200 hover:border-amber-400 hover:bg-amber-100/50 transition-colors text-left"
+              >
+                <Building2 className="h-4 w-4 text-emerald-600 mb-1" />
+                <span className="text-xs font-semibold text-gray-900">Faculty</span>
+                <span className="text-[10px] text-gray-500 font-mono">faculty</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleFillDemo('admin')}
+                className="flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-amber-200 hover:border-amber-400 hover:bg-amber-100/50 transition-colors text-left"
+              >
+                <UserCheck className="h-4 w-4 text-purple-600 mb-1" />
+                <span className="text-xs font-semibold text-gray-900">Admin</span>
+                <span className="text-[10px] text-gray-500 font-mono">admin</span>
+              </button>
+            </div>
+
+            <div className="mt-2.5 pt-2 border-t border-amber-200/60 flex items-center justify-between text-[11px] text-amber-800">
+              <span>Demo Password:</span>
+              <code className="bg-amber-100/80 px-1.5 py-0.5 rounded font-mono text-[10px] select-all">
+                DemoEduPulse2026!
+              </code>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
