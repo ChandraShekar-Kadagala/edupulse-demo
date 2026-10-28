@@ -4,8 +4,14 @@ import com.edupulse.dto.InterventionDto;
 import com.edupulse.dto.RiskAssessmentResponse;
 import com.edupulse.dto.StudentAcademicAnalyticsDto;
 import com.edupulse.dto.StudentDto;
+import com.edupulse.dto.UserDto;
+import com.edupulse.model.Attendance;
+import com.edupulse.model.AttendanceStatus;
 import com.edupulse.model.Intervention;
+import com.edupulse.model.Mark;
 import com.edupulse.model.Student;
+import com.edupulse.repository.AttendanceRepository;
+import com.edupulse.repository.MarkRepository;
 import com.edupulse.service.AcademicAnalyticsService;
 import com.edupulse.service.InterventionService;
 import com.edupulse.service.RiskAssessmentService;
@@ -33,6 +39,12 @@ public class StudentController {
 
     @Autowired
     private InterventionService interventionService;
+
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private MarkRepository markRepository;
 
     @GetMapping
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
@@ -75,14 +87,65 @@ public class StudentController {
     }
 
     private StudentDto mapToDto(Student student) {
-        return StudentDto.builder()
+        UserDto userDto = student.getUser() != null ? UserDto.builder()
                 .id(student.getUser().getId())
+                .username(student.getUser().getUsername())
                 .name(student.getUser().getName())
                 .email(student.getUser().getEmail())
+                .role(student.getUser().getRole())
+                .authProvider(student.getUser().getAuthProvider())
+                .build() : null;
+
+        Long studentId = student.getUser() != null ? student.getUser().getId() : student.getId();
+
+        List<Attendance> attendances = attendanceRepository.findByStudentId(studentId);
+        Double attendancePercentage = null;
+        Long totalClasses = null;
+        Long presentClasses = null;
+        if (attendances != null && !attendances.isEmpty()) {
+            totalClasses = (long) attendances.size();
+            presentClasses = attendances.stream().filter(a -> a.getStatus() == AttendanceStatus.PRESENT).count();
+            attendancePercentage = Math.round(((double) presentClasses / totalClasses * 100.0) * 10.0) / 10.0;
+        }
+
+        List<Mark> marks = markRepository.findByStudentId(studentId);
+        Double avgMarks = null;
+        if (marks != null && !marks.isEmpty()) {
+            double avg = marks.stream()
+                    .filter(m -> m.getAssessment() != null && m.getAssessment().getMaxMarks() > 0)
+                    .mapToDouble(m -> (m.getMarksObtained() / m.getAssessment().getMaxMarks()) * 100.0)
+                    .average().orElse(0.0);
+            avgMarks = Math.round(avg * 10.0) / 10.0;
+        }
+
+        RiskAssessmentResponse risk = null;
+        try {
+            risk = riskAssessmentService.getLatestRiskAssessment(studentId);
+        } catch (Exception ignored) {
+        }
+
+        String riskLevel = risk != null && risk.getRiskLevel() != null ? risk.getRiskLevel().name() : null;
+        Double riskScore = risk != null ? risk.getRiskScore() : null;
+        String riskReason = (risk != null && risk.getRiskFactors() != null && !risk.getRiskFactors().isEmpty())
+                ? risk.getRiskFactors().get(0).getDescription()
+                : null;
+
+        return StudentDto.builder()
+                .id(studentId)
+                .name(student.getUser() != null ? student.getUser().getName() : null)
+                .email(student.getUser() != null ? student.getUser().getEmail() : null)
                 .studentNumber(student.getStudentNumber())
                 .department(student.getDepartment())
                 .currentSemester(student.getCurrentSemester())
                 .currentCgpa(student.getCurrentCgpa())
+                .user(userDto)
+                .riskLevel(riskLevel)
+                .riskScore(riskScore)
+                .riskReason(riskReason)
+                .attendancePercentage(attendancePercentage)
+                .averageMarksPercentage(avgMarks)
+                .totalClasses(totalClasses)
+                .presentClasses(presentClasses)
                 .build();
     }
 

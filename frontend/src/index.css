@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-risk-low: #10b981;
   --color-risk-medium: #f59e0b;
@@ -8,5 +10,5 @@
 }
 
 body {
-  @apply bg-gray-900 text-gray-100 antialiased;
+  @apply bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 antialiased transition-colors duration-200;
 }

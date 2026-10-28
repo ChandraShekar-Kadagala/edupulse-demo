@@ -14,6 +14,10 @@ public class InterventionService {
     public List<Intervention> getInterventionsForStudent(Long studentId) {
         return interventionRepository.findByStudentId(studentId);
     }
+
+    public List<Intervention> getAllInterventions() {
+        return interventionRepository.findAll();
+    }
     
     public Intervention createIntervention(Intervention intervention) {
         return interventionRepository.save(intervention);

@@ -23,6 +23,15 @@ public class InterventionController {
     @Autowired
     private com.edupulse.repository.FacultyRepository facultyRepository;
 
+    @GetMapping
+    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
+    public ResponseEntity<List<com.edupulse.dto.InterventionDto>> getAllInterventions() {
+        List<com.edupulse.dto.InterventionDto> dtos = interventionService.getAllInterventions().stream()
+                .map(this::mapToDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #studentId == principal.id")
     public ResponseEntity<List<com.edupulse.dto.InterventionDto>> getInterventionsForStudent(@PathVariable Long studentId) {

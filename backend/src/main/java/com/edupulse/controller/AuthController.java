@@ -23,8 +23,14 @@ public class AuthController {
         return ResponseEntity.ok(java.util.Map.of(
                 "demoModeEnabled", demoModeEnabled,
                 "demoMarker", "DEMO_SHOWCASE",
+                "students", java.util.List.of(
+                        java.util.Map.of("username", "aarav", "regNo", "STU-1001", "name", "Aarav Sharma", "risk", "LOW", "cgpa", 9.4),
+                        java.util.Map.of("username", "bhavna", "regNo", "STU-1002", "name", "Bhavna Patel", "risk", "LOW", "cgpa", 7.9),
+                        java.util.Map.of("username", "chirag", "regNo", "STU-1003", "name", "Chirag Verma", "risk", "MEDIUM", "cgpa", 6.2),
+                        java.util.Map.of("username", "arun", "regNo", "STU-1004", "name", "Arun Kumar", "risk", "HIGH", "cgpa", 5.1)
+                ),
                 "defaultStudentUsername", "arun",
-                "defaultStudentRegNo", "STU-1001",
+                "defaultStudentRegNo", "STU-1004",
                 "defaultFacultyUsername", "faculty",
                 "defaultAdminUsername", "admin",
                 "disclaimer", "Illustrative sandbox demo data for evaluation and testing. Not affiliated with actual SRM University AP student records."
