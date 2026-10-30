@@ -51,16 +51,19 @@ public class AcademicAnalyticsService {
     @Autowired
     private TimetableService timetableService;
 
+    @Transactional
     public StudentAcademicAnalyticsDto getStudentAnalytics(Long studentId) {
         return getStudentAnalytics(studentId, null);
     }
 
+    @Transactional
     public StudentAcademicAnalyticsDto calculateStudentAnalytics(String studentNumber, DataProvenance overrideProvenance) {
         Student student = studentRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with number: " + studentNumber));
         return getStudentAnalytics(student.getId(), overrideProvenance);
     }
 
+    @Transactional
     public StudentAcademicAnalyticsDto getStudentAnalytics(Long studentId, DataProvenance overrideProvenance) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));

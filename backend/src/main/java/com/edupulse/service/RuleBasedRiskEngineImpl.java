@@ -6,6 +6,7 @@ import com.edupulse.model.*;
 import com.edupulse.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -34,7 +35,7 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
     private AssignmentSubmissionRepository submissionRepository;
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RiskAssessment calculateRiskForStudent(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
