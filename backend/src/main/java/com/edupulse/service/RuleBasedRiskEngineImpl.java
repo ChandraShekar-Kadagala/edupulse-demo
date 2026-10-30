@@ -266,6 +266,7 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
         }
 
         String provenance = (student.getStudentNumber().equals("STU-1001")
+                || student.getUser().getUsername().equalsIgnoreCase("demo.student.a")
                 || student.getUser().getUsername().equalsIgnoreCase("student_a")
                 || student.getUser().getName().contains("Student A"))
                 ? "STUDENT-SUPPLIED REFERENCE DATA"

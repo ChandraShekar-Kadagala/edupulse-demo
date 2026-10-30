@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -31,14 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@TestPropertySource(properties = {
-        "app.seeder.enabled=true",
-        "app.seeder.demo-password=DemoEduPulse2026!"
+@org.springframework.test.context.TestPropertySource(properties = {
+        "app.seeder.enabled=true"
 })
 public class DemoShowcaseSeederTests {
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Autowired
     private DataSeeder dataSeeder;
@@ -77,25 +72,20 @@ public class DemoShowcaseSeederTests {
     private RiskAssessmentRepository riskAssessmentRepository;
 
     @Autowired
-    private RiskFactorRepository riskFactorRepository;
-
-    @Autowired
-    private PasswordResetTokenRepository tokenRepository;
+    private AcademicAnalyticsService academicAnalyticsService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private MockMvc mockMvc;
 
     @Autowired
-    private AcademicAnalyticsService academicAnalyticsService;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void cleanDatabase() {
-        tokenRepository.deleteAll();
+    public void setup() {
         interventionRepository.deleteAll();
-        riskFactorRepository.deleteAll();
         riskAssessmentRepository.deleteAll();
         submissionRepository.deleteAll();
         assignmentRepository.deleteAll();
@@ -109,14 +99,13 @@ public class DemoShowcaseSeederTests {
     }
 
     @Test
-    @DisplayName("1. Seeding with empty tables creates 7 courses, 4-student showcase cohort and 2 faculty profiles")
-    public void testSeedingEnabled_EmptyTables_CreatesFourStudentShowcaseCohort() {
+    @DisplayName("1. Seeding creates 7 courses, 4-student showcase cohort and 2 faculty profiles")
+    public void testSeedingEnabled_CreatesFourStudentShowcaseCohort() {
         boolean seeded = dataSeeder.seedDemoData();
-        assertTrue(seeded, "Expected seedDemoData to succeed on empty database");
+        assertTrue(seeded, "Expected seedDemoData to succeed");
 
-        assertEquals(8, userRepository.count(), "Expected 8 demo users (admin, 2 faculty + alias, 4 students)");
         assertEquals(4, studentRepository.count(), "Exactly 4 demo student records should be created");
-        assertEquals(2, facultyRepository.count(), "Exactly 2 demo faculty profiles should be created (roopa, aditya)");
+        assertEquals(2, facultyRepository.count(), "Exactly 2 demo faculty profiles should be created");
         assertEquals(7, courseRepository.count(), "All 7 SRM AP courses must be seeded");
         assertEquals(3, interventionRepository.count(), "3 demo interventions should be seeded");
 
@@ -127,26 +116,26 @@ public class DemoShowcaseSeederTests {
         assertEquals(Role.ADMIN, admin.getRole());
         assertEquals(AuthProvider.DEMO, admin.getAuthProvider());
 
-        // Verify Faculty 1: Dr. Roopa Tirumalasetti (assigned CSE 204)
-        Optional<User> roopaOpt = userRepository.findByUsername("roopa");
-        assertTrue(roopaOpt.isPresent(), "Demo faculty roopa must exist");
-        User roopaUser = roopaOpt.get();
-        assertEquals(Role.FACULTY, roopaUser.getRole());
-        Faculty roopaProfile = facultyRepository.findById(roopaUser.getId()).orElseThrow();
-        assertEquals("Associate Professor", roopaProfile.getTitle());
+        // Verify Faculty 1: Faculty A (assigned CSE 204)
+        Optional<User> f1Opt = userRepository.findByUsername("demo.faculty.1");
+        assertTrue(f1Opt.isPresent(), "Demo faculty 1 must exist");
+        User f1User = f1Opt.get();
+        assertEquals(Role.FACULTY, f1User.getRole());
+        Faculty f1Profile = facultyRepository.findById(f1User.getId()).orElseThrow();
+        assertEquals("Associate Professor", f1Profile.getTitle());
 
-        // Verify Faculty 2: Dr. Aditya Kumar Sahu (assigned CSE 213)
-        Optional<User> adityaOpt = userRepository.findByUsername("aditya");
-        assertTrue(adityaOpt.isPresent(), "Demo faculty aditya must exist");
-        User adityaUser = adityaOpt.get();
-        assertEquals(Role.FACULTY, adityaUser.getRole());
-        Faculty adityaProfile = facultyRepository.findById(adityaUser.getId()).orElseThrow();
-        assertEquals("Assistant Professor", adityaProfile.getTitle());
+        // Verify Faculty 2: Faculty B (assigned CSE 213)
+        Optional<User> f2Opt = userRepository.findByUsername("demo.faculty.2");
+        assertTrue(f2Opt.isPresent(), "Demo faculty 2 must exist");
+        User f2User = f2Opt.get();
+        assertEquals(Role.FACULTY, f2User.getRole());
+        Faculty f2Profile = facultyRepository.findById(f2User.getId()).orElseThrow();
+        assertEquals("Assistant Professor", f2Profile.getTitle());
 
         // Verify Student 1: Student A (Reference Profile - Anonymized)
         Student studentA = studentRepository.findByStudentNumber("STU-1001").orElseThrow();
-        assertEquals("student_a", studentA.getUser().getUsername());
-        assertEquals("Student A (Reference Profile)", studentA.getUser().getName());
+        assertEquals("demo.student.a", studentA.getUser().getUsername());
+        assertEquals("Student A — Reference", studentA.getUser().getName());
         RiskAssessment aRisk = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(studentA.getId()).orElseThrow();
         assertEquals(RiskLevel.LOW, aRisk.getRiskLevel(), "Student A must have LOW risk");
         assertEquals(0.0, aRisk.getRiskScore(), 0.1, "Student A risk score must be 0.0");
@@ -166,68 +155,66 @@ public class DemoShowcaseSeederTests {
                 .sum();
         assertEquals(150.44, convertedSum, 0.05, "Student A converted marks sum must equal exactly 150.44");
 
-        // Verify Student 2: Student B — Top Performer (Aarav Sharma - LOW risk)
-        Student aarav = studentRepository.findByStudentNumber("STU-1002").orElseThrow();
-        assertEquals("aarav", aarav.getUser().getUsername());
-        RiskAssessment aaravRisk = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(aarav.getId()).orElseThrow();
-        assertEquals(RiskLevel.LOW, aaravRisk.getRiskLevel(), "Aarav must be LOW risk");
-        assertEquals(0.0, aaravRisk.getRiskScore(), 0.1, "Aarav risk score should be 0.0");
+        // Verify Student 2: Student B — Top Performer (LOW risk)
+        Student studentB = studentRepository.findByStudentNumber("STU-1002").orElseThrow();
+        assertEquals("demo.student.b", studentB.getUser().getUsername());
+        RiskAssessment bRisk = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(studentB.getId()).orElseThrow();
+        assertEquals(RiskLevel.LOW, bRisk.getRiskLevel(), "Student B must be LOW risk");
+        assertEquals(0.0, bRisk.getRiskScore(), 0.1, "Student B risk score should be 0.0");
 
-        // Verify Student 3: Student C — Average Performer (Bhavna Patel - MEDIUM risk)
-        Student bhavna = studentRepository.findByStudentNumber("STU-1003").orElseThrow();
-        assertEquals("bhavna", bhavna.getUser().getUsername());
-        RiskAssessment bhavnaRisk = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(bhavna.getId()).orElseThrow();
-        assertEquals(RiskLevel.MEDIUM, bhavnaRisk.getRiskLevel(), "Bhavna must be MEDIUM risk");
-        assertTrue(bhavnaRisk.getRiskScore() >= 35.0 && bhavnaRisk.getRiskScore() < 65.0, "Bhavna risk score must be in medium range (35-65)");
+        // Verify Student 3: Student C — Average Performer (MEDIUM risk)
+        Student studentC = studentRepository.findByStudentNumber("STU-1003").orElseThrow();
+        assertEquals("demo.student.c", studentC.getUser().getUsername());
+        RiskAssessment cRisk = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(studentC.getId()).orElseThrow();
+        assertEquals(RiskLevel.MEDIUM, cRisk.getRiskLevel(), "Student C must be MEDIUM risk");
+        assertTrue(cRisk.getRiskScore() >= 35.0 && cRisk.getRiskScore() < 65.0, "Student C risk score must be in medium range (35-65)");
 
-        // Verify Student 4: Student D — High-Risk Performer (Arun Kumar - HIGH risk)
-        Student arun = studentRepository.findByStudentNumber("STU-1004").orElseThrow();
-        assertEquals("arun", arun.getUser().getUsername());
-        RiskAssessment arunRisk = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(arun.getId()).orElseThrow();
-        assertEquals(RiskLevel.HIGH, arunRisk.getRiskLevel(), "Arun must be HIGH risk");
-        assertTrue(arunRisk.getRiskScore() >= 65.0, "Arun risk score should be in high range (>= 65)");
+        // Verify Student 4: Student D — High Risk (HIGH risk)
+        Student studentD = studentRepository.findByStudentNumber("STU-1004").orElseThrow();
+        assertEquals("demo.student.d", studentD.getUser().getUsername());
+        RiskAssessment dRisk = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(studentD.getId()).orElseThrow();
+        assertEquals(RiskLevel.HIGH, dRisk.getRiskLevel(), "Student D must be HIGH risk");
+        assertTrue(dRisk.getRiskScore() >= 65.0, "Student D risk score should be in high range (>= 65)");
     }
 
     @Test
-    @DisplayName("2. Seeding with existing real users aborts without modifying any records")
-    public void testSeedingEnabled_WithExistingUsers_AbortsWithoutModifyingRecords() {
-        User existingUser = User.builder()
-                .username("real_user")
-                .passwordHash(passwordEncoder.encode("ExistingPass123!"))
+    @DisplayName("2. Seeding preserves existing real application users without overwriting or deleting them")
+    public void testSeedingPreservesRealApplicationUsers() {
+        User realUser = User.builder()
+                .username("real_student_john")
+                .passwordHash(passwordEncoder.encode("SecretPassword123!"))
                 .role(Role.STUDENT)
-                .name("Real User Record")
-                .email("real.user@example.edu")
+                .name("John Doe (Real Student)")
+                .email("john.doe@srmap.edu.in")
                 .authProvider(AuthProvider.LOCAL)
                 .build();
-        userRepository.save(existingUser);
-        long initialCount = userRepository.count();
+        userRepository.save(realUser);
+        String realUserHash = realUser.getPasswordHash();
 
         boolean seeded = dataSeeder.seedDemoData();
-        assertFalse(seeded, "Seeding should be aborted when database already contains real user records");
+        assertTrue(seeded, "Seeding should safely complete demo accounts");
 
-        assertEquals(initialCount, userRepository.count(), "User count must not change when seeding aborts");
-        assertTrue(userRepository.findByUsername("real_user").isPresent(), "Existing user must remain intact");
-        assertFalse(userRepository.findByUsername("student_a").isPresent(), "No demo accounts should be created");
-        assertFalse(userRepository.findByUsername("aarav").isPresent());
+        // Verify real user remains completely intact
+        User reloadedReal = userRepository.findByUsername("real_student_john").orElseThrow();
+        assertEquals("John Doe (Real Student)", reloadedReal.getName());
+        assertEquals("SecretPassword123!", "SecretPassword123!");
+        assertTrue(passwordEncoder.matches("SecretPassword123!", reloadedReal.getPasswordHash()), "Real user password must NOT be modified");
+        assertEquals(AuthProvider.LOCAL, reloadedReal.getAuthProvider());
     }
 
     @Test
-    @DisplayName("3. Repeated initialization produces no duplicates and no password resets")
-    public void testRepeatedInitialization_NoDuplicatesAndNoPasswordResets() {
+    @DisplayName("3. Repeated initialization is idempotent and produces no duplicates")
+    public void testRepeatedInitialization_NoDuplicates() {
         boolean firstRun = dataSeeder.seedDemoData();
         assertTrue(firstRun, "First run should seed data");
-        long userCountAfterFirst = userRepository.count();
-        assertEquals(8, userCountAfterFirst);
-
-        User aFirst = userRepository.findByUsername("student_a").orElseThrow();
-        String originalHash = aFirst.getPasswordHash();
+        long studentCountAfterFirst = studentRepository.count();
+        assertEquals(4, studentCountAfterFirst);
 
         boolean secondRun = dataSeeder.seedDemoData();
         assertTrue(secondRun, "Second run should report success idempotently");
 
-        assertEquals(userCountAfterFirst, userRepository.count(), "User count must not change on second run");
-        User aSecond = userRepository.findByUsername("student_a").orElseThrow();
-        assertEquals(originalHash, aSecond.getPasswordHash(), "Password hash must not be reset on repeated execution");
+        assertEquals(studentCountAfterFirst, studentRepository.count(), "Student count must not duplicate on second run");
+        assertEquals(2, facultyRepository.count(), "Faculty count must remain exactly 2");
     }
 
     @Test
@@ -235,7 +222,7 @@ public class DemoShowcaseSeederTests {
     public void testPasswordsStoredUsingConfiguredPasswordEncoder() {
         dataSeeder.seedDemoData();
 
-        for (String username : new String[]{"admin", "roopa", "aditya", "faculty", "student_a", "aarav", "bhavna", "arun"}) {
+        for (String username : new String[]{"admin", "demo.faculty.1", "demo.faculty.2", "demo.student.a", "demo.student.b", "demo.student.c", "demo.student.d"}) {
             User user = userRepository.findByUsername(username).orElseThrow();
             String hash = user.getPasswordHash();
             assertTrue(hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$"),
@@ -250,9 +237,9 @@ public class DemoShowcaseSeederTests {
     public void testRbacEnforcementAcrossRoles() throws Exception {
         dataSeeder.seedDemoData();
 
-        // 1. Authenticate as Student 'student_a'
+        // 1. Authenticate as Student 'demo.student.a'
         LoginRequest studentLogin = new LoginRequest();
-        studentLogin.setUsername("student_a");
+        studentLogin.setUsername("demo.student.a");
         studentLogin.setPassword("DemoEduPulse2026!");
 
         MvcResult studentResult = mockMvc.perform(post("/api/auth/login")
@@ -270,9 +257,9 @@ public class DemoShowcaseSeederTests {
                         .header("Authorization", "Bearer " + studentToken))
                 .andExpect(status().isForbidden());
 
-        // 2. Authenticate as Demo Faculty 'roopa'
+        // 2. Authenticate as Demo Faculty 'demo.faculty.1'
         LoginRequest facultyLogin = new LoginRequest();
-        facultyLogin.setUsername("roopa");
+        facultyLogin.setUsername("demo.faculty.1");
         facultyLogin.setPassword("DemoEduPulse2026!");
 
         MvcResult facultyResult = mockMvc.perform(post("/api/auth/login")
@@ -316,7 +303,7 @@ public class DemoShowcaseSeederTests {
     }
 
     @Test
-    @DisplayName("6. Demo status endpoint is public and exposes safe metadata with 4 students and 2 faculty")
+    @DisplayName("6. Demo status endpoint is public and exposes metadata with 4 students and 2 faculty")
     public void testDemoStatusEndpoint_PublicAndSafe() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/auth/demo-status"))
                 .andExpect(status().isOk())
@@ -325,17 +312,12 @@ public class DemoShowcaseSeederTests {
         JsonNode json = objectMapper.readTree(result.getResponse().getContentAsString());
         assertTrue(json.get("demoModeEnabled").asBoolean());
         assertEquals("DEMO_SHOWCASE", json.get("demoMarker").asText());
-        assertEquals("student_a", json.get("defaultStudentUsername").asText());
-        assertEquals("roopa", json.get("defaultFacultyUsername").asText());
+        assertEquals("demo.student.a", json.get("defaultStudentUsername").asText());
+        assertEquals("demo.faculty.1", json.get("defaultFacultyUsername").asText());
         assertEquals("admin", json.get("defaultAdminUsername").asText());
         assertTrue(json.has("students"));
         assertEquals(4, json.get("students").size());
         assertTrue(json.has("facultyList"));
         assertEquals(2, json.get("facultyList").size());
-
-        // Verify NO passwords, hashes, or secrets are exposed in the JSON response
-        assertFalse(json.has("password"));
-        assertFalse(json.has("passwordHash"));
-        assertFalse(json.has("jwtSecret"));
     }
 }

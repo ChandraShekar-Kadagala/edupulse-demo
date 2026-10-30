@@ -223,7 +223,10 @@ public class AcademicAnalyticsService {
         String provenance;
         if (overrideProvenance != null) {
             provenance = overrideProvenance.name();
-        } else if ("STU-1001".equals(student.getStudentNumber()) || studentName.contains("Student A") || studentName.contains("Reference Profile")) {
+        } else if ("STU-1001".equals(student.getStudentNumber()) 
+                || studentName.contains("Student A") 
+                || studentName.contains("Reference Profile")
+                || (student.getUser() != null && ("demo.student.a".equalsIgnoreCase(student.getUser().getUsername()) || "student_a".equalsIgnoreCase(student.getUser().getUsername())))) {
             provenance = "STUDENT-SUPPLIED REFERENCE DATA";
         } else {
             provenance = "SYNTHETIC DEMO DATA";

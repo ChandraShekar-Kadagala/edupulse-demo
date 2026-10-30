@@ -35,9 +35,9 @@ public class FacultyService {
 
         // If table is empty or before seeder runs, provide standard verified faculty details
         if (result.isEmpty()) {
-            result.add(buildFallbackFaculty(101L, "Dr. Roopa Tirumalasetti", "roopa", "24082", "Associate Professor",
+            result.add(buildFallbackFaculty(101L, "Faculty A", "demo.faculty.1", "24082", "Associate Professor",
                     "CSE 204", "DESIGN AND ANALYSIS OF ALGORITHMS", "(C 305), (S 404)", studentCount));
-            result.add(buildFallbackFaculty(102L, "Dr. Aditya Kumar Sahu", "aditya", "25346", "Assistant Professor",
+            result.add(buildFallbackFaculty(102L, "Faculty B", "demo.faculty.2", "25346", "Assistant Professor",
                     "CSE 213", "ADVANCED JAVA PROGRAMMING", "(C 305), (S 404)", studentCount));
         }
 
@@ -50,10 +50,10 @@ public class FacultyService {
                 .map(f -> mapFacultyToDto(f, studentCount))
                 .orElseGet(() -> {
                     if (id == 101L) {
-                        return buildFallbackFaculty(101L, "Dr. Roopa Tirumalasetti", "roopa", "24082", "Associate Professor",
+                        return buildFallbackFaculty(101L, "Faculty A", "demo.faculty.1", "24082", "Associate Professor",
                                 "CSE 204", "DESIGN AND ANALYSIS OF ALGORITHMS", "(C 305), (S 404)", studentCount);
                     }
-                    return buildFallbackFaculty(102L, "Dr. Aditya Kumar Sahu", "aditya", "25346", "Assistant Professor",
+                    return buildFallbackFaculty(102L, "Faculty B", "demo.faculty.2", "25346", "Assistant Professor",
                             "CSE 213", "ADVANCED JAVA PROGRAMMING", "(C 305), (S 404)", studentCount);
                 });
     }
@@ -61,14 +61,14 @@ public class FacultyService {
     private FacultyDto mapFacultyToDto(Faculty f, int studentCount) {
         User u = f.getUser();
         String name = u != null ? u.getName() : "Faculty Member";
-        String username = u != null ? u.getUsername() : "faculty";
-        String email = u != null ? u.getEmail() : "faculty@edupulse.local";
+        String username = u != null ? u.getUsername() : "demo.faculty.1";
+        String email = u != null ? u.getEmail() : "demo.faculty.1@edupulse.local";
 
-        boolean isRoopa = name.contains("Roopa") || username.equalsIgnoreCase("roopa");
-        String courseCode = isRoopa ? "CSE 204" : "CSE 213";
-        String courseName = isRoopa ? "DESIGN AND ANALYSIS OF ALGORITHMS" : "ADVANCED JAVA PROGRAMMING";
-        String empCode = isRoopa ? "24082" : "25346";
-        String classroom = isRoopa ? "(C 305), (S 404)" : "(C 305), (S 404)";
+        boolean isFaculty1 = name.contains("Faculty A") || name.contains("Roopa") || username.equalsIgnoreCase("demo.faculty.1") || username.equalsIgnoreCase("roopa");
+        String courseCode = isFaculty1 ? "CSE 204" : "CSE 213";
+        String courseName = isFaculty1 ? "DESIGN AND ANALYSIS OF ALGORITHMS" : "ADVANCED JAVA PROGRAMMING";
+        String empCode = isFaculty1 ? "24082" : "25346";
+        String classroom = isFaculty1 ? "(C 305), (S 404)" : "(C 305), (S 404)";
 
         return FacultyDto.builder()
                 .id(f.getId())
@@ -87,7 +87,7 @@ public class FacultyService {
                                 .courseName(courseName)
                                 .credits(4)
                                 .classroom(classroom)
-                                .slotDetails(isRoopa ? "Mon (09:00-10:50), Wed (10:00-10:50), Fri (01:00-02:50)" : "Mon (01:00-01:50), Thu (09:00-10:50), Fri (09:00-10:50)")
+                                .slotDetails(isFaculty1 ? "Mon (09:00-10:50), Wed (10:00-10:50), Fri (01:00-02:50)" : "Mon (01:00-01:50), Thu (09:00-10:50), Fri (09:00-10:50)")
                                 .build()
                 ))
                 .enrolledStudentsCount(studentCount)
