@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class AcademicAnalyticsService {
 
     private static final double ATTENDANCE_THRESHOLD = 75.0;
