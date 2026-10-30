@@ -80,9 +80,9 @@ export default function Login() {
   };
 
   const demoStudentsList: DemoStudent[] = demoStatus?.students || [
-    { username: 'aarav', regNo: 'STU-1001', name: 'Aarav Sharma', risk: 'LOW', cgpa: 9.4 },
-    { username: 'bhavna', regNo: 'STU-1002', name: 'Bhavna Patel', risk: 'LOW', cgpa: 7.9 },
-    { username: 'chirag', regNo: 'STU-1003', name: 'Chirag Verma', risk: 'MEDIUM', cgpa: 6.2 },
+    { username: 'chandrashekar', regNo: 'STU-2026-CHANDRA', name: 'KADAGALA CHANDRA SHEKAR', risk: 'LOW', cgpa: 9.1 },
+    { username: 'aarav', regNo: 'STU-1002', name: 'Aarav Sharma', risk: 'LOW', cgpa: 9.4 },
+    { username: 'bhavna', regNo: 'STU-1003', name: 'Bhavna Patel', risk: 'MEDIUM', cgpa: 7.2 },
     { username: 'arun', regNo: 'STU-1004', name: 'Arun Kumar', risk: 'HIGH', cgpa: 5.1 },
   ];
 
@@ -273,24 +273,36 @@ export default function Login() {
               </div>
 
               <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider pt-2">
-                Staff & Admin Roles:
+                Faculty Instructors & Administration:
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleFillDemo(demoStatus.defaultFacultyUsername || 'faculty')}
+                  onClick={() => handleFillDemo('roopa')}
                   className="flex items-center p-2 rounded-lg bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors text-left"
                 >
                   <Building2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2 flex-shrink-0" />
                   <div>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-white block">Faculty</span>
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">faculty</span>
+                    <span className="text-xs font-semibold text-gray-900 dark:text-white block">Dr. Roopa</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">CSE 204 • roopa</span>
                   </div>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => handleFillDemo(demoStatus.defaultAdminUsername || 'admin')}
+                  onClick={() => handleFillDemo('aditya')}
+                  className="flex items-center p-2 rounded-lg bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors text-left"
+                >
+                  <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0" />
+                  <div>
+                    <span className="text-xs font-semibold text-gray-900 dark:text-white block">Dr. Aditya</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">CSE 213 • aditya</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleFillDemo(demoStatus?.defaultAdminUsername || 'admin')}
                   className="flex items-center p-2 rounded-lg bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors text-left"
                 >
                   <UserCheck className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2 flex-shrink-0" />

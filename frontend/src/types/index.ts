@@ -27,6 +27,7 @@ export interface Student {
   riskReason?: string;
   totalClasses?: number;
   presentClasses?: number;
+  provenance?: string;
 }
 
 export interface RiskFactor {
@@ -87,4 +88,167 @@ export interface AuthResponse {
   role?: string;
   roles?: string[];
   authProvider?: string;
+}
+
+export interface TimetableSlot {
+  day: string;
+  slotNumber: number;
+  timeRange: string;
+  courseCode: string;
+  courseName: string;
+  classroom: string;
+  facultyName: string;
+}
+
+export interface Faculty {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  department: string;
+  title: string;
+  assignedCourses: string[];
+  classroom?: string;
+  enrolledStudentCount: number;
+  averageAttendance?: number;
+  highRiskCount?: number;
+}
+
+export interface FutureTargetPlanner {
+  courseCode: string;
+  courseName: string;
+  currentObtainedMarks: number;
+  currentMaxMarks: number;
+  currentConvertedMarks: number;
+  maxConvertedMarks: number;
+  currentPercentage: number;
+  pendingAssessmentName: string;
+  pendingWeightage: number;
+  minImprovementTarget: number;
+  recommendedTarget: number;
+  stretchTarget: number;
+  targetType: string;
+  targetAffectsRisk: string;
+}
+
+export interface SubjectRiskDetail {
+  courseCode: string;
+  courseName: string;
+  attendancePercentage?: number;
+  attendanceStatus?: string;
+  evaluatedMarksPercentage?: number;
+  marksStatus?: string;
+  riskContribution: number;
+  riskLevel: string;
+  riskFactors: string[];
+}
+
+export interface RiskEngineExplanation {
+  overallRiskScore: number;
+  riskLevel: string;
+  attendancePercentage?: number;
+  attendanceRiskContribution: number;
+  attendanceFormulaExplanation: string;
+  marksPercentage?: number;
+  marksRiskContribution: number;
+  marksFormulaExplanation: string;
+  missingAssignmentsCount: number;
+  missingAssignmentsRiskContribution: number;
+  missingAssignmentsFormulaExplanation: string;
+  calculationFormula: string;
+  calculationTimestamp: string;
+  studentName: string;
+  studentNumber: string;
+  subjectRisks: SubjectRiskDetail[];
+}
+
+export interface CourseAttendance {
+  courseId: number;
+  courseCode: string;
+  courseName: string;
+  totalClasses: number;
+  presentClasses: number;
+  absentClasses: number;
+  odMlClasses: number;
+  attendancePercentage?: number;
+  status: string;
+  period: string;
+  facultyName: string;
+  classroom: string;
+}
+
+export interface AssessmentMark {
+  markId?: number;
+  assessmentId: number;
+  courseCode: string;
+  courseName: string;
+  assessmentName: string;
+  assessmentType: string;
+  marksObtained?: number;
+  maxMarks: number;
+  convertedMarks?: number;
+  maxConvertedMarks: number;
+  percentage?: number;
+  weightage: number;
+  status: string;
+  facultyName: string;
+  classroom: string;
+}
+
+export interface AcademicRecommendation {
+  type: string;
+  title: string;
+  description: string;
+  priority: string;
+  actionableStep: string;
+}
+
+export interface PerformanceTrendPoint {
+  date: string;
+  label: string;
+  attendanceCumulative?: number;
+  internalMarkCumulative?: number;
+}
+
+export interface StudentAcademicAnalytics {
+  studentId: number;
+  studentNumber: string;
+  name: string;
+  department: string;
+  currentSemester: number;
+  currentCgpa: number;
+  provenance: string;
+  dataStatus: string;
+  lastActivityDate?: string;
+  isStale: boolean;
+  attendancePeriod: string;
+  lastUpdated: string;
+  disclaimer: string;
+  hasAttendanceData: boolean;
+  totalClasses: number;
+  presentClasses: number;
+  absentClasses: number;
+  overallAttendancePercentage?: number;
+  courseAttendanceBreakdown: CourseAttendance[];
+  hasMarksData: boolean;
+  evaluatedAssessmentsCount: number;
+  overallAverageMarksPercentage?: number;
+  assessmentBreakdown: AssessmentMark[];
+  hasAssignmentData: boolean;
+  totalAssignments: number;
+  submittedAssignments: number;
+  missingAssignments: number;
+  riskScore: number;
+  riskLevel: string;
+  riskReason: string;
+  riskCategory: string;
+  riskExplanation?: string;
+  recommendations: AcademicRecommendation[];
+  targetPlanner: FutureTargetPlanner[];
+  riskEngineExplanation?: RiskEngineExplanation;
+  timetable: TimetableSlot[];
+  strengths: string[];
+  improvementAreas: string[];
+  upcomingConcerns: string[];
+  performanceTrends: PerformanceTrendPoint[];
 }

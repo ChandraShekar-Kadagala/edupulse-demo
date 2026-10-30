@@ -1,4 +1,12 @@
 import axios from 'axios';
+import type { 
+  StudentAcademicAnalytics, 
+  TimetableSlot, 
+  Faculty, 
+  Student, 
+  RiskAssessment, 
+  Intervention 
+} from '../types';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:8080/api' : '/api'),
@@ -63,5 +71,17 @@ export function getSafeErrorMessage(error: any, fallback = 'An unexpected error 
   }
   return fallback;
 }
+
+export const academicApi = {
+  getStudentAnalytics: (studentId: number | string) => api.get<StudentAcademicAnalytics>(`/academic/student/${studentId}`),
+  getStudentAnalyticsByRegNo: (regNo: string) => api.get<StudentAcademicAnalytics>(`/academic/student/number/${regNo}`),
+  getTimetable: () => api.get<TimetableSlot[]>('/timetable'),
+  getFacultyList: () => api.get<Faculty[]>('/faculty'),
+  getFacultyById: (facultyId: number | string) => api.get<Faculty>(`/faculty/${facultyId}`),
+  getDemoStatus: () => api.get<any>('/auth/demo-status'),
+  getStudents: () => api.get<Student[]>('/students'),
+  getRiskAssessment: (studentId: number | string) => api.get<RiskAssessment>(`/risk/student/${studentId}`),
+  getInterventions: () => api.get<Intervention[]>('/interventions'),
+};
 
 export default api;

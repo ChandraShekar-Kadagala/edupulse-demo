@@ -204,8 +204,19 @@ export default function Dashboard() {
                           {studentName.charAt(0)}
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-900 dark:text-white">{studentName}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">{student.department || 'CSE'}</div>
+                          <div className="flex items-center space-x-1.5">
+                            <span className="font-semibold text-gray-900 dark:text-white">{studentName}</span>
+                            {studentName.includes('CHANDRA SHEKAR') ? (
+                              <Badge className="bg-emerald-600 text-white text-[9px] px-1 py-0 h-4">
+                                ⭐ ACTUAL
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-amber-700 dark:text-amber-300 border-amber-300 text-[9px] px-1 py-0 h-4">
+                                SYNTHETIC
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{student.department || 'CSE'} • Sem {student.currentSemester || 5}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 font-mono text-xs text-gray-600 dark:text-gray-400">
@@ -262,6 +273,60 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
+      </Card>
+
+      {/* Faculty Profiles & Assigned Courses */}
+      <Card>
+        <CardHeader className="py-4">
+          <CardTitle className="text-base font-bold flex items-center">
+            <Users className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+            Faculty Course Instructors & Cohort Coverage
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Showcase faculty accounts derived from official SRM AP timetable assignments
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-gray-900 dark:text-white text-sm">Dr. Roopa Tirumalasetti</span>
+                  <Badge variant="outline" className="text-xs">Associate Professor</Badge>
+                </div>
+                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mb-1">
+                  CSE 204: Design and Analysis of Algorithms (4 Credits)
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Classrooms: <strong className="text-gray-700 dark:text-gray-300 font-mono">(C 305), (S 404)</strong> • 48 Conducted Sessions
+                </p>
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500">
+                <span>Cohort Enrolled: <strong>4 students</strong></span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">1 Active Intervention Assigned</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-gray-900 dark:text-white text-sm">Dr. Aditya Kumar Sahu</span>
+                  <Badge variant="outline" className="text-xs">Assistant Professor</Badge>
+                </div>
+                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mb-1">
+                  CSE 213: Advanced Java Programming (4 Credits)
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Classrooms: <strong className="text-gray-700 dark:text-gray-300 font-mono">(C 305), (S 404)</strong> • 49 Conducted Sessions
+                </p>
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500">
+                <span>Cohort Enrolled: <strong>4 students</strong></span>
+                <span className="text-amber-600 dark:text-amber-400 font-semibold">1 Active Intervention Assigned</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Charts & Actions Row */}

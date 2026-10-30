@@ -24,16 +24,20 @@ public class AuthController {
                 "demoModeEnabled", demoModeEnabled,
                 "demoMarker", "DEMO_SHOWCASE",
                 "students", java.util.List.of(
-                        java.util.Map.of("username", "aarav", "regNo", "STU-1001", "name", "Aarav Sharma", "risk", "LOW", "cgpa", 9.4),
-                        java.util.Map.of("username", "bhavna", "regNo", "STU-1002", "name", "Bhavna Patel", "risk", "LOW", "cgpa", 7.9),
-                        java.util.Map.of("username", "chirag", "regNo", "STU-1003", "name", "Chirag Verma", "risk", "MEDIUM", "cgpa", 6.2),
-                        java.util.Map.of("username", "arun", "regNo", "STU-1004", "name", "Arun Kumar", "risk", "HIGH", "cgpa", 5.1)
+                        java.util.Map.of("username", "chandrashekar", "regNo", "STU-2026-CHANDRA", "name", "KADAGALA CHANDRA SHEKAR", "risk", "LOW", "cgpa", 9.1, "provenance", "ACTUAL STUDENT-SUPPLIED REFERENCE DATA", "label", "Actual Student Reference (Chandra Shekar)"),
+                        java.util.Map.of("username", "aarav", "regNo", "STU-1002", "name", "Aarav Sharma", "risk", "LOW", "cgpa", 9.4, "provenance", "SYNTHETIC DEMO DATA", "label", "Synthetic Top Performer (Aarav)"),
+                        java.util.Map.of("username", "bhavna", "regNo", "STU-1003", "name", "Bhavna Patel", "risk", "MEDIUM", "cgpa", 7.2, "provenance", "SYNTHETIC DEMO DATA", "label", "Synthetic Average Performer (Bhavna)"),
+                        java.util.Map.of("username", "arun", "regNo", "STU-1004", "name", "Arun Kumar", "risk", "HIGH", "cgpa", 5.1, "provenance", "SYNTHETIC DEMO DATA", "label", "Synthetic High-Risk (Arun)")
                 ),
-                "defaultStudentUsername", "arun",
-                "defaultStudentRegNo", "STU-1004",
-                "defaultFacultyUsername", "faculty",
+                "facultyList", java.util.List.of(
+                        java.util.Map.of("username", "roopa", "name", "Dr. Roopa Tirumalasetti", "title", "Associate Professor", "course", "CSE 204"),
+                        java.util.Map.of("username", "aditya", "name", "Dr. Aditya Kumar Sahu", "title", "Assistant Professor", "course", "CSE 213")
+                ),
+                "defaultStudentUsername", "chandrashekar",
+                "defaultStudentRegNo", "STU-2026-CHANDRA",
+                "defaultFacultyUsername", "roopa",
                 "defaultAdminUsername", "admin",
-                "disclaimer", "Illustrative sandbox demo data for evaluation and testing. Not affiliated with actual SRM University AP student records."
+                "disclaimer", "Student showcase featuring actual SRM AP student reference data for Chandra Shekar and synthetic performance profiles for comparative academic analytics."
         ));
     }
 

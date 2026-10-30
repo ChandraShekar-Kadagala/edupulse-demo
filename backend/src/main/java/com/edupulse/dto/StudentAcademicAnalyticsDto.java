@@ -22,11 +22,13 @@ public class StudentAcademicAnalyticsDto {
     private Double currentCgpa;
 
     // Provenance & Freshness
-    private String provenance; // CSV_FACULTY_IMPORT, SYNTHETIC_TEST_FIXTURE, OFFICIAL_INSTITUTIONAL_API
+    private String provenance; // CSV_FACULTY_IMPORT, SYNTHETIC_TEST_FIXTURE, OFFICIAL_INSTITUTIONAL_API, ACTUAL STUDENT-SUPPLIED REFERENCE DATA, SYNTHETIC DEMO DATA
     private String dataStatus; // COMPLETE, PARTIAL, INSUFFICIENT_DATA
     private LocalDateTime lastActivityDate;
     private boolean isStale;
     private String disclaimer;
+    private String attendancePeriod;
+    private String lastUpdated;
 
     // Attendance Summary
     private boolean hasAttendanceData;
@@ -65,4 +67,13 @@ public class StudentAcademicAnalyticsDto {
     private List<String> strengths;
     private List<String> improvementAreas;
     private List<String> upcomingConcerns;
+
+    // Next CLA / NTM Target Planner
+    private List<FutureTargetPlannerDto> targetPlanner;
+
+    // Transparent Risk Engine Explanation
+    private RiskEngineExplanationDto riskEngineExplanation;
+
+    // Common Course Schedule & Timetable
+    private List<TimetableSlotDto> timetable;
 }
