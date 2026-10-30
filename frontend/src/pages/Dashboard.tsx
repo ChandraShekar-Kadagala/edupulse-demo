@@ -206,9 +206,9 @@ export default function Dashboard() {
                         <div>
                           <div className="flex items-center space-x-1.5">
                             <span className="font-semibold text-gray-900 dark:text-white">{studentName}</span>
-                            {studentName.includes('CHANDRA SHEKAR') ? (
-                              <Badge className="bg-emerald-600 text-white text-[9px] px-1 py-0 h-4">
-                                ⭐ ACTUAL
+                            {studentName.includes('Student A') || student.studentNumber === 'STU-1001' ? (
+                              <Badge className="bg-emerald-600 text-white text-[9px] px-1.5 py-0 h-4 font-medium">
+                                ⭐ REFERENCE DATA
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="text-amber-700 dark:text-amber-300 border-amber-300 text-[9px] px-1 py-0 h-4">

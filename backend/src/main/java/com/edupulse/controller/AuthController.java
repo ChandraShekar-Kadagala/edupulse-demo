@@ -24,20 +24,20 @@ public class AuthController {
                 "demoModeEnabled", demoModeEnabled,
                 "demoMarker", "DEMO_SHOWCASE",
                 "students", java.util.List.of(
-                        java.util.Map.of("username", "chandrashekar", "regNo", "STU-2026-CHANDRA", "name", "KADAGALA CHANDRA SHEKAR", "risk", "LOW", "cgpa", 9.1, "provenance", "ACTUAL STUDENT-SUPPLIED REFERENCE DATA", "label", "Actual Student Reference (Chandra Shekar)"),
-                        java.util.Map.of("username", "aarav", "regNo", "STU-1002", "name", "Aarav Sharma", "risk", "LOW", "cgpa", 9.4, "provenance", "SYNTHETIC DEMO DATA", "label", "Synthetic Top Performer (Aarav)"),
-                        java.util.Map.of("username", "bhavna", "regNo", "STU-1003", "name", "Bhavna Patel", "risk", "MEDIUM", "cgpa", 7.2, "provenance", "SYNTHETIC DEMO DATA", "label", "Synthetic Average Performer (Bhavna)"),
-                        java.util.Map.of("username", "arun", "regNo", "STU-1004", "name", "Arun Kumar", "risk", "HIGH", "cgpa", 5.1, "provenance", "SYNTHETIC DEMO DATA", "label", "Synthetic High-Risk (Arun)")
+                        java.util.Map.of("username", "student_a", "regNo", "STU-1001", "name", "Student A (Reference Profile)", "risk", "LOW", "cgpa", 9.1, "provenance", "STUDENT-SUPPLIED REFERENCE DATA", "label", "Student A (Reference Profile)"),
+                        java.util.Map.of("username", "aarav", "regNo", "STU-1002", "name", "Student B (Top Performer)", "risk", "LOW", "cgpa", 9.4, "provenance", "SYNTHETIC DEMO DATA", "label", "Student B — Top Performer (Aarav)"),
+                        java.util.Map.of("username", "bhavna", "regNo", "STU-1003", "name", "Student C (Average Performer)", "risk", "MEDIUM", "cgpa", 7.2, "provenance", "SYNTHETIC DEMO DATA", "label", "Student C — Average Performer (Bhavna)"),
+                        java.util.Map.of("username", "arun", "regNo", "STU-1004", "name", "Student D (High-Risk Performer)", "risk", "HIGH", "cgpa", 5.1, "provenance", "SYNTHETIC DEMO DATA", "label", "Student D — High-Risk Performer (Arun)")
                 ),
                 "facultyList", java.util.List.of(
                         java.util.Map.of("username", "roopa", "name", "Dr. Roopa Tirumalasetti", "title", "Associate Professor", "course", "CSE 204"),
                         java.util.Map.of("username", "aditya", "name", "Dr. Aditya Kumar Sahu", "title", "Assistant Professor", "course", "CSE 213")
                 ),
-                "defaultStudentUsername", "chandrashekar",
-                "defaultStudentRegNo", "STU-2026-CHANDRA",
+                "defaultStudentUsername", "student_a",
+                "defaultStudentRegNo", "STU-1001",
                 "defaultFacultyUsername", "roopa",
                 "defaultAdminUsername", "admin",
-                "disclaimer", "Student showcase featuring actual SRM AP student reference data for Chandra Shekar and synthetic performance profiles for comparative academic analytics."
+                "disclaimer", "EduPulse Academic Analytics Showcase. Student A reflects verified student-supplied reference records; Students B, C, and D provide synthetic comparative benchmarks."
         ));
     }
 

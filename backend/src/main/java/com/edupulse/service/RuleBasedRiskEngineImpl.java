@@ -265,8 +265,10 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
             interventionRec = "MAINTAIN COURSE: Academic performance and attendance remain within healthy thresholds. Continue regular progress.";
         }
 
-        String provenance = student.getUser().getName().equalsIgnoreCase("KADAGALA CHANDRA SHEKAR")
-                ? "ACTUAL STUDENT-SUPPLIED REFERENCE DATA"
+        String provenance = (student.getStudentNumber().equals("STU-1001")
+                || student.getUser().getUsername().equalsIgnoreCase("student_a")
+                || student.getUser().getName().contains("Student A"))
+                ? "STUDENT-SUPPLIED REFERENCE DATA"
                 : "SYNTHETIC DEMO DATA";
 
         return RiskEngineExplanationDto.builder()

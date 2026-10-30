@@ -80,10 +80,10 @@ export default function Login() {
   };
 
   const demoStudentsList: DemoStudent[] = demoStatus?.students || [
-    { username: 'chandrashekar', regNo: 'STU-2026-CHANDRA', name: 'KADAGALA CHANDRA SHEKAR', risk: 'LOW', cgpa: 9.1 },
-    { username: 'aarav', regNo: 'STU-1002', name: 'Aarav Sharma', risk: 'LOW', cgpa: 9.4 },
-    { username: 'bhavna', regNo: 'STU-1003', name: 'Bhavna Patel', risk: 'MEDIUM', cgpa: 7.2 },
-    { username: 'arun', regNo: 'STU-1004', name: 'Arun Kumar', risk: 'HIGH', cgpa: 5.1 },
+    { username: 'student_a', regNo: 'STU-1001', name: 'Student A (Reference Profile)', risk: 'LOW', cgpa: 9.1 },
+    { username: 'aarav', regNo: 'STU-1002', name: 'Student B (Top Performer)', risk: 'LOW', cgpa: 9.4 },
+    { username: 'bhavna', regNo: 'STU-1003', name: 'Student C (Average Performer)', risk: 'MEDIUM', cgpa: 7.2 },
+    { username: 'arun', regNo: 'STU-1004', name: 'Student D (High-Risk)', risk: 'HIGH', cgpa: 5.1 },
   ];
 
   return (

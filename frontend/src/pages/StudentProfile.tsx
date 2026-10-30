@@ -84,7 +84,7 @@ export default function StudentProfile() {
 
   if (!student) return <div className="text-red-500 p-8 text-center">Student record not found.</div>;
 
-  const isActualStudent = analytics?.provenance?.includes("ACTUAL") || student.name?.includes("CHANDRA SHEKAR");
+  const isActualStudent = analytics?.provenance?.includes("REFERENCE") || analytics?.provenance?.includes("ACTUAL") || student.name?.includes("Student A") || student.studentNumber === "STU-1001";
   const isHighRisk = riskAssessment?.riskLevel === 'HIGH' || analytics?.riskLevel === 'HIGH';
   const isMedRisk = riskAssessment?.riskLevel === 'MEDIUM' || analytics?.riskLevel === 'MEDIUM';
   const riskColor = isHighRisk ? 'text-red-600 dark:text-red-400' : isMedRisk ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400';
@@ -132,7 +132,7 @@ export default function StudentProfile() {
                 {/* Provenance Badge */}
                 {isActualStudent ? (
                   <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-2.5 py-0.5 text-xs shadow-sm">
-                    ⭐ ACTUAL STUDENT-SUPPLIED REFERENCE DATA
+                    ⭐ STUDENT-SUPPLIED REFERENCE DATA
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300 bg-amber-50/50 dark:bg-amber-950/30 text-xs font-semibold px-2.5 py-0.5">
