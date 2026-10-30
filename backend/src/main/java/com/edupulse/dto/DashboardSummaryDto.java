@@ -24,6 +24,8 @@ public class DashboardSummaryDto {
     private List<RecentHighRiskStudentDto> recentHighRisk;
     private List<String> cohortStrengths;
     private List<String> cohortImprovementAreas;
+    private FacultyDto currentFaculty;
+    private FacultyDashboardDto facultyView;
 
     @Data
     @NoArgsConstructor

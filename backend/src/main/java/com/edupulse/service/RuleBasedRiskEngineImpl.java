@@ -35,7 +35,7 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
     private AssignmentSubmissionRepository submissionRepository;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public RiskAssessment calculateRiskForStudent(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));

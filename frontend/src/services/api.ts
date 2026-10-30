@@ -3,6 +3,7 @@ import type {
   StudentAcademicAnalytics, 
   TimetableSlot, 
   Faculty, 
+  FacultyDashboard,
   Student, 
   RiskAssessment, 
   Intervention 
@@ -78,6 +79,8 @@ export const academicApi = {
   getTimetable: () => api.get<TimetableSlot[]>('/timetable'),
   getFacultyList: () => api.get<Faculty[]>('/faculty'),
   getFacultyById: (facultyId: number | string) => api.get<Faculty>(`/faculty/${facultyId}`),
+  getFacultyDashboard: (facultyId: number | string) => api.get<FacultyDashboard>(`/faculty/${facultyId}/dashboard`),
+  getMyFacultyDashboard: () => api.get<FacultyDashboard>('/faculty/me/dashboard'),
   getDemoStatus: () => api.get<any>('/auth/demo-status'),
   getStudents: () => api.get<Student[]>('/students'),
   getRiskAssessment: (studentId: number | string) => api.get<RiskAssessment>(`/risk/student/${studentId}`),

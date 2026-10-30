@@ -21,10 +21,22 @@ public class DashboardController {
     @Autowired
     private AcademicAnalyticsService academicAnalyticsService;
 
+    @Autowired
+    private com.edupulse.service.FacultyService facultyService;
+
     @GetMapping("/summary")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
-    public ResponseEntity<DashboardSummaryDto> getSummary() {
-        return ResponseEntity.ok(academicAnalyticsService.getDashboardSummary());
+    public ResponseEntity<DashboardSummaryDto> getSummary(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.edupulse.security.UserDetailsImpl userDetails) {
+        DashboardSummaryDto summary = academicAnalyticsService.getDashboardSummary();
+        if (userDetails != null) {
+            boolean isFaculty = userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_FACULTY"));
+            if (isFaculty) {
+                summary.setCurrentFaculty(facultyService.getFacultyById(userDetails.getId()));
+                summary.setFacultyView(facultyService.getFacultyDashboard(userDetails.getId(), userDetails.getUsername()));
+            }
+        }
+        return ResponseEntity.ok(summary);
     }
 
     @GetMapping("/stats")

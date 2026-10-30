@@ -252,3 +252,61 @@ export interface StudentAcademicAnalytics {
   upcomingConcerns: string[];
   performanceTrends: PerformanceTrendPoint[];
 }
+
+export interface StudentCoursePerformance {
+  studentId: number;
+  studentName: string;
+  studentNumber: string;
+  cgpa: number;
+  provenance: string;
+  courseTotalClasses: number;
+  coursePresentClasses: number;
+  courseAbsentClasses: number;
+  courseAttendancePercentage?: number;
+  courseAttendanceStatus: 'NORMAL' | 'BELOW_THRESHOLD' | string;
+  overallAttendancePercentage?: number;
+  courseAverageMarksPercentage?: number;
+  marks: AssessmentMark[];
+  missingAssignmentsCount: number;
+  riskLevel: RiskLevel | string;
+  riskScore: number;
+  riskReason: string;
+}
+
+export interface AssessmentOverview {
+  id: number;
+  name: string;
+  type: string;
+  maxMarks: number;
+  weightage: number;
+  status: 'EVALUATED' | 'PENDING' | string;
+  classAverage?: number;
+}
+
+export interface RiskEngineSummary {
+  formula: string;
+  attendanceThresholdRule: string;
+  marksThresholdRule: string;
+  missingAssignmentRule: string;
+  pendingAssessmentRule: string;
+}
+
+export interface FacultyDashboard {
+  faculty: Faculty;
+  courseCode: string;
+  courseName: string;
+  credits: number;
+  classroom: string;
+  slotDetails: string;
+  totalConductedSessions: number;
+  courseAverageAttendance?: number;
+  courseAverageMarks?: number;
+  enrolledStudentsCount: number;
+  highRiskCount: number;
+  mediumRiskCount: number;
+  lowRiskCount: number;
+  students: StudentCoursePerformance[];
+  assessments: AssessmentOverview[];
+  activeInterventions: Intervention[];
+  riskEngineSummary?: RiskEngineSummary;
+}

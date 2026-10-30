@@ -16,6 +16,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
+  const normalizeRole = (roleStr?: string): Role => {
+    if (!roleStr) return 'STUDENT';
+    const clean = roleStr.replace(/^ROLE_/, '').toUpperCase();
+    if (clean === 'ADMIN' || clean === 'FACULTY' || clean === 'STUDENT') {
+      return clean as Role;
+    }
+    return 'STUDENT';
+  };
+
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
@@ -23,7 +32,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (storedToken && storedUser) {
       try {
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        if (parsed) {
+          parsed.role = normalizeRole(parsed.role);
+        }
+        setUser(parsed);
       } catch (e) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -40,7 +53,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (data: AuthResponse) => {
-    const resolvedRole = (data.role || (data.roles && data.roles[0]) || 'STUDENT') as any;
+    const rawRole = (data.role || (data.roles && data.roles[0]) || 'STUDENT') as string;
+    const resolvedRole = normalizeRole(rawRole);
     const u: User = {
       id: data.id,
       username: data.username,

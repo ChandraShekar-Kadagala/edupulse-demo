@@ -320,4 +320,62 @@ public class DemoShowcaseSeederTests {
         assertTrue(json.has("facultyList"));
         assertEquals(2, json.get("facultyList").size());
     }
+
+    private String obtainToken(String username, String password) throws Exception {
+        LoginRequest login = new LoginRequest();
+        login.setUsername(username);
+        login.setPassword(password);
+        MvcResult res = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(login)))
+                .andExpect(status().isOk())
+                .andReturn();
+        return objectMapper.readTree(res.getResponse().getContentAsString()).get("token").asText();
+    }
+
+    @Test
+    @DisplayName("7. Faculty dashboard endpoints provide rich course-specific cohort data for CSE 204 and CSE 213")
+    public void testFacultyDashboardEndpoints() throws Exception {
+        dataSeeder.seedDemoData();
+
+        // Faculty 1 (CSE 204)
+        String faculty1Token = obtainToken("demo.faculty.1", "DemoEduPulse2026!");
+        MvcResult fac1DashboardResult = mockMvc.perform(get("/api/faculty/me/dashboard")
+                        .header("Authorization", "Bearer " + faculty1Token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode fac1Json = objectMapper.readTree(fac1DashboardResult.getResponse().getContentAsString());
+        assertEquals("CSE 204", fac1Json.get("courseCode").asText());
+        assertEquals("DESIGN AND ANALYSIS OF ALGORITHMS", fac1Json.get("courseName").asText());
+        assertEquals(4, fac1Json.get("enrolledStudentsCount").asInt());
+        assertEquals(48, fac1Json.get("totalConductedSessions").asInt());
+        assertTrue(fac1Json.has("students"));
+        assertEquals(4, fac1Json.get("students").size());
+        assertTrue(fac1Json.has("assessments"));
+        assertTrue(fac1Json.has("riskEngineSummary"));
+
+        // Verify summary endpoint also includes faculty view
+        MvcResult summaryResult = mockMvc.perform(get("/api/dashboard/summary")
+                        .header("Authorization", "Bearer " + faculty1Token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode summaryJson = objectMapper.readTree(summaryResult.getResponse().getContentAsString());
+        assertTrue(summaryJson.has("facultyView"));
+        assertEquals("CSE 204", summaryJson.get("facultyView").get("courseCode").asText());
+
+        // Faculty 2 (CSE 213)
+        String faculty2Token = obtainToken("demo.faculty.2", "DemoEduPulse2026!");
+        MvcResult fac2DashboardResult = mockMvc.perform(get("/api/faculty/me/dashboard")
+                        .header("Authorization", "Bearer " + faculty2Token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode fac2Json = objectMapper.readTree(fac2DashboardResult.getResponse().getContentAsString());
+        assertEquals("CSE 213", fac2Json.get("courseCode").asText());
+        assertEquals("ADVANCED JAVA PROGRAMMING", fac2Json.get("courseName").asText());
+        assertEquals(4, fac2Json.get("enrolledStudentsCount").asInt());
+        assertEquals(49, fac2Json.get("totalConductedSessions").asInt());
+    }
 }
