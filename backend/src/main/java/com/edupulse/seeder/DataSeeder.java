@@ -227,17 +227,10 @@ public class DataSeeder implements CommandLineRunner {
         );
         ensureLegacyUser("student_a", Role.STUDENT, "Student A — Reference", "demo.student.a@edupulse.srmap.edu.in", encodedPassword);
 
-        Student studentA = studentRepository.findById(studentAUser.getId())
-                .orElseGet(() -> studentRepository.findByStudentNumber("STU-1001")
-                        .orElseGet(() -> studentRepository.save(Student.builder()
-                                .user(studentAUser)
-                                .studentNumber("STU-1001")
-                                .department("Computer Science & Engineering")
-                                .currentSemester(5)
-                                .currentCgpa(9.1)
-                                .build())));
-        studentA.setCurrentCgpa(9.1);
-        studentRepository.save(studentA);
+        Student studentA = syncDemoStudent(studentAUser, "STU-1001", "Computer Science & Engineering", 5, 9.1);
+        if (attendanceRepository.findByStudentId(studentA.getId()).size() != 276 || markRepository.findByStudentId(studentA.getId()).isEmpty()) {
+            clearDemoAcademicRecords(studentA);
+        }
 
         if (attendanceRepository.findByStudentId(studentA.getId()).isEmpty()) {
             seedCourseAttendance(studentA, cse203, 29, 0);
@@ -290,17 +283,10 @@ public class DataSeeder implements CommandLineRunner {
         );
         ensureLegacyUser("aarav", Role.STUDENT, "Student B — Top Performer", "demo.student.b@edupulse.srmap.edu.in", encodedPassword);
 
-        Student studentB = studentRepository.findById(studentBUser.getId())
-                .orElseGet(() -> studentRepository.findByStudentNumber("STU-1002")
-                        .orElseGet(() -> studentRepository.save(Student.builder()
-                                .user(studentBUser)
-                                .studentNumber("STU-1002")
-                                .department("Computer Science & Engineering")
-                                .currentSemester(5)
-                                .currentCgpa(9.4)
-                                .build())));
-        studentB.setCurrentCgpa(9.4);
-        studentRepository.save(studentB);
+        Student studentB = syncDemoStudent(studentBUser, "STU-1002", "Computer Science & Engineering", 5, 9.4);
+        if (attendanceRepository.findByStudentId(studentB.getId()).size() != 276 || markRepository.findByStudentId(studentB.getId()).isEmpty()) {
+            clearDemoAcademicRecords(studentB);
+        }
 
         if (attendanceRepository.findByStudentId(studentB.getId()).isEmpty()) {
             seedCourseAttendance(studentB, cse203, 29, 1);
@@ -353,17 +339,10 @@ public class DataSeeder implements CommandLineRunner {
         );
         ensureLegacyUser("bhavna", Role.STUDENT, "Student C — Average Performer", "demo.student.c@edupulse.srmap.edu.in", encodedPassword);
 
-        Student studentC = studentRepository.findById(studentCUser.getId())
-                .orElseGet(() -> studentRepository.findByStudentNumber("STU-1003")
-                        .orElseGet(() -> studentRepository.save(Student.builder()
-                                .user(studentCUser)
-                                .studentNumber("STU-1003")
-                                .department("Computer Science & Engineering")
-                                .currentSemester(5)
-                                .currentCgpa(7.2)
-                                .build())));
-        studentC.setCurrentCgpa(7.2);
-        studentRepository.save(studentC);
+        Student studentC = syncDemoStudent(studentCUser, "STU-1003", "Computer Science & Engineering", 5, 7.2);
+        if (attendanceRepository.findByStudentId(studentC.getId()).size() != 276 || markRepository.findByStudentId(studentC.getId()).isEmpty()) {
+            clearDemoAcademicRecords(studentC);
+        }
 
         if (attendanceRepository.findByStudentId(studentC.getId()).isEmpty()) {
             seedCourseAttendance(studentC, cse203, 29, 8);
@@ -418,17 +397,12 @@ public class DataSeeder implements CommandLineRunner {
         );
         ensureLegacyUser("arun", Role.STUDENT, "Student D — High Risk", "demo.student.d@edupulse.srmap.edu.in", encodedPassword);
 
-        Student studentD = studentRepository.findById(studentDUser.getId())
-                .orElseGet(() -> studentRepository.findByStudentNumber("STU-1004")
-                        .orElseGet(() -> studentRepository.save(Student.builder()
-                                .user(studentDUser)
-                                .studentNumber("STU-1004")
-                                .department("Computer Science & Engineering")
-                                .currentSemester(5)
-                                .currentCgpa(5.1)
-                                .build())));
-        studentD.setCurrentCgpa(5.1);
-        studentRepository.save(studentD);
+        Student studentD = syncDemoStudent(studentDUser, "STU-1004", "Computer Science & Engineering", 5, 5.1);
+        long studentDAbsent = attendanceRepository.findByStudentId(studentD.getId()).stream()
+                .filter(a -> a.getStatus() == AttendanceStatus.ABSENT).count();
+        if (studentDAbsent != 111L || markRepository.findByStudentId(studentD.getId()).isEmpty()) {
+            clearDemoAcademicRecords(studentD);
+        }
 
         if (attendanceRepository.findByStudentId(studentD.getId()).isEmpty()) {
             seedCourseAttendance(studentD, cse203, 29, 12);
@@ -582,6 +556,43 @@ public class DataSeeder implements CommandLineRunner {
                         .name(name)
                         .dueDate(dueDate)
                         .build()));
+    }
+
+    private Student syncDemoStudent(User user, String studentNumber, String department, int semester, double cgpa) {
+        studentRepository.findByStudentNumber(studentNumber).ifPresent(other -> {
+            if (!other.getId().equals(user.getId())) {
+                other.setStudentNumber("TEMP-" + other.getId() + "-" + System.currentTimeMillis());
+                studentRepository.saveAndFlush(other);
+            }
+        });
+
+        Student student = studentRepository.findById(user.getId()).orElse(null);
+        if (student == null) {
+            student = Student.builder()
+                    .user(user)
+                    .studentNumber(studentNumber)
+                    .department(department)
+                    .currentSemester(semester)
+                    .currentCgpa(cgpa)
+                    .build();
+        } else {
+            student.setUser(user);
+            student.setStudentNumber(studentNumber);
+            student.setDepartment(department);
+            student.setCurrentSemester(semester);
+            student.setCurrentCgpa(cgpa);
+        }
+        return studentRepository.saveAndFlush(student);
+    }
+
+    private void clearDemoAcademicRecords(Student student) {
+        if (student == null || student.getId() == null) return;
+        attendanceRepository.deleteAll(attendanceRepository.findByStudentId(student.getId()));
+        markRepository.deleteAll(markRepository.findByStudentId(student.getId()));
+        submissionRepository.deleteAll(submissionRepository.findByStudentId(student.getId()));
+        attendanceRepository.flush();
+        markRepository.flush();
+        submissionRepository.flush();
     }
 
     private void seedCourseAttendance(Student student, Course course, int totalSessions, int absentCount) {
