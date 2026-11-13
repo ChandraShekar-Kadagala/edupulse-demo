@@ -20,23 +20,30 @@ import java.util.Map;
 @RestController
 @RequestMapping({"/api/integration", "/api/v1/integration"})
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
-@lombok.RequiredArgsConstructor
 public class IntegrationController {
 
     private static final Logger log = LoggerFactory.getLogger(IntegrationController.class);
 
-    @Qualifier("officialSrmDataProvider")
     private final AcademicDataProvider officialDataProvider;
-
-    @Qualifier("portalFixtureAcademicDataProvider")
     private final AcademicDataProvider fixtureDataProvider;
-
-    @Qualifier("demoAcademicDataProvider")
     private final AcademicDataProvider demoDataProvider;
-
     private final SrmPortalIntegrationService portalIntegrationService;
-
     private final StudentRepository studentRepository;
+
+    // Explicit constructor: qualifiers must sit on the parameters. Do not rely on lombok.config
+    // copyableAnnotations — the Docker build context does not include build-config files.
+    public IntegrationController(
+            @Qualifier("officialSrmDataProvider") AcademicDataProvider officialDataProvider,
+            @Qualifier("portalFixtureAcademicDataProvider") AcademicDataProvider fixtureDataProvider,
+            @Qualifier("demoAcademicDataProvider") AcademicDataProvider demoDataProvider,
+            SrmPortalIntegrationService portalIntegrationService,
+            StudentRepository studentRepository) {
+        this.officialDataProvider = officialDataProvider;
+        this.fixtureDataProvider = fixtureDataProvider;
+        this.demoDataProvider = demoDataProvider;
+        this.portalIntegrationService = portalIntegrationService;
+        this.studentRepository = studentRepository;
+    }
 
     @GetMapping("/status")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'FACULTY')")
