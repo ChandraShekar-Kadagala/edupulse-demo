@@ -20,84 +20,37 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final com.edupulse.service.DemoShowcaseService demoShowcaseService;
+
     @Value("${app.demo.public-accounts-enabled:true}")
     private boolean publicDemoAccountsEnabled;
 
     @Value("${app.seeder.demo-password:DemoEduPulse2026!}")
     private String demoPassword;
 
+    /**
+     * Public showcase roster for the login page. Values are read live from the database
+     * (DEMO accounts only); nothing is hardcoded. The shared demo password is public by design.
+     */
     @GetMapping("/demo-status")
-    public ResponseEntity<?> getDemoStatus() {
+    public ResponseEntity<Map<String, Object>> getDemoStatus() {
         if (!publicDemoAccountsEnabled) {
             return ResponseEntity.ok(Map.of("demoModeEnabled", false));
         }
-        return ResponseEntity.ok(Map.of(
-                "demoModeEnabled", true,
-                "demoMarker", "DEMO_SHOWCASE",
-                "demoPassword", demoPassword != null ? demoPassword : "DemoEduPulse2026!",
-                "students", List.of(
-                        buildStudentDemo(
-                                "demo.student.a", "STU-1001", "Student A — Reference",
-                                "LOW", 0.0, 9.1, "99.6% (275/276)", "44.2% (150.44/340)",
-                                "Anonymized SRM AP academic reference data (High attendance, clean submissions)",
-                                "STUDENT-SUPPLIED REFERENCE DATA"
-                        ),
-                        buildStudentDemo(
-                                "demo.student.b", "STU-1002", "Student B — Top Performer",
-                                "LOW", 0.0, 9.4, "97.1% (268/276)", "92.4% (314/340)",
-                                "Top academic performance across all assessments",
-                                "SYNTHETIC DEMO DATA"
-                        ),
-                        buildStudentDemo(
-                                "demo.student.c", "STU-1003", "Student C — Average Performer",
-                                "MEDIUM", 37.0, 7.2, "71.0% (196/276)", "38.8% (132/340)",
-                                "Average performance with 4 overdue deliverables (Medium risk flag)",
-                                "SYNTHETIC DEMO DATA"
-                        ),
-                        buildStudentDemo(
-                                "demo.student.d", "STU-1004", "Student D — High Risk",
-                                "HIGH", 74.8, 5.1, "59.8% (165/276)", "27.6% (94/340)",
-                                "Critical attendance deficit and 6 overdue deliverables (High risk flag)",
-                                "SYNTHETIC DEMO DATA"
-                        )
-                ),
-                "facultyList", List.of(
-                        buildFacultyDemo("demo.faculty.1", "Faculty A", "Associate Professor", "CSE 204", "Design and Analysis of Algorithms", "Faculty Instructor & Evaluator for CSE 204"),
-                        buildFacultyDemo("demo.faculty.2", "Faculty B", "Assistant Professor", "CSE 213", "Advanced Java Programming", "Faculty Instructor & Evaluator for CSE 213")
-                ),
-                "defaultStudentUsername", "demo.student.a",
-                "defaultStudentRegNo", "STU-1001",
-                "defaultFacultyUsername", "demo.faculty.1",
-                "disclaimer", "Illustrative demonstration accounts with pre-loaded SRM AP curriculum scenarios. Student A represents anonymized reference data; Students B, C, D and Faculty accounts provide synthetic comparative benchmarks."
-        ));
-    }
-
-    private Map<String, Object> buildStudentDemo(String username, String regNo, String name, String risk, double riskScore, double cgpa, String attendance, String marks, String profile, String provenance) {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("username", username);
-        map.put("regNo", regNo);
-        map.put("name", name);
-        map.put("role", "STUDENT");
-        map.put("risk", risk);
-        map.put("riskScore", riskScore);
-        map.put("cgpa", cgpa);
-        map.put("attendance", attendance);
-        map.put("marks", marks);
-        map.put("profile", profile);
-        map.put("provenance", provenance);
-        return map;
-    }
-
-    private Map<String, Object> buildFacultyDemo(String username, String name, String title, String course, String courseName, String profile) {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("username", username);
-        map.put("name", name);
-        map.put("role", "FACULTY");
-        map.put("title", title);
-        map.put("course", course);
-        map.put("courseName", courseName);
-        map.put("profile", profile);
-        return map;
+        List<Map<String, Object>> students = demoShowcaseService.students();
+        List<Map<String, Object>> faculty = demoShowcaseService.faculty();
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("demoModeEnabled", !students.isEmpty() || !faculty.isEmpty());
+        body.put("demoMarker", "DEMO_SHOWCASE");
+        body.put("demoPassword", demoPassword);
+        body.put("students", students);
+        body.put("facultyList", faculty);
+        body.put("defaultStudentUsername", "demo.student.a");
+        body.put("defaultStudentRegNo", "STU-1001");
+        body.put("defaultFacultyUsername", "demo.faculty.1");
+        body.put("disclaimer", "Illustrative demonstration accounts. Student A holds anonymized student-supplied reference data; "
+                + "Students B-D and both faculty accounts are synthetic. Figures are read live from the database.");
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping("/login")

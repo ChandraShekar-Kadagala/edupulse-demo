@@ -35,6 +35,8 @@ class DemoProvisioningIdempotencyTests {
     @Autowired private StudentRepository studentRepository;
     @Autowired private FacultyRepository facultyRepository;
     @Autowired private CourseRepository courseRepository;
+    @Autowired private com.edupulse.repository.EnrollmentRepository enrollmentRepository;
+    @Autowired private com.edupulse.repository.CourseAssignmentRepository courseAssignmentRepository;
     @Autowired private AttendanceRepository attendanceRepository;
     @Autowired private MarkRepository markRepository;
     @Autowired private AssessmentRepository assessmentRepository;
@@ -53,6 +55,8 @@ class DemoProvisioningIdempotencyTests {
         markRepository.deleteAll();
         assessmentRepository.deleteAll();
         attendanceRepository.deleteAll();
+        enrollmentRepository.deleteAll();
+        courseAssignmentRepository.deleteAll();
         courseRepository.deleteAll();
         studentRepository.deleteAll();
         facultyRepository.deleteAll();

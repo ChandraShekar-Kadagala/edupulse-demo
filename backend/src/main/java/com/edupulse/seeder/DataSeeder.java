@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -45,6 +46,10 @@ public class DataSeeder implements CommandLineRunner {
     private final RiskAssessmentService riskAssessmentService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final CourseAssignmentRepository courseAssignmentRepository;
+
+    private final EnrollmentRepository enrollmentRepository;
 
     @Value("${app.seeder.enabled:false}")
     private boolean seederEnabled;
@@ -135,7 +140,8 @@ public class DataSeeder implements CommandLineRunner {
         faculty2.setTitle("Assistant Professor");
         faculty2.setDepartment("Computer Science & Engineering");
         facultyRepository.save(faculty2);
-
+        // Legacy DEMO usernames (aliases above) are renamed to the neutral demo.* usernames on provisioning;
+        // they are never created and no longer accepted as login aliases.
         // Backwards compatibility: ensure legacy usernames 'roopa', 'aditya', 'faculty' authenticate if present
 
         // 4. Seed 7 SRM AP Courses
@@ -153,6 +159,10 @@ public class DataSeeder implements CommandLineRunner {
                 courseRepository.save(Course.builder().code("MCE 272").name("INTRODUCTION TO ROCKET AND JET TECHNOLOGY").credits(2).build()));
         Course sec203 = courseRepository.findByCode("SEC 203").orElseGet(() ->
                 courseRepository.save(Course.builder().code("SEC 203").name("QUANTITATIVE APTITUDE AND LOGICAL REASONING").credits(2).build()));
+
+        // 4b. Explicit teaching assignments (drive faculty dashboards; no username guessing)
+        ensureCourseAssignment(faculty1, cse204);
+        ensureCourseAssignment(faculty2, cse213);
 
         // 5. Seed Official Assessments (matching SRM AP Student Corner course syllabus structure)
         Assessment cse203Mid = getOrCreateAssessment(cse203, "Mid Semester Exam I", 20.0, 20.0);
@@ -428,6 +438,15 @@ public class DataSeeder implements CommandLineRunner {
             submissionRepository.save(AssignmentSubmission.builder().assignment(a6).student(studentD).submittedAt(null).status("MISSING").build());
         }
 
+        // 6b. Enroll every showcase student in the same seven subjects
+        for (Student s : List.of(studentA, studentB, studentC, studentD)) {
+            for (Course c : List.of(cse203, cse204, cse207, cse213, fic120, mce272, sec203)) {
+                if (!enrollmentRepository.existsByStudentIdAndCourseId(s.getId(), c.getId())) {
+                    enrollmentRepository.save(Enrollment.builder().student(s).course(c).semester(5).status("ACTIVE").build());
+                }
+            }
+        }
+
         // 7. Seed Interventions
         if (interventionRepository.count() == 0) {
             interventionRepository.save(Intervention.builder()
@@ -470,7 +489,7 @@ public class DataSeeder implements CommandLineRunner {
         riskAssessmentService.calculateRiskForStudent(studentC.getId());
         riskAssessmentService.calculateRiskForStudent(studentD.getId());
 
-        log.info("Demo showcase bootstrap successfully completed with 6 dedicated showcase accounts (4 students, 2 faculty) plus admin.");
+        log.info("Demo showcase bootstrap successfully completed with 6 dedicated showcase accounts (4 students, 2 faculty) (admin only if DEMO_ADMIN_PASSWORD is set).");
         return true;
     }
 
@@ -535,6 +554,12 @@ public class DataSeeder implements CommandLineRunner {
                         .build()));
     }
 
+    private void ensureCourseAssignment(Faculty faculty, Course course) {
+        if (!courseAssignmentRepository.existsByFacultyIdAndCourseId(faculty.getId(), course.getId())) {
+            courseAssignmentRepository.save(CourseAssignment.builder().faculty(faculty).course(course).build());
+        }
+    }
+
     private Student syncDemoStudent(User user, String studentNumber, String department, int semester, double cgpa) {
         studentRepository.findByStudentNumber(studentNumber).ifPresent(other -> {
             if (!other.getId().equals(user.getId())) {
@@ -563,6 +588,9 @@ public class DataSeeder implements CommandLineRunner {
             student.setCurrentSemester(semester);
             student.setCurrentCgpa(cgpa);
         }
+        student.setDataProvenance("STU-1001".equals(studentNumber)
+                ? DataProvenance.STUDENT_SUPPLIED_REFERENCE
+                : DataProvenance.SYNTHETIC_TEST_FIXTURE);
         return studentRepository.saveAndFlush(student);
     }
 

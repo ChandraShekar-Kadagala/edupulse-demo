@@ -40,6 +40,8 @@ public class StudentController {
 
     private final MarkRepository markRepository;
 
+    private final com.edupulse.repository.RiskAssessmentRepository riskAssessmentRepository;
+
     @GetMapping
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<List<StudentDto>> getAllStudents() {
@@ -69,6 +71,34 @@ public class StudentController {
     public ResponseEntity<?> recalculateStudentRisk(@PathVariable Long id) {
         riskAssessmentService.calculateRiskForStudent(id);
         return ResponseEntity.ok(riskAssessmentService.getLatestRiskAssessment(id));
+    }
+
+    /** Official risk snapshots over time plus intervention start dates (timeline for trends and outcomes). */
+    @GetMapping("/{id}/risk/history")
+    @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<java.util.Map<String, Object>> getRiskHistory(@PathVariable Long id) {
+        studentService.getStudentById(id); // 404 if unknown
+        var snapshots = riskAssessmentRepository.findByStudentId(id).stream()
+                .filter(r -> r.getCalculatedAt() != null)
+                .sorted(java.util.Comparator.comparing(com.edupulse.model.RiskAssessment::getCalculatedAt))
+                .map(r -> java.util.Map.<String, Object>of(
+                        "calculatedAt", r.getCalculatedAt(),
+                        "riskScore", r.getRiskScore(),
+                        "riskLevel", r.getRiskLevel().name()))
+                .toList();
+        var interventions = interventionService.getInterventionsForStudent(id).stream()
+                .sorted(java.util.Comparator.comparing(Intervention::getId))
+                .map(i -> { var m = new java.util.LinkedHashMap<String, Object>();
+                    m.put("id", i.getId()); m.put("type", i.getType());
+                    m.put("status", i.getStatus() != null ? i.getStatus().name() : null);
+                    m.put("startedAt", InterventionService.startOf(i)); return m; })
+                .toList();
+        var body = new java.util.LinkedHashMap<String, Object>();
+        body.put("studentId", id);
+        body.put("snapshots", snapshots);
+        body.put("interventions", interventions);
+        body.put("note", "Snapshots are appended when an official recalculation changes the result; a single snapshot is not a trend.");
+        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/{id}/interventions")

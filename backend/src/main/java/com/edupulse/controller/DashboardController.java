@@ -29,8 +29,12 @@ public class DashboardController {
         if (userDetails != null) {
             boolean isFaculty = userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_FACULTY"));
             if (isFaculty) {
-                summary.setCurrentFaculty(facultyService.getFacultyById(userDetails.getId()));
-                summary.setFacultyView(facultyService.getFacultyDashboard(userDetails.getId(), userDetails.getUsername()));
+                try {
+                    summary.setCurrentFaculty(facultyService.getFacultyById(userDetails.getId()));
+                    summary.setFacultyView(facultyService.getFacultyDashboard(userDetails.getId(), null));
+                } catch (com.edupulse.exception.ResourceNotFoundException noProfile) {
+                    // FACULTY account without a faculty profile: the cohort summary is still returned.
+                }
             }
         }
         return ResponseEntity.ok(summary);

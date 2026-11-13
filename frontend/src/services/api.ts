@@ -5,8 +5,12 @@ import type {
   Faculty, 
   FacultyDashboard,
   Student, 
-  RiskAssessment, 
-  Intervention 
+  RiskAssessment,
+  Intervention,
+  DashboardSummary,
+  DemoStatus,
+  EffectivenessReport,
+  RiskHistory
 } from '../types';
 
 const api = axios.create({
@@ -73,18 +77,23 @@ export function getSafeErrorMessage(error: any, fallback = 'An unexpected error 
   return fallback;
 }
 
+/** Typed helpers for the real backend routes (see docs/api-reference.md). */
 export const academicApi = {
-  getStudentAnalytics: (studentId: number | string) => api.get<StudentAcademicAnalytics>(`/academic/student/${studentId}`),
-  getStudentAnalyticsByRegNo: (regNo: string) => api.get<StudentAcademicAnalytics>(`/academic/student/number/${regNo}`),
+  getStudentAnalytics: (studentId: number | string) => api.get<StudentAcademicAnalytics>(`/students/${studentId}/analytics`),
+  getRiskHistory: (studentId: number | string) => api.get<RiskHistory>(`/students/${studentId}/risk/history`),
   getTimetable: () => api.get<TimetableSlot[]>('/timetable'),
   getFacultyList: () => api.get<Faculty[]>('/faculty'),
   getFacultyById: (facultyId: number | string) => api.get<Faculty>(`/faculty/${facultyId}`),
-  getFacultyDashboard: (facultyId: number | string) => api.get<FacultyDashboard>(`/faculty/${facultyId}/dashboard`),
-  getMyFacultyDashboard: () => api.get<FacultyDashboard>('/faculty/me/dashboard'),
-  getDemoStatus: () => api.get<any>('/auth/demo-status'),
+  getFacultyDashboard: (facultyId: number | string, courseCode?: string) =>
+    api.get<FacultyDashboard>(`/faculty/${facultyId}/dashboard`, { params: courseCode ? { courseCode } : undefined }),
+  getMyFacultyDashboard: (courseCode?: string) =>
+    api.get<FacultyDashboard>('/faculty/me/dashboard', { params: courseCode ? { courseCode } : undefined }),
+  getDashboardSummary: () => api.get<DashboardSummary>('/dashboard/summary'),
+  getDemoStatus: () => api.get<DemoStatus>('/auth/demo-status'),
   getStudents: () => api.get<Student[]>('/students'),
-  getRiskAssessment: (studentId: number | string) => api.get<RiskAssessment>(`/risk/student/${studentId}`),
+  getRiskAssessment: (studentId: number | string) => api.get<RiskAssessment>(`/students/${studentId}/risk`),
   getInterventions: () => api.get<Intervention[]>('/interventions'),
+  getInterventionEffectiveness: () => api.get<EffectivenessReport>('/analytics/interventions/effectiveness'),
 };
 
 export default api;

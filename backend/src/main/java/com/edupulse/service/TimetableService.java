@@ -21,13 +21,14 @@ public class TimetableService {
     );
 
     public static final Map<String, String> SUBJECT_FACULTY = Map.of(
-            "CSE 203", "Dr. Jayasree Subramanian ( 19091 )",
-            "CSE 204", "Dr. Roopa Tirumalasetti ( 24082 ), Mr. Sugyan Kumar Mishra ( 24032 )",
-            "CSE 207", "Dr. Pudi Dhilleswararao ( 25369 ), Dr. Rishikanta Mayengbam ( 26372 )",
-            "CSE 213", "Dr. Aditya Kumar Sahu ( 25346 ), Mr. Balvinder Singh Bondili ( 24101 )",
-            "FIC 120", "Dr. Bibaswan Bose ( 26369 )",
-            "MCE 272", "Dr. Vipin Kumar ( 26083 )",
-            "SEC 203", "Mr. Skilling Course Six Two ( tmp062 )"
+            // Anonymized: real instructor names and employee IDs are never shipped with the reference timetable.
+            "CSE 203", "Course Instructor",
+            "CSE 204", "Faculty A (demo)",
+            "CSE 207", "Course Instructor",
+            "CSE 213", "Faculty B (demo)",
+            "FIC 120", "Course Instructor",
+            "MCE 272", "Course Instructor",
+            "SEC 203", "Course Instructor"
     );
 
     public static final Map<String, String> SUBJECT_ROOMS = Map.of(

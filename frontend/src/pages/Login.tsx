@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import api, { academicApi, getSafeErrorMessage } from '../services/api';
+import type { DemoStatus } from '../types';
 import { Activity, Eye, EyeOff, Sparkles, GraduationCap, Building2, Copy, Check, ShieldCheck, Info } from 'lucide-react';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 
@@ -10,9 +11,9 @@ interface ShowcaseStudent {
   regNo: string;
   name: string;
   role: 'STUDENT';
-  risk: 'LOW' | 'MEDIUM' | 'HIGH';
-  riskScore: number;
-  cgpa: number;
+  risk: 'LOW' | 'MEDIUM' | 'HIGH' | null;
+  riskScore: number | null;
+  cgpa: number | null;
   attendance: string;
   marks: string;
   profile: string;
@@ -22,7 +23,7 @@ interface ShowcaseStudent {
 interface ShowcaseFaculty {
   username: string;
   name: string;
-  role: 'FACULTY' | 'ADMIN';
+  role: 'FACULTY';
   title: string;
   course?: string;
   courseName?: string;
@@ -41,90 +42,50 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const publicDemoPassword = 'DemoEduPulse2026!';
+  // Showcase accounts are read live from GET /auth/demo-status (DEMO accounts only); nothing is hardcoded.
+  const [demoStatus, setDemoStatus] = useState<DemoStatus | null>(null);
+  const [demoLoading, setDemoLoading] = useState(true);
+  const [demoError, setDemoError] = useState<string | null>(null);
 
-  const studentAccounts: ShowcaseStudent[] = [
-    {
-      username: 'demo.student.a',
-      regNo: 'STU-1001',
-      name: 'Student A — Reference',
-      role: 'STUDENT',
-      risk: 'LOW',
-      riskScore: 0.0,
-      cgpa: 9.1,
-      attendance: '99.6% (275/276 classes)',
-      marks: '44.2% (150.44/340 marks)',
-      profile: 'Anonymized SRM AP academic reference data (High attendance, clean on-time coursework)',
-      provenance: 'STUDENT-SUPPLIED REFERENCE DATA'
-    },
-    {
-      username: 'demo.student.b',
-      regNo: 'STU-1002',
-      name: 'Student B — Top Performer',
-      role: 'STUDENT',
-      risk: 'LOW',
-      riskScore: 0.0,
-      cgpa: 9.4,
-      attendance: '97.1% (268/276 classes)',
-      marks: '92.4% (314/340 marks)',
-      profile: 'High academic performance across all assessments, peer mentor track',
-      provenance: 'SYNTHETIC DEMO DATA'
-    },
-    {
-      username: 'demo.student.c',
-      regNo: 'STU-1003',
-      name: 'Student C — Average Performer',
-      role: 'STUDENT',
-      risk: 'MEDIUM',
-      riskScore: 37.0,
-      cgpa: 7.2,
-      attendance: '71.0% (196/276 classes)',
-      marks: '38.8% (132/340 marks)',
-      profile: 'Average performance with 4 overdue deliverables (Medium risk advisory)',
-      provenance: 'SYNTHETIC DEMO DATA'
-    },
-    {
-      username: 'demo.student.d',
-      regNo: 'STU-1004',
-      name: 'Student D — High Risk',
-      role: 'STUDENT',
-      risk: 'HIGH',
-      riskScore: 74.8,
-      cgpa: 5.1,
-      attendance: '59.8% (165/276 classes)',
-      marks: '27.6% (94/340 marks)',
-      profile: 'Critical attendance shortfall and 6 overdue deliverables (Urgent intervention)',
-      provenance: 'SYNTHETIC DEMO DATA'
+  const loadDemoStatus = async () => {
+    setDemoLoading(true);
+    setDemoError(null);
+    try {
+      setDemoStatus((await academicApi.getDemoStatus()).data);
+    } catch (err) {
+      setDemoError(getSafeErrorMessage(err, 'Demo accounts could not be loaded. The server may be waking up; please retry.'));
+    } finally {
+      setDemoLoading(false);
     }
-  ];
+  };
 
-  const facultyAccounts: ShowcaseFaculty[] = [
-    {
-      username: 'demo.faculty.1',
-      name: 'Faculty A',
-      role: 'FACULTY',
-      title: 'Associate Professor',
-      course: 'CSE 204',
-      courseName: 'Design and Analysis of Algorithms',
-      profile: 'Faculty Instructor & Course Evaluator for CSE 204'
-    },
-    {
-      username: 'demo.faculty.2',
-      name: 'Faculty B',
-      role: 'FACULTY',
-      title: 'Assistant Professor',
-      course: 'CSE 213',
-      courseName: 'Advanced Java Programming',
-      profile: 'Faculty Instructor & Course Evaluator for CSE 213'
-    }
-  ];
+  useEffect(() => { void loadDemoStatus(); }, []);
 
-  useEffect(() => {
-    // Ping demo-status to prime the backend or verify connection
-    api.get('/auth/demo-status').catch(() => {
-      // Backend waking up or silent pass
-    });
-  }, []);
+  const publicDemoPassword = demoStatus?.demoPassword ?? '';
+
+  const studentAccounts: ShowcaseStudent[] = (demoStatus?.students ?? []).map(s => ({
+    username: s.username,
+    regNo: s.regNo,
+    name: s.name,
+    role: 'STUDENT',
+    risk: s.risk ?? null,
+    riskScore: s.riskScore ?? null,
+    cgpa: s.cgpa ?? null,
+    attendance: s.attendance ?? '—',
+    marks: s.averageMarksPercentage != null ? `${s.averageMarksPercentage.toFixed(1)}% across ${s.evaluatedAssessments} evaluated` : 'No evaluated marks yet',
+    profile: `${s.subjects} subjects · attendance ${s.attendance ?? '—'} · marks ${s.averageMarksPercentage != null ? s.averageMarksPercentage.toFixed(1) + '%' : '—'}`,
+    provenance: s.provenance,
+  }));
+
+  const facultyAccounts: ShowcaseFaculty[] = (demoStatus?.facultyList ?? []).map(f => ({
+    username: f.username,
+    name: f.name,
+    role: 'FACULTY',
+    title: f.title ?? 'Faculty',
+    course: f.courses[0]?.code,
+    courseName: f.courses[0]?.name,
+    profile: f.courses.length ? 'Assigned: ' + f.courses.map(c => c.code).join(', ') : 'No course assigned',
+  }));
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -362,7 +323,7 @@ export default function Login() {
           <div className="flex items-start space-x-2 text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/40 p-2.5 rounded-lg border border-gray-200 dark:border-gray-800">
             <Info className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              These are public demonstration accounts with pre-loaded SRM AP curriculum scenarios. Student A reflects verified reference records; Students B, C, D and Faculty accounts provide synthetic comparative benchmarks.
+              These are public demonstration accounts with pre-loaded SRM AP curriculum scenarios. Student A holds anonymized student-supplied reference data; Students B, C, D and both faculty accounts are synthetic. Figures are read live from the database.
             </p>
           </div>
 
@@ -378,7 +339,7 @@ export default function Login() {
               }`}
             >
               <GraduationCap className="h-4 w-4 inline mr-1.5" />
-              Student Accounts (4 Profiles)
+              Student Accounts ({studentAccounts.length})
             </button>
             <button
               type="button"
@@ -390,9 +351,22 @@ export default function Login() {
               }`}
             >
               <Building2 className="h-4 w-4 inline mr-1.5" />
-              Faculty & Admin (3 Profiles)
+              Faculty Accounts ({facultyAccounts.length})
             </button>
           </div>
+
+          {demoLoading && (
+            <p role="status" className="text-xs text-gray-500 dark:text-gray-400 py-2">Loading demo accounts…</p>
+          )}
+          {!demoLoading && demoError && (
+            <div role="alert" className="text-xs p-3 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
+              <span>{demoError}</span>
+              <button type="button" onClick={() => void loadDemoStatus()} className="px-2 py-1 rounded bg-amber-600 text-white font-semibold">Retry</button>
+            </div>
+          )}
+          {!demoLoading && !demoError && demoStatus && !demoStatus.demoModeEnabled && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 py-2">Demo accounts are not available on this deployment.</p>
+          )}
 
           {/* Tab 1: Student Accounts */}
           {activeTab === 'students' && (
@@ -425,7 +399,7 @@ export default function Login() {
                             {stu.name}
                           </span>
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${riskBadgeClass}`}>
-                            {stu.risk} ({stu.riskScore})
+                            {stu.risk ?? 'NO DATA'} ({stu.riskScore != null ? stu.riskScore.toFixed(1) : '—'})
                           </span>
                         </div>
 
@@ -514,7 +488,7 @@ export default function Login() {
             </div>
           )}
 
-          {/* Tab 2: Faculty & Admin Accounts */}
+          {/* Tab 2: Faculty Accounts */}
           {activeTab === 'faculty' && (
             <div className="space-y-3 pt-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">

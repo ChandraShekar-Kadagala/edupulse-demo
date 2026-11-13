@@ -64,12 +64,12 @@ Do not hardcode secrets in production.
 * `DEMO_ADMIN_PASSWORD`: optional, **non-public** password for a demo admin; if unset, no admin is seeded
 * `FLYWAY_ENABLED` (default `true`), `JPA_DDL_AUTO` (default `validate`)
 
-**Schema management:** Flyway owns the schema in every PostgreSQL environment (`backend/src/main/resources/db/migration`); Hibernate only validates. Add forward-only `V{n}__description.sql` migrations; never edit an applied one. The H2 `dev`/`test` profiles let Hibernate build the schema, and `PostgresMigrationIntegrationTest` verifies the real migrations against PostgreSQL in CI.
+**Schema management:** see [docs/database-migrations.md](docs/database-migrations.md) (includes the V2 review record). Flyway owns the schema in every PostgreSQL environment (`backend/src/main/resources/db/migration`); Hibernate only validates. Add forward-only `V{n}__description.sql` migrations; never edit an applied one. The H2 `dev`/`test` profiles let Hibernate build the schema, and `PostgresMigrationIntegrationTest` verifies the real migrations against PostgreSQL in CI.
 
 ---
 
 ## 👥 Demo Showcase Accounts
-When `SEED_DEMO_DATA=true` (or an admin calls `POST /api/admin/demo/provision`), `DataSeeder` idempotently provisions six public demo accounts (auth provider `DEMO`). Their credentials are listed on the login page.
+When `SEED_DEMO_DATA=true` (or an admin calls `POST /api/admin/demo/provision`), `DataSeeder` idempotently provisions six public demo accounts (auth provider `DEMO`). Their credentials and live figures (from `GET /api/auth/demo-status`) are listed on the login page. Every showcase student is enrolled in the same seven subjects.
 
 | Username | Role | Data |
 |---|---|---|
@@ -77,8 +77,8 @@ When `SEED_DEMO_DATA=true` (or an admin calls `POST /api/admin/demo/provision`),
 | `demo.student.b` | Student (STU-1002) | Synthetic: top performer |
 | `demo.student.c` | Student (STU-1003) | Synthetic: average performer |
 | `demo.student.d` | Student (STU-1004) | Synthetic: high risk |
-| `demo.faculty.1` | Faculty (CSE 204) | Synthetic |
-| `demo.faculty.2` | Faculty (CSE 213) | Synthetic |
+| `demo.faculty.1` | Faculty (assigned CSE 204 via `course_assignments`) | Synthetic |
+| `demo.faculty.2` | Faculty (assigned CSE 213 via `course_assignments`) | Synthetic |
 
 There is no public admin account. Real (non-`DEMO`) accounts are never modified by provisioning.
 
@@ -104,6 +104,9 @@ STU-1002,CS101,95.0,Midterm,85.0,100.0
 ```
 
 ---
+
+## 📊 Intervention Outcomes
+Observational before/after analytics for interventions (sample sizes, exclusions, no causal claims): see [docs/intervention-analytics.md](docs/intervention-analytics.md).
 
 ## 📈 Risk Scoring
 See [docs/risk-engine.md](docs/risk-engine.md). The formula lives only in `RiskFormula.java` (backend); the frontend renders the backend explanation.

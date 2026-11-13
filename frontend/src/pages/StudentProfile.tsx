@@ -21,6 +21,7 @@ import {
   UserX
 } from 'lucide-react';
 import api, { getSafeErrorMessage } from '../services/api';
+import { fmt, riskBadgeVariant } from '../components/common/StateViews';
 import type { StudentAcademicAnalytics, TimetableSlot } from '../types';
 
 export default function StudentProfile() {
@@ -34,6 +35,7 @@ export default function StudentProfile() {
   const [error, setError] = useState<string | null>(null);
   const [isNotFound, setIsNotFound] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [targetScenario, setTargetScenario] = useState<'min' | 'rec' | 'stretch'>('rec');
 
   const fetchStudentData = async () => {
@@ -73,11 +75,12 @@ export default function StudentProfile() {
   }, [id]);
 
   const handleRecalculateRisk = async () => {
+    setActionError(null);
     try {
       await api.post('/students/' + id + '/risk/recalculate');
-      fetchStudentData();
+      await fetchStudentData();
     } catch (err) {
-      console.error("Recalculation error:", err);
+      setActionError(getSafeErrorMessage(err, 'Risk recalculation failed. The previous official result is unchanged.'));
     }
   };
 
@@ -284,7 +287,7 @@ export default function StudentProfile() {
             </span>
             <div className="flex items-center space-x-3">
               <span className={`text-4xl font-extrabold ${riskColor}`}>
-                {analytics?.riskScore ?? riskAssessment?.riskScore ?? 0.0}
+                {fmt(analytics?.riskScore ?? riskAssessment?.riskScore)}
               </span>
               <Badge 
                 variant={isHighRisk ? 'destructive' : isMedRisk ? 'warning' : 'success'} 
@@ -298,6 +301,7 @@ export default function StudentProfile() {
                 <RefreshCw className="h-3 w-3 mr-1" /> Re-audit Risk
               </Button>
             )}
+            {actionError && <p role="alert" className="mt-1 text-[11px] text-red-600 dark:text-red-400">{actionError}</p>}
           </div>
         </div>
       </div>
@@ -362,7 +366,7 @@ export default function StudentProfile() {
               Threshold standard: <strong className="text-gray-700 dark:text-gray-300">50.0%</strong> passing grade
             </p>
             <p className={`text-[11px] font-semibold mt-1 ${ (analytics?.overallAverageMarksPercentage || 0) >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
-              {(analytics?.overallAverageMarksPercentage || 0) >= 75 ? 'Exemplary Performance' : (analytics?.overallAverageMarksPercentage || 0) >= 50 ? 'Good Academic Standing' : 'Remedial Support Required'}
+              {analytics?.overallAverageMarksPercentage == null ? 'No evaluated marks yet' : analytics.overallAverageMarksPercentage >= 75 ? 'Exemplary Performance' : analytics.overallAverageMarksPercentage >= 50 ? 'Good Academic Standing' : 'Remedial Support Required'}
             </p>
           </CardContent>
         </Card>
@@ -595,11 +599,11 @@ export default function StudentProfile() {
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200">1. Attendance Penalty</span>
                 <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
-                  +{analytics?.riskEngineExplanation?.attendanceRiskContribution ?? 0.0} pts
+                  +{fmt(analytics?.riskEngineExplanation?.attendanceComponent?.pointsContributed)} pts
                 </span>
               </div>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-                {analytics?.riskEngineExplanation?.attendanceFormulaExplanation || 'Aggregate attendance >= 75.0% incurs 0.0 penalty.'}
+                {analytics?.riskEngineExplanation?.attendanceComponent?.explanation ?? 'Explanation unavailable.'}
               </p>
             </div>
 
@@ -608,11 +612,11 @@ export default function StudentProfile() {
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200">2. Evaluated Marks Penalty</span>
                 <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
-                  +{analytics?.riskEngineExplanation?.marksRiskContribution ?? 0.0} pts
+                  +{fmt(analytics?.riskEngineExplanation?.marksComponent?.pointsContributed)} pts
                 </span>
               </div>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-                {analytics?.riskEngineExplanation?.marksFormulaExplanation || 'Evaluated avg marks >= 50.0% incurs 0.0 penalty.'}
+                {analytics?.riskEngineExplanation?.marksComponent?.explanation ?? 'Explanation unavailable.'}
               </p>
             </div>
 
@@ -621,11 +625,11 @@ export default function StudentProfile() {
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200">3. Overdue Coursework Penalty</span>
                 <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
-                  +{analytics?.riskEngineExplanation?.missingAssignmentsRiskContribution ?? 0.0} pts
+                  +{fmt(analytics?.riskEngineExplanation?.missingAssignmentsComponent?.pointsContributed)} pts
                 </span>
               </div>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-                {analytics?.riskEngineExplanation?.missingAssignmentsFormulaExplanation || '5.0 pts friction per missing or overdue submission.'}
+                {analytics?.riskEngineExplanation?.missingAssignmentsComponent?.explanation ?? 'Explanation unavailable.'}
               </p>
             </div>
           </div>
@@ -653,18 +657,18 @@ export default function StudentProfile() {
                         {sr.attendancePercentage != null ? `${sr.attendancePercentage}%` : 'N/A'}
                       </td>
                       <td className="px-3 py-2 text-center font-medium">
-                        {sr.evaluatedMarksPercentage != null ? `${sr.evaluatedMarksPercentage}%` : 'Pending'}
+                        {sr.marksPercentage != null ? `${sr.marksPercentage}%` : 'Pending'}
                       </td>
                       <td className="px-3 py-2 text-center">
                         <Badge 
-                          variant={sr.riskLevel === 'HIGH' ? 'destructive' : sr.riskLevel === 'MEDIUM' ? 'warning' : 'outline'}
+                          variant={riskBadgeVariant(sr.riskStatus)}
                           className="text-[9px]"
                         >
-                          {sr.riskLevel}
+                          {sr.riskStatus}
                         </Badge>
                       </td>
                       <td className="px-3 py-2 text-gray-500 text-[11px]">
-                        {sr.riskFactors.join(', ')}
+                        {sr.details}
                       </td>
                     </tr>
                   ))}

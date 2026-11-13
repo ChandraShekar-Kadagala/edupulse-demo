@@ -88,6 +88,9 @@ public class SrmPortalIntegrationService {
         Student student = studentRepository.findById(studentUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with user ID: " + studentUserId));
 
+        if (student.getDataProvenance() == null) {
+            student.setDataProvenance(com.edupulse.model.DataProvenance.INSTITUTIONAL_PORTAL_REPORT);
+        }
         log.info("Starting authentic SRM AP portal report synchronization for student: {} ({})", student.getStudentNumber(), studentUserId);
 
         int attendanceCount = 0;
@@ -151,6 +154,9 @@ public class SrmPortalIntegrationService {
         Student student = studentRepository.findById(studentUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with user ID: " + studentUserId));
 
+        if (student.getDataProvenance() == null) {
+            student.setDataProvenance(com.edupulse.model.DataProvenance.INSTITUTIONAL_PORTAL_FIXTURE);
+        }
         log.info("Starting SRM portal fixture synchronization for student: {} ({})", student.getStudentNumber(), studentUserId);
 
         try {

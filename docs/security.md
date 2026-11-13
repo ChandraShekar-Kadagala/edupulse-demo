@@ -36,3 +36,9 @@
 - **Build status:** the backend compiles and the full Maven suite (unit, Spring integration, PostgreSQL Testcontainers migration test) runs in GitHub Actions on every push and pull request (`.github/workflows/ci.yml`).
 - **Production follow-up (operator action):** if the production `admin` account was ever provisioned by the old seeder, its password equals the public demo password. Rotate it with the forgot/reset-password flow or a direct password-hash update by the database owner. EduPulse code no longer creates or resets it.
 - **Audit Logging:** audit logging for data imports records counts; per-row change tracking by user ID is still future work.
+
+## 6. Privacy notes (batch 2)
+- The reference timetable no longer contains real instructor names or employee IDs; instructors are shown as neutral labels ("Faculty A (demo)", "Course Instructor").
+- Faculty profiles never show invented employee codes; the field is null because it is not stored.
+- The public `GET /api/auth/demo-status` returns only DEMO showcase accounts and only aggregate figures for them (latest risk, attendance %, average marks, subject count).
+- `GET /health` exposes only the schema version, never record counts.

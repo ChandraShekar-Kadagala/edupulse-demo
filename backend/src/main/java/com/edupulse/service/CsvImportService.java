@@ -187,13 +187,16 @@ public class CsvImportService {
                 }
 
                 Student student = studentOpt.get();
+                if (student.getDataProvenance() == null) {
+                    student.setDataProvenance(com.edupulse.model.DataProvenance.CSV_FACULTY_IMPORT);
+                }
 
                 // Find or create course
                 Course course = courseRepository.findByCode(courseCode).orElseGet(() -> {
                     Course newCourse = Course.builder()
                             .code(courseCode)
                             .name("Imported Course " + courseCode)
-                            .credits(3)
+                            .credits(null) // unknown; never invented
                             .build();
                     return courseRepository.save(newCourse);
                 });

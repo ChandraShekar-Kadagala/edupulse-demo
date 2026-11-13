@@ -289,18 +289,27 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
     }
 
     /**
-     * Provenance label derived from stored account metadata, never from display names.
-     * DEMO accounts are showcase data (STU-1001 is the anonymized student-supplied reference profile);
-     * every other account holds institution-entered or imported records.
+     * Human-readable provenance label from the stored students.data_provenance (V2). For legacy rows
+     * without a stored value, DEMO showcase accounts are still recognised from account metadata.
      */
-    static String provenanceLabel(Student student) {
-        User user = student.getUser();
-        if (user != null && user.getAuthProvider() == AuthProvider.DEMO) {
-            return REFERENCE_STUDENT_NUMBER.equals(student.getStudentNumber())
-                    ? "STUDENT-SUPPLIED REFERENCE DATA"
-                    : "SYNTHETIC DEMO DATA";
+    public static String provenanceLabel(Student student) {
+        DataProvenance p = student.getDataProvenance();
+        if (p == null) {
+            User user = student.getUser();
+            if (user != null && user.getAuthProvider() == AuthProvider.DEMO) {
+                p = REFERENCE_STUDENT_NUMBER.equals(student.getStudentNumber())
+                        ? DataProvenance.STUDENT_SUPPLIED_REFERENCE : DataProvenance.SYNTHETIC_TEST_FIXTURE;
+            } else {
+                return "UNSPECIFIED SOURCE";
+            }
         }
-        return "INSTITUTIONAL / IMPORTED RECORDS";
+        return switch (p) {
+            case STUDENT_SUPPLIED_REFERENCE -> "STUDENT-SUPPLIED REFERENCE DATA";
+            case SYNTHETIC_TEST_FIXTURE -> "SYNTHETIC DEMO DATA";
+            case CSV_FACULTY_IMPORT -> "IMPORTED ACADEMIC REPORT (CSV)";
+            case INSTITUTIONAL_PORTAL_FIXTURE, INSTITUTIONAL_PORTAL_REPORT -> "IMPORTED ACADEMIC REPORT (PORTAL)";
+            case OFFICIAL_INSTITUTIONAL_API -> "OFFICIAL INSTITUTIONAL RECORD";
+        };
     }
 
     static final String REFERENCE_STUDENT_NUMBER = "STU-1001";

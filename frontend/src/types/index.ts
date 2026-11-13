@@ -100,18 +100,28 @@ export interface TimetableSlot {
   facultyName: string;
 }
 
+export interface CourseSummary {
+  courseCode: string;
+  courseName: string;
+  credits?: number | null;
+  classroom?: string | null;
+  slotDetails?: string | null;
+}
+
 export interface Faculty {
   id: number;
-  username: string;
-  name: string;
-  email: string;
-  department: string;
-  title: string;
-  assignedCourses: string[];
-  classroom?: string;
-  enrolledStudentCount: number;
-  averageAttendance?: number;
-  highRiskCount?: number;
+  username: string | null;
+  name: string | null;
+  email?: string | null;
+  department?: string | null;
+  title?: string | null;
+  employeeCode?: string | null;
+  assignedCourseCode?: string | null;
+  assignedCourseName?: string | null;
+  classroom?: string | null;
+  assignedCourses: CourseSummary[];
+  enrolledStudentsCount: number;
+  atRiskStudentsCount: number;
 }
 
 export interface TargetScenario {
@@ -149,35 +159,41 @@ export interface FutureTargetPlanner {
   projectionDisclaimer?: string;
 }
 
+/** Mirrors backend RiskEngineExplanationDto.SubjectRiskDto */
 export interface SubjectRiskDetail {
   courseCode: string;
   courseName: string;
-  attendancePercentage?: number;
-  attendanceStatus?: string;
-  evaluatedMarksPercentage?: number;
-  marksStatus?: string;
-  riskContribution: number;
-  riskLevel: string;
-  riskFactors: string[];
+  attendancePercentage?: number | null;
+  marksPercentage?: number | null;
+  riskStatus: 'LOW' | 'MEDIUM' | 'HIGH';
+  details: string;
 }
 
-export interface RiskEngineExplanation {
-  overallRiskScore: number;
-  riskLevel: string;
-  attendancePercentage?: number;
-  attendanceRiskContribution: number;
-  attendanceFormulaExplanation: string;
-  marksPercentage?: number;
-  marksRiskContribution: number;
-  marksFormulaExplanation: string;
-  missingAssignmentsCount: number;
-  missingAssignmentsRiskContribution: number;
-  missingAssignmentsFormulaExplanation: string;
+/** Mirrors backend RiskEngineExplanationDto.ComponentExplanation */
+export interface RiskComponentExplanation {
+  componentName: string;
+  actualValue?: number | null;
+  thresholdValue?: number | null;
+  pointsContributed: number;
+  maxPossiblePoints?: number | null;
   calculationFormula: string;
-  calculationTimestamp: string;
-  studentName: string;
-  studentNumber: string;
+  explanation: string;
+  status: 'HEALTHY' | 'ATTENTION' | 'CRITICAL' | 'NO_DATA';
+}
+
+/** Mirrors backend RiskEngineExplanationDto (official rule-based score breakdown). */
+export interface RiskEngineExplanation {
+  overallScore: number;
+  riskLevel: string;
+  attendanceComponent: RiskComponentExplanation;
+  marksComponent: RiskComponentExplanation;
+  missingAssignmentsComponent: RiskComponentExplanation;
   subjectRisks: SubjectRiskDetail[];
+  formulaDescription: string;
+  formulaVersion?: string;
+  recommendedIntervention: string;
+  dataSourceProvenance: string;
+  calculatedAt: string;
 }
 
 export interface CourseAttendance {
@@ -311,14 +327,15 @@ export interface RiskEngineSummary {
 
 export interface FacultyDashboard {
   faculty: Faculty;
-  courseCode: string;
-  courseName: string;
-  credits: number;
-  classroom: string;
-  slotDetails: string;
+  /** null when the faculty member has no course assignment yet */
+  courseCode: string | null;
+  courseName: string | null;
+  credits?: number | null;
+  classroom?: string | null;
+  slotDetails?: string | null;
   totalConductedSessions: number;
-  courseAverageAttendance?: number;
-  courseAverageMarks?: number;
+  courseAverageAttendance?: number | null;
+  courseAverageMarks?: number | null;
   enrolledStudentsCount: number;
   highRiskCount: number;
   mediumRiskCount: number;
@@ -327,4 +344,112 @@ export interface FacultyDashboard {
   assessments: AssessmentOverview[];
   activeInterventions: Intervention[];
   riskEngineSummary?: RiskEngineSummary;
+}
+
+// ---- Batch 2: live demo roster, cohort summary, intervention effectiveness ----
+
+export interface DemoStudentAccount {
+  username: string;
+  regNo: string;
+  name: string;
+  role: 'STUDENT';
+  cgpa?: number | null;
+  risk?: RiskLevel | null;
+  riskScore?: number | null;
+  riskCalculatedAt?: string | null;
+  attendance?: string | null;
+  evaluatedAssessments: number;
+  averageMarksPercentage?: number | null;
+  subjects: number;
+  provenance: string;
+}
+
+export interface DemoFacultyAccount {
+  username: string;
+  name: string;
+  role: 'FACULTY';
+  title?: string | null;
+  courses: { code: string; name: string }[];
+}
+
+export interface DemoStatus {
+  demoModeEnabled: boolean;
+  demoMarker?: string;
+  demoPassword?: string;
+  students?: DemoStudentAccount[];
+  facultyList?: DemoFacultyAccount[];
+  disclaimer?: string;
+}
+
+export interface DashboardSummary {
+  totalStudents: number;
+  highRisk: number;
+  mediumRisk: number;
+  lowRisk: number;
+  insufficientData: number;
+  activeInterventions: number;
+  completedInterventions: number;
+  cohortAverageAttendance?: number | null;
+  cohortAverageMarks?: number | null;
+  recentHighRisk?: { id: number; name: string; factor: string; riskScore: number; intervention: string }[];
+  cohortStrengths?: string[];
+  cohortImprovementAreas?: string[];
+}
+
+export interface InterventionOutcome {
+  interventionId: number;
+  studentId: number | null;
+  type: string | null;
+  priority: string | null;
+  status: string | null;
+  startDate: string | null;
+  baselineRisk: number | null;
+  baselineLevel: string | null;
+  outcomeRisk: number | null;
+  outcomeLevel: string | null;
+  riskChange: number | null;
+  attendanceBefore: number | null;
+  attendanceAfter: number | null;
+  attendanceChange: number | null;
+  followUpCount: number;
+  evaluable: boolean;
+  exclusionReason: string | null;
+}
+
+export interface EffectivenessGroup {
+  group: string;
+  interventions: number;
+  evaluable: number;
+  meanRiskChange: number | null;
+  improved: number;
+  unchanged: number;
+  worsened: number;
+  smallSample: boolean;
+}
+
+export interface EffectivenessReport {
+  generatedAt: string;
+  methodology: string;
+  causalityNote: string;
+  minGroupSize: number;
+  totalInterventions: number;
+  completedInterventions: number;
+  completionRate: number | null;
+  interventionsWithFollowUp: number;
+  followUpCompletionRate: number | null;
+  overall: EffectivenessGroup;
+  byType: EffectivenessGroup[];
+  byPriority: EffectivenessGroup[];
+  byStatus: EffectivenessGroup[];
+  excluded: Record<string, number>;
+  marksChangeNote: string;
+  subjectBreakdownNote: string;
+  interventions: InterventionOutcome[];
+}
+
+export interface RiskHistory {
+  studentId: number;
+  snapshots: { calculatedAt: string; riskScore: number; riskLevel: RiskLevel }[];
+  interventions: { id: number; type: string | null; status: string | null; startedAt: string | null }[];
+  note: string;
 }

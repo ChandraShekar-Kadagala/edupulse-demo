@@ -40,13 +40,14 @@ public class InterventionController {
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
     public ResponseEntity<com.edupulse.dto.InterventionDto> createIntervention(@RequestBody com.edupulse.dto.InterventionRequest request) {
         Intervention intervention = new Intervention();
-        intervention.setStudent(studentRepository.findById(request.getStudentId()).orElseThrow());
-        intervention.setAssignedFaculty(facultyRepository.findById(request.getAssignedFacultyId()).orElseThrow());
+        intervention.setStudent(studentRepository.findById(request.getStudentId()).orElseThrow(() -> new com.edupulse.exception.ResourceNotFoundException("Student", request.getStudentId())));
+        intervention.setAssignedFaculty(facultyRepository.findById(request.getAssignedFacultyId()).orElseThrow(() -> new com.edupulse.exception.ResourceNotFoundException("Faculty profile", request.getAssignedFacultyId())));
         intervention.setType(request.getType());
         intervention.setDescription(request.getDescription());
         intervention.setPriority(request.getPriority());
         intervention.setDueDate(request.getDueDate());
         intervention.setStatus(com.edupulse.model.InterventionStatus.PLANNED);
+        intervention.setStartDate(request.getStartDate() != null ? request.getStartDate() : java.time.LocalDate.now());
         intervention.setCreatedAt(java.time.LocalDateTime.now());
         
         Intervention saved = interventionService.createIntervention(intervention);
@@ -65,7 +66,7 @@ public class InterventionController {
         com.edupulse.model.FollowUp f = new com.edupulse.model.FollowUp();
         f.setNotes(request.getNotes());
         f.setOutcome(request.getOutcome());
-        f.setFaculty(facultyRepository.findById(request.getFacultyId()).orElseThrow());
+        f.setFaculty(facultyRepository.findById(request.getFacultyId()).orElseThrow(() -> new com.edupulse.exception.ResourceNotFoundException("Faculty profile", request.getFacultyId())));
         com.edupulse.model.FollowUp saved = interventionService.addFollowUp(id, f);
         return ResponseEntity.ok(mapFollowUpToDto(saved));
     }

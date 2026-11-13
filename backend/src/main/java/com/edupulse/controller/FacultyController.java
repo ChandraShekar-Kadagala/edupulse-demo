@@ -33,15 +33,16 @@ public class FacultyController {
 
     @GetMapping("/{id}/dashboard")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
-    public ResponseEntity<FacultyDashboardDto> getFacultyDashboard(@PathVariable Long id) {
-        return ResponseEntity.ok(facultyService.getFacultyDashboard(id, null));
+    public ResponseEntity<FacultyDashboardDto> getFacultyDashboard(@PathVariable Long id,
+                                                                   @RequestParam(required = false) String courseCode) {
+        return ResponseEntity.ok(facultyService.getFacultyDashboard(id, courseCode));
     }
 
     @GetMapping("/me/dashboard")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")
-    public ResponseEntity<FacultyDashboardDto> getMyFacultyDashboard(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        Long userId = userDetails != null ? userDetails.getId() : null;
-        String username = userDetails != null ? userDetails.getUsername() : null;
-        return ResponseEntity.ok(facultyService.getFacultyDashboard(userId, username));
+    public ResponseEntity<FacultyDashboardDto> getMyFacultyDashboard(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                     @RequestParam(required = false) String courseCode) {
+        // 404 for accounts without a faculty profile (e.g. admins); never falls back to another faculty.
+        return ResponseEntity.ok(facultyService.getFacultyDashboard(userDetails.getId(), courseCode));
     }
 }

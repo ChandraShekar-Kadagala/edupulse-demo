@@ -49,14 +49,14 @@ public class AcademicAnalyticsService {
     @Transactional
     public StudentAcademicAnalyticsDto calculateStudentAnalytics(String studentNumber, DataProvenance overrideProvenance) {
         Student student = studentRepository.findByStudentNumber(studentNumber)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found with number: " + studentNumber));
+                .orElseThrow(() -> new com.edupulse.exception.ResourceNotFoundException("Student", studentNumber));
         return getStudentAnalytics(student.getId(), overrideProvenance);
     }
 
     @Transactional
     public StudentAcademicAnalyticsDto getStudentAnalytics(Long studentId, DataProvenance overrideProvenance) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+                .orElseThrow(() -> new com.edupulse.exception.ResourceNotFoundException("Student", studentId));
 
         // 1. Attendance Analysis across all 7 subjects
         List<Attendance> attendances = attendanceRepository.findByStudentId(studentId);
@@ -89,8 +89,8 @@ public class AcademicAnalyticsService {
                     .attendancePercentage(cPct)
                     .status(status)
                     .period("03-Aug-2026 to 29-Oct-2026")
-                    .facultyName(TimetableService.SUBJECT_FACULTY.getOrDefault(c.getCode(), "Faculty"))
-                    .classroom(TimetableService.SUBJECT_ROOMS.getOrDefault(c.getCode(), "Room"))
+                    .facultyName(TimetableService.SUBJECT_FACULTY.get(c.getCode()))
+                    .classroom(TimetableService.SUBJECT_ROOMS.get(c.getCode()))
                     .build());
         }
         courseAttendanceBreakdown.sort(Comparator.comparing(CourseAttendanceDto::getCourseCode));
@@ -145,8 +145,8 @@ public class AcademicAnalyticsService {
                     .percentage(percentage)
                     .weightage(weightage)
                     .status(markStatus)
-                    .facultyName(a.getCourse() != null ? TimetableService.SUBJECT_FACULTY.getOrDefault(a.getCourse().getCode(), "Faculty") : "Faculty")
-                    .classroom(a.getCourse() != null ? TimetableService.SUBJECT_ROOMS.getOrDefault(a.getCourse().getCode(), "Room") : "Room")
+                    .facultyName(a.getCourse() != null ? TimetableService.SUBJECT_FACULTY.get(a.getCourse().getCode()) : null)
+                    .classroom(a.getCourse() != null ? TimetableService.SUBJECT_ROOMS.get(a.getCourse().getCode()) : null)
                     .build());
         }
 
@@ -216,13 +216,8 @@ public class AcademicAnalyticsService {
         String provenance;
         if (overrideProvenance != null) {
             provenance = overrideProvenance.name();
-        } else if ("STU-1001".equals(student.getStudentNumber()) 
-                || studentName.contains("Student A") 
-                || studentName.contains("Reference Profile")
-                || (student.getUser() != null && ("demo.student.a".equalsIgnoreCase(student.getUser().getUsername()) || "student_a".equalsIgnoreCase(student.getUser().getUsername())))) {
-            provenance = "STUDENT-SUPPLIED REFERENCE DATA";
         } else {
-            provenance = "SYNTHETIC DEMO DATA";
+            provenance = RuleBasedRiskEngineImpl.provenanceLabel(student);
         }
 
         LocalDateTime lastActivity = determineLastActivityDate(attendances, studentMarks, submissions);
@@ -281,98 +276,84 @@ public class AcademicAnalyticsService {
                 .build();
     }
 
+    /**
+     * CLA / NTM target planner. Every figure is derived from stored assessments:
+     * weights come from assessment weightage (or max marks when no weightage is recorded), the subject
+     * total is the sum of those weights, and targets are converted to weighted marks before being added
+     * to the current converted total. Courses with no pending assessment get no planner entry.
+     */
     private List<FutureTargetPlannerDto> buildTargetPlanner(List<Assessment> assessments, Map<Long, Mark> markMap) {
         Map<Course, List<Assessment>> byCourse = assessments.stream()
-                .filter(a -> a.getCourse() != null)
+                .filter(a -> a.getCourse() != null && a.getMaxMarks() != null && a.getMaxMarks() > 0)
                 .collect(Collectors.groupingBy(Assessment::getCourse));
 
         List<FutureTargetPlannerDto> planners = new ArrayList<>();
-
         for (Map.Entry<Course, List<Assessment>> entry : byCourse.entrySet()) {
             Course course = entry.getKey();
-            List<Assessment> courseAssessments = entry.getValue();
+            List<Assessment> courseAssessments = entry.getValue().stream()
+                    .sorted(Comparator.comparing(Assessment::getId)).toList();
 
-            double currentObtainedConverted = 0.0;
-            double currentEvaluatedMaxConverted = 0.0;
-            List<String> pendingNames = new ArrayList<>();
-            Double nextPendingMax = null;
-            String nextPendingName = null;
-
+            double obtainedConverted = 0.0, evaluatedWeight = 0.0, subjectTotalWeight = 0.0;
+            List<Assessment> pending = new ArrayList<>();
             for (Assessment a : courseAssessments) {
-                Mark m = markMap.get(a.getId());
                 double weight = a.getWeightage() != null ? a.getWeightage() : a.getMaxMarks();
-
-                if (m != null && m.getMarksObtained() != null && a.getMaxMarks() > 0) {
-                    currentObtainedConverted += (m.getMarksObtained() / a.getMaxMarks()) * weight;
-                    currentEvaluatedMaxConverted += weight;
+                subjectTotalWeight += weight;
+                Mark m = markMap.get(a.getId());
+                if (m != null && m.getMarksObtained() != null) {
+                    obtainedConverted += m.getMarksObtained() / a.getMaxMarks() * weight;
+                    evaluatedWeight += weight;
                 } else {
-                    pendingNames.add(a.getName());
-                    if (nextPendingName == null) {
-                        nextPendingName = a.getName();
-                        nextPendingMax = a.getMaxMarks();
-                    }
+                    pending.add(a);
                 }
             }
+            if (pending.isEmpty()) {
+                continue; // nothing left to plan for; never invent a "next" assessment
+            }
 
-            double totalSubjectMax = course.getCode().equals("SEC 203") ? 40.0 : 50.0;
-            double nextMax = nextPendingMax != null ? nextPendingMax : 10.0;
-            String pendingName = nextPendingName != null ? nextPendingName : "Next CLA";
-
-            // Minimum scenario: Target >= 50%
-            double minRequired = Math.max(0.0, Math.min(nextMax, nextMax * 0.50));
-            double minExpectedTotal = currentObtainedConverted + minRequired;
-
-            // Recommended scenario: Target >= 75%
-            double recRequired = Math.max(0.0, Math.min(nextMax, nextMax * 0.75));
-            double recExpectedTotal = currentObtainedConverted + recRequired;
-
-            // Stretch scenario: Target >= 90%
-            double stretchRequired = Math.max(0.0, Math.min(nextMax, nextMax * 0.95));
-            double stretchExpectedTotal = currentObtainedConverted + stretchRequired;
+            Assessment next = pending.get(0);
+            double nextMax = next.getMaxMarks();
+            double nextWeight = next.getWeightage() != null ? next.getWeightage() : nextMax;
+            boolean allWeighted = courseAssessments.stream().allMatch(a -> a.getWeightage() != null);
 
             planners.add(FutureTargetPlannerDto.builder()
                     .courseCode(course.getCode())
                     .courseName(course.getName())
-                    .currentObtainedMarks(roundToTwoDecimal(currentObtainedConverted))
-                    .currentEvaluatedMaxMarks(roundToTwoDecimal(currentEvaluatedMaxConverted))
-                    .currentConvertedMarks(roundToTwoDecimal(currentObtainedConverted))
-                    .totalSubjectMaxMarks(totalSubjectMax)
-                    .pendingAssessmentName(pendingName)
+                    .currentObtainedMarks(roundToTwoDecimal(obtainedConverted))
+                    .currentEvaluatedMaxMarks(roundToTwoDecimal(evaluatedWeight))
+                    .currentConvertedMarks(roundToTwoDecimal(obtainedConverted))
+                    .totalSubjectMaxMarks(roundToTwoDecimal(subjectTotalWeight))
+                    .pendingAssessmentName(next.getName())
                     .pendingAssessmentMaxMarks(nextMax)
-                    .remainingAssessmentsCount(pendingNames.size())
-                    .remainingAssessmentsList(String.join(", ", pendingNames))
-                    .minimumTarget(FutureTargetPlannerDto.TargetScenario.builder()
-                            .scenarioName("Minimum Target (Passing)")
-                            .targetScore(roundToTwoDecimal(minRequired))
-                            .expectedConvertedTotal(roundToTwoDecimal(minExpectedTotal))
-                            .projectedPercentage(roundToTwoDecimal((minExpectedTotal / totalSubjectMax) * 100.0))
-                            .projectedRiskLevel("LOW")
-                            .rationale("Secures minimum required threshold without risking penalty.")
-                            .build())
-                    .recommendedTarget(FutureTargetPlannerDto.TargetScenario.builder()
-                            .scenarioName("Recommended Target (Good Standing)")
-                            .targetScore(roundToTwoDecimal(recRequired))
-                            .expectedConvertedTotal(roundToTwoDecimal(recExpectedTotal))
-                            .projectedPercentage(roundToTwoDecimal((recExpectedTotal / totalSubjectMax) * 100.0))
-                            .projectedRiskLevel("LOW")
-                            .rationale("Builds strong academic buffer for end-semester examinations.")
-                            .build())
-                    .stretchTarget(FutureTargetPlannerDto.TargetScenario.builder()
-                            .scenarioName("Stretch Target (Distinction)")
-                            .targetScore(roundToTwoDecimal(stretchRequired))
-                            .expectedConvertedTotal(roundToTwoDecimal(stretchExpectedTotal))
-                            .projectedPercentage(roundToTwoDecimal((stretchExpectedTotal / totalSubjectMax) * 100.0))
-                            .projectedRiskLevel("LOW")
-                            .rationale("Places student in top cohort percentile for departmental honors.")
-                            .build())
-                    .riskImpactDescription("Scoring at or above the recommended target keeps subject risk at zero.")
-                    .verifiedWeightage(true)
-                    .projectionDisclaimer("Simulated projections only; does not alter actual institutional records.")
+                    .remainingAssessmentsCount(pending.size())
+                    .remainingAssessmentsList(pending.stream().map(Assessment::getName).collect(Collectors.joining(", ")))
+                    .minimumTarget(scenario("Minimum Target (50%)", 0.50, nextMax, nextWeight, obtainedConverted, evaluatedWeight,
+                            "Reaches the 50% passing benchmark on the next assessment."))
+                    .recommendedTarget(scenario("Recommended Target (75%)", 0.75, nextMax, nextWeight, obtainedConverted, evaluatedWeight,
+                            "Builds a buffer before the end-semester examination."))
+                    .stretchTarget(scenario("Stretch Target (90%)", 0.90, nextMax, nextWeight, obtainedConverted, evaluatedWeight,
+                            "Distinction-level performance on the next assessment."))
+                    .riskImpactDescription("The marks component adds risk only while the evaluated average is below 50%.")
+                    .verifiedWeightage(allWeighted)
+                    .projectionDisclaimer("Hypothetical projection for planning only. It is not an official risk snapshot and does not change academic records."
+                            + (allWeighted ? "" : " Some assessments have no recorded weightage; max marks were used as weights."))
                     .build());
         }
-
         planners.sort(Comparator.comparing(FutureTargetPlannerDto::getCourseCode));
         return planners;
+    }
+
+    static FutureTargetPlannerDto.TargetScenario scenario(String name, double fraction, double nextMax, double nextWeight,
+                                                          double obtainedConverted, double evaluatedWeight, String rationale) {
+        double expected = obtainedConverted + fraction * nextWeight;
+        double projectedPct = expected / (evaluatedWeight + nextWeight) * 100.0;
+        return FutureTargetPlannerDto.TargetScenario.builder()
+                .scenarioName(name)
+                .targetScore(roundToTwoDecimal(nextMax * fraction))
+                .expectedConvertedTotal(roundToTwoDecimal(expected))
+                .projectedPercentage(roundToTwoDecimal(projectedPct)) // of everything evaluated so far plus the next assessment
+                .projectedRiskLevel(projectedPct >= 50.0 ? "ON_TRACK" : "BELOW_THRESHOLD")
+                .rationale(rationale)
+                .build();
     }
 
     public DashboardSummaryDto getDashboardSummary() {
@@ -613,8 +594,11 @@ public class AcademicAnalyticsService {
             list.add(AcademicRecommendationDto.builder()
                     .category("GENERAL_STUDY")
                     .title("Maintain Academic Momentum")
-                    .rationale(String.format("Academic performance is currently steady with %.1f%% attendance and %.1f%% average marks.",
-                            attPct != null ? attPct : 0.0, marksPct != null ? marksPct : 0.0))
+                    .rationale("Academic performance is currently steady ("
+                            + (attPct != null ? String.format(Locale.US, "%.1f%% attendance", attPct) : "no attendance recorded")
+                            + ", "
+                            + (marksPct != null ? String.format(Locale.US, "%.1f%% average marks", marksPct) : "no evaluated marks yet")
+                            + ").")
                     .nextStep("Continue attending scheduled sessions, review course lecture notes weekly, and prepare ahead for end-semester exams.")
                     .priority("LOW")
                     .build());
@@ -645,7 +629,7 @@ public class AcademicAnalyticsService {
         return Math.round(val * 10.0) / 10.0;
     }
 
-    private Double roundToTwoDecimal(double val) {
+    private static Double roundToTwoDecimal(double val) {
         return Math.round(val * 100.0) / 100.0;
     }
 }

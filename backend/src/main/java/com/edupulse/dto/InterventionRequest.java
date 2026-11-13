@@ -11,4 +11,6 @@ public class InterventionRequest {
     private String description;
     private String priority;
     private LocalDate dueDate;
+    /** Optional; defaults to today. Used as the baseline point for effectiveness analytics. */
+    private LocalDate startDate;
 }

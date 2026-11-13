@@ -21,4 +21,9 @@ public class Student {
     private String department;
     private Integer currentSemester;
     private Double currentCgpa;
+
+    /** Primary source of this student's academic records (null = unspecified / legacy record). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "data_provenance", length = 64)
+    private DataProvenance dataProvenance;
 }

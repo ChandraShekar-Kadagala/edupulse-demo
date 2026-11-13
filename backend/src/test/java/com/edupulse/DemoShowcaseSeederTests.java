@@ -51,6 +51,10 @@ public class DemoShowcaseSeederTests {
     @Autowired
     private CourseRepository courseRepository;
 
+    @Autowired private com.edupulse.repository.EnrollmentRepository enrollmentRepository;
+
+    @Autowired private com.edupulse.repository.CourseAssignmentRepository courseAssignmentRepository;
+
     @Autowired
     private AttendanceRepository attendanceRepository;
 
@@ -93,6 +97,8 @@ public class DemoShowcaseSeederTests {
         markRepository.deleteAll();
         assessmentRepository.deleteAll();
         attendanceRepository.deleteAll();
+        enrollmentRepository.deleteAll();
+        courseAssignmentRepository.deleteAll();
         courseRepository.deleteAll();
         studentRepository.deleteAll();
         facultyRepository.deleteAll();
@@ -312,6 +318,7 @@ public class DemoShowcaseSeederTests {
     @Test
     @DisplayName("6. Demo status endpoint is public and exposes metadata with 4 students and 2 faculty")
     public void testDemoStatusEndpoint_PublicAndSafe() throws Exception {
+        dataSeeder.seedDemoData();
         MvcResult result = mockMvc.perform(get("/api/auth/demo-status"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -326,6 +333,17 @@ public class DemoShowcaseSeederTests {
         assertEquals(4, json.get("students").size());
         assertTrue(json.has("facultyList"));
         assertEquals(2, json.get("facultyList").size());
+
+        // Values must come from the database, not hardcoded literals.
+        for (JsonNode st : json.get("students")) {
+            Student s = studentRepository.findByStudentNumber(st.get("regNo").asText()).orElseThrow();
+            RiskAssessment latest = riskAssessmentRepository.findFirstByStudentIdOrderByCalculatedAtDesc(s.getId()).orElseThrow();
+            assertEquals(latest.getRiskScore(), st.get("riskScore").asDouble(), 1e-9);
+            assertEquals(latest.getRiskLevel().name(), st.get("risk").asText());
+            assertEquals(7, st.get("subjects").asInt(), "Every showcase student takes the same seven subjects");
+        }
+        assertEquals("CSE 204", json.get("facultyList").get(0).get("courses").get(0).get("code").asText());
+        assertEquals("CSE 213", json.get("facultyList").get(1).get("courses").get(0).get("code").asText());
     }
 
     private String obtainToken(String username, String password) throws Exception {
@@ -356,7 +374,7 @@ public class DemoShowcaseSeederTests {
         assertEquals("CSE 204", fac1Json.get("courseCode").asText());
         assertEquals("DESIGN AND ANALYSIS OF ALGORITHMS", fac1Json.get("courseName").asText());
         assertEquals(4, fac1Json.get("enrolledStudentsCount").asInt());
-        assertEquals(48, fac1Json.get("totalConductedSessions").asInt());
+        assertTrue(fac1Json.get("totalConductedSessions").asInt() > 0, "Conducted sessions are counted from recorded attendance dates");
         assertTrue(fac1Json.has("students"));
         assertEquals(4, fac1Json.get("students").size());
         assertTrue(fac1Json.has("assessments"));
