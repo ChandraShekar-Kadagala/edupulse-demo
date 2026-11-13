@@ -1,8 +1,9 @@
 name: CI
 
 on:
+  # Every branch push runs CI, so changes (and migrations) can be verified before they reach main,
+  # which Render deploys automatically.
   push:
-    branches: [main]
   pull_request:
 
 permissions:
