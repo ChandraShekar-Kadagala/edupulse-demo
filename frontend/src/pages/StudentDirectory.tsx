@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { useEffect, useState } from 'react';
+import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { Search, Filter, ArrowRight, RefreshCw, UserCheck } from 'lucide-react';
+import { Search, ArrowRight, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 

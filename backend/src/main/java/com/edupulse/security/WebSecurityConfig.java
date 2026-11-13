@@ -1,6 +1,5 @@
 package com.edupulse.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,16 +23,14 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity
+@lombok.RequiredArgsConstructor
 public class WebSecurityConfig {
     
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
+    private final AuthEntryPointJwt unauthorizedHandler;
 
-    @Autowired
-    private RateLimitingFilter rateLimitingFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
     @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}")
     private String allowedOrigins;
@@ -88,7 +85,15 @@ public class WebSecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/api/auth/**", "/health", "/api/health").permitAll()
+                // Explicit allow-list: only these auth endpoints are public. Anything else under
+                // /api/auth (or anywhere) requires a valid JWT. Never re-introduce a /api/auth/** wildcard.
+                auth.requestMatchers(
+                        "/api/auth/login",
+                        "/api/auth/forgot-password",
+                        "/api/auth/reset-password",
+                        "/api/auth/demo-status",
+                        "/api/auth/logout",
+                        "/health", "/api/health").permitAll()
                     .anyRequest().authenticated()
             );
         

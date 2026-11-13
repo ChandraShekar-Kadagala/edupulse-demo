@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { AlertTriangle, Clock, User, CheckCircle2, RefreshCw, Calendar } from 'lucide-react';
+import { User, CheckCircle2, RefreshCw, Calendar } from 'lucide-react';
 import api from '../services/api';
 
 export default function Interventions() {

@@ -16,7 +16,6 @@ import com.edupulse.service.AcademicAnalyticsService;
 import com.edupulse.service.InterventionService;
 import com.edupulse.service.RiskAssessmentService;
 import com.edupulse.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,25 +25,20 @@ import java.util.List;
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
 @RestController
 @RequestMapping("/api/students")
+@lombok.RequiredArgsConstructor
 public class StudentController {
 
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
 
-    @Autowired
-    private RiskAssessmentService riskAssessmentService;
+    private final RiskAssessmentService riskAssessmentService;
 
-    @Autowired
-    private AcademicAnalyticsService academicAnalyticsService;
+    private final AcademicAnalyticsService academicAnalyticsService;
 
-    @Autowired
-    private InterventionService interventionService;
+    private final InterventionService interventionService;
 
-    @Autowired
-    private AttendanceRepository attendanceRepository;
+    private final AttendanceRepository attendanceRepository;
 
-    @Autowired
-    private MarkRepository markRepository;
+    private final MarkRepository markRepository;
 
     @GetMapping
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")

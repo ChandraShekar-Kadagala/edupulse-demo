@@ -2,10 +2,8 @@ package com.edupulse.controller;
 
 import com.edupulse.dto.JwtResponse;
 import com.edupulse.dto.LoginRequest;
-import com.edupulse.seeder.DataSeeder;
 import com.edupulse.service.AuthService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,22 +15,22 @@ import java.util.Map;
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
+@lombok.RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
-    @Autowired(required = false)
-    private DataSeeder dataSeeder;
-
-    @Value("${app.seeder.enabled:false}")
-    private boolean demoModeEnabled;
+    @Value("${app.demo.public-accounts-enabled:true}")
+    private boolean publicDemoAccountsEnabled;
 
     @Value("${app.seeder.demo-password:DemoEduPulse2026!}")
     private String demoPassword;
 
     @GetMapping("/demo-status")
     public ResponseEntity<?> getDemoStatus() {
+        if (!publicDemoAccountsEnabled) {
+            return ResponseEntity.ok(Map.of("demoModeEnabled", false));
+        }
         return ResponseEntity.ok(Map.of(
                 "demoModeEnabled", true,
                 "demoMarker", "DEMO_SHOWCASE",
@@ -65,12 +63,11 @@ public class AuthController {
                 ),
                 "facultyList", List.of(
                         buildFacultyDemo("demo.faculty.1", "Faculty A", "Associate Professor", "CSE 204", "Design and Analysis of Algorithms", "Faculty Instructor & Evaluator for CSE 204"),
-                        buildFacultyDemo("demo.faculty.2", "Faculty B", "Assistant Professor", "CSE 213", "Database Systems", "Faculty Instructor & Evaluator for CSE 213")
+                        buildFacultyDemo("demo.faculty.2", "Faculty B", "Assistant Professor", "CSE 213", "Advanced Java Programming", "Faculty Instructor & Evaluator for CSE 213")
                 ),
                 "defaultStudentUsername", "demo.student.a",
                 "defaultStudentRegNo", "STU-1001",
                 "defaultFacultyUsername", "demo.faculty.1",
-                "defaultAdminUsername", "admin",
                 "disclaimer", "Illustrative demonstration accounts with pre-loaded SRM AP curriculum scenarios. Student A represents anonymized reference data; Students B, C, D and Faculty accounts provide synthetic comparative benchmarks."
         ));
     }
@@ -101,21 +98,6 @@ public class AuthController {
         map.put("courseName", courseName);
         map.put("profile", profile);
         return map;
-    }
-
-    @PostMapping("/provision-demo-showcase")
-    public ResponseEntity<?> provisionDemoShowcase() {
-        if (dataSeeder == null) {
-            return ResponseEntity.ok(Map.of(
-                    "success", false,
-                    "message", "DataSeeder is inactive (app.seeder.enabled=false). Set SEED_DEMO_DATA=true in environment to activate seeder."
-            ));
-        }
-        boolean success = dataSeeder.seedDemoData();
-        return ResponseEntity.ok(Map.of(
-                "success", success,
-                "message", "Demo showcase accounts successfully provisioned or refreshed."
-        ));
     }
 
     @PostMapping("/login")

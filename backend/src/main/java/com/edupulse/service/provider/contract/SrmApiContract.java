@@ -37,7 +37,7 @@ public interface SrmApiContract {
     /**
      * Synchronizes official academic records for an authorized student registration number.
      * 
-     * @param srmRegistrationNumber Canonical student registration number (e.g. AP25110070436)
+     * @param srmRegistrationNumber Canonical student registration number (e.g. AP00000000000)
      * @throws IllegalStateException if unconfigured or unauthorized
      */
     void synchronizeOfficialStudentRecords(String srmRegistrationNumber);

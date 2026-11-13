@@ -3,7 +3,6 @@ package com.edupulse.controller;
 import com.edupulse.dto.DashboardSummaryDto;
 import com.edupulse.service.AcademicAnalyticsService;
 import com.edupulse.service.DashboardService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,16 +12,14 @@ import java.util.Map;
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
 @RestController
 @RequestMapping("/api/dashboard")
+@lombok.RequiredArgsConstructor
 public class DashboardController {
 
-    @Autowired
-    private DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
-    @Autowired
-    private AcademicAnalyticsService academicAnalyticsService;
+    private final AcademicAnalyticsService academicAnalyticsService;
 
-    @Autowired
-    private com.edupulse.service.FacultyService facultyService;
+    private final com.edupulse.service.FacultyService facultyService;
 
     @GetMapping("/summary")
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN')")

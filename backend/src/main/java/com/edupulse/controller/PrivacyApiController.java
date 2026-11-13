@@ -6,7 +6,6 @@ import com.edupulse.model.Student;
 import com.edupulse.repository.EncryptedRiskRecordRepository;
 import com.edupulse.repository.StudentRepository;
 import com.edupulse.security.UserDetailsImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,13 +19,12 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
 @RestController
 @RequestMapping({"/api/privacy", "/api/v1/privacy"})
+@lombok.RequiredArgsConstructor
 public class PrivacyApiController {
 
-    @Autowired
-    private EncryptedRiskRecordRepository encryptedRiskRecordRepository;
+    private final EncryptedRiskRecordRepository encryptedRiskRecordRepository;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
     @PostMapping("/records")
     @PreAuthorize("hasRole('STUDENT')")

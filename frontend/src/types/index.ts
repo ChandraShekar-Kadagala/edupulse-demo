@@ -114,21 +114,39 @@ export interface Faculty {
   highRiskCount?: number;
 }
 
+export interface TargetScenario {
+  scenarioName?: string;
+  targetScore: number;
+  expectedConvertedTotal?: number;
+  projectedPercentage?: number;
+  projectedRiskLevel?: string;
+  rationale?: string;
+}
+
 export interface FutureTargetPlanner {
   courseCode: string;
   courseName: string;
-  currentObtainedMarks: number;
-  currentMaxMarks: number;
-  currentConvertedMarks: number;
-  maxConvertedMarks: number;
-  currentPercentage: number;
+  currentObtainedMarks?: number;
+  currentEvaluatedMaxMarks?: number;
+  currentMaxMarks?: number;
+  currentConvertedMarks?: number;
+  maxConvertedMarks?: number;
+  totalSubjectMaxMarks?: number;
+  currentPercentage?: number;
   pendingAssessmentName: string;
-  pendingWeightage: number;
-  minImprovementTarget: number;
-  recommendedTarget: number;
-  stretchTarget: number;
-  targetType: string;
-  targetAffectsRisk: string;
+  pendingAssessmentMaxMarks?: number;
+  pendingWeightage?: number;
+  remainingAssessmentsCount?: number;
+  remainingAssessmentsList?: string;
+  minimumTarget?: TargetScenario;
+  recommendedTarget?: TargetScenario | number;
+  stretchTarget?: TargetScenario | number;
+  minImprovementTarget?: number;
+  riskImpactDescription?: string;
+  targetType?: string;
+  targetAffectsRisk?: string;
+  verifiedWeightage?: boolean;
+  projectionDisclaimer?: string;
 }
 
 export interface SubjectRiskDetail {

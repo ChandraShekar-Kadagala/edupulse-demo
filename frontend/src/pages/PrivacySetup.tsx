@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCrypto } from '../context/CryptoContext';
 import { generateKey, exportKey, importKey, exportKeyWithPassphrase, importKeyWithPassphrase } from '../utils/crypto';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';

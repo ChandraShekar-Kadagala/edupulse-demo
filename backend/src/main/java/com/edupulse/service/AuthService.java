@@ -4,7 +4,6 @@ import com.edupulse.dto.JwtResponse;
 import com.edupulse.dto.LoginRequest;
 import com.edupulse.security.JwtUtils;
 import com.edupulse.security.UserDetailsImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,13 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
+@lombok.RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
 
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -41,20 +39,15 @@ public class AuthService {
                 .build();
     }
 
-    @Autowired
-    private com.edupulse.repository.UserRepository userRepository;
+    private final com.edupulse.repository.UserRepository userRepository;
     
-    @Autowired
-    private com.edupulse.repository.StudentRepository studentRepository;
+    private final com.edupulse.repository.StudentRepository studentRepository;
     
-    @Autowired
-    private com.edupulse.repository.PasswordResetTokenRepository tokenRepository;
+    private final com.edupulse.repository.PasswordResetTokenRepository tokenRepository;
     
-    @Autowired
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     
-    @Autowired
-    private org.springframework.core.env.Environment env;
+    private final org.springframework.core.env.Environment env;
     
     private String hashToken(String token) {
         try {
@@ -70,7 +63,7 @@ public class AuthService {
             }
             return hexString.toString();
         } catch (Exception e) {
-            throw new RuntimeException("Error hashing token", e);
+            throw new IllegalStateException("SHA-256 unavailable for token hashing", e);
         }
     }
 
@@ -101,10 +94,10 @@ public class AuthService {
     public void resetPassword(String rawToken, String newPassword) {
         String hashedToken = hashToken(rawToken);
         com.edupulse.model.PasswordResetToken resetToken = tokenRepository.findByToken(hashedToken)
-            .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
+            .orElseThrow(() -> new com.edupulse.exception.InvalidTokenException("Invalid or expired token"));
 
         if (resetToken.isUsed() || resetToken.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
-            throw new RuntimeException("Token has expired or already been used");
+            throw new com.edupulse.exception.InvalidTokenException("Token has expired or already been used");
         }
 
         com.edupulse.model.User user = resetToken.getUser();

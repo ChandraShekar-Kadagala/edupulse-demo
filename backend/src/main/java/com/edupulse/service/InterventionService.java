@@ -2,14 +2,13 @@ package com.edupulse.service;
 
 import com.edupulse.model.Intervention;
 import com.edupulse.repository.InterventionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@lombok.RequiredArgsConstructor
 public class InterventionService {
-    @Autowired
-    private InterventionRepository interventionRepository;
+    private final InterventionRepository interventionRepository;
 
     public List<Intervention> getInterventionsForStudent(Long studentId) {
         return interventionRepository.findByStudentId(studentId);
@@ -29,8 +28,7 @@ public class InterventionService {
         return interventionRepository.save(i);
     }
 
-    @Autowired
-    private com.edupulse.repository.FollowUpRepository followUpRepository;
+    private final com.edupulse.repository.FollowUpRepository followUpRepository;
 
     public com.edupulse.model.FollowUp addFollowUp(Long interventionId, com.edupulse.model.FollowUp followUp) {
         Intervention i = interventionRepository.findById(interventionId).orElseThrow();

@@ -9,7 +9,6 @@ import com.edupulse.service.provider.portal.SrmPortalIntegrationService;
 import com.edupulse.repository.StudentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,27 +20,23 @@ import java.util.Map;
 @RestController
 @RequestMapping({"/api/integration", "/api/v1/integration"})
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
+@lombok.RequiredArgsConstructor
 public class IntegrationController {
 
     private static final Logger log = LoggerFactory.getLogger(IntegrationController.class);
 
-    @Autowired
     @Qualifier("officialSrmDataProvider")
-    private AcademicDataProvider officialDataProvider;
+    private final AcademicDataProvider officialDataProvider;
 
-    @Autowired
     @Qualifier("portalFixtureAcademicDataProvider")
-    private AcademicDataProvider fixtureDataProvider;
+    private final AcademicDataProvider fixtureDataProvider;
 
-    @Autowired
     @Qualifier("demoAcademicDataProvider")
-    private AcademicDataProvider demoDataProvider;
+    private final AcademicDataProvider demoDataProvider;
 
-    @Autowired
-    private SrmPortalIntegrationService portalIntegrationService;
+    private final SrmPortalIntegrationService portalIntegrationService;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
     @GetMapping("/status")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'FACULTY')")

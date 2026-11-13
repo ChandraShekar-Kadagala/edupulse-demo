@@ -1,4 +1,6 @@
 # EduPulse
+
+[![CI](https://github.com/ChandraShekar-Kadagala/edupulse-demo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ChandraShekar-Kadagala/edupulse-demo/actions/workflows/ci.yml)
 **Early Academic Risk Detection & Intervention Intelligence Platform**
 
 EduPulse is a secure, role-based platform designed to identify students who may be experiencing academic difficulties early enough for supportive action.
@@ -24,7 +26,7 @@ From the project root (`c:\javapr\edupulse`):
 ```powershell
 docker-compose up -d
 ```
-*This binds PostgreSQL to `localhost:5432` with username `postgres` and password `password`.*
+*This binds PostgreSQL to `localhost:5432` with username `postgres`; the password comes from the `DB_PASSWORD` environment variable.*
 
 ### 2. Backend (Spring Boot)
 Open a new PowerShell terminal and manually inject the `JAVA_HOME` environment variable to point to your JDK installation (adjust path if necessary):
@@ -52,23 +54,42 @@ npm run preview
 
 ## 🔐 Environment Variables & Secrets Management
 Do not hardcode secrets in production.
-**Backend Config (`application-postgres.yml` or ENV vars):**
-* `SPRING_DATASOURCE_URL`: `jdbc:postgresql://localhost:5432/edupulse`
-* `SPRING_DATASOURCE_USERNAME`: `postgres`
-* `SPRING_DATASOURCE_PASSWORD`: (Inject via secret manager)
-* `EDUPULSE_JWT_SECRET`: A secure Base64 256-bit key (e.g. `export EDUPULSE_JWT_SECRET=super-secure-key`)
-* `APP_SEEDER_ENABLED`: `true` to populate demo accounts on startup.
+**Backend environment variables** (names only; set values in your shell, `.env` (git-ignored) or the Render dashboard):
+* `JDBC_DATABASE_URL` *or* `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+* `JWT_SECRET`: Base64-encoded 256-bit key
+* `SPRING_PROFILES_ACTIVE`: `prod` on Render; omit locally for the PostgreSQL default profile, or `dev` for in-memory H2
+* `APP_CORS_ALLOWED_ORIGINS`: comma-separated frontend origins
+* `SEED_DEMO_DATA`: `true` to provision the demo showcase on startup (default `false`)
+* `DEMO_USER_PASSWORD`: password shared by the six public demo accounts
+* `DEMO_ADMIN_PASSWORD`: optional, **non-public** password for a demo admin; if unset, no admin is seeded
+* `FLYWAY_ENABLED` (default `true`), `JPA_DDL_AUTO` (default `validate`)
+
+**Schema management:** Flyway owns the schema in every PostgreSQL environment (`backend/src/main/resources/db/migration`); Hibernate only validates. Add forward-only `V{n}__description.sql` migrations; never edit an applied one. The H2 `dev`/`test` profiles let Hibernate build the schema, and `PostgresMigrationIntegrationTest` verifies the real migrations against PostgreSQL in CI.
 
 ---
 
-## 👥 Synthetic Demo Accounts & Startup Behavior
-When `app.seeder.enabled=true`, the backend leverages `DataSeeder.java` to inject mock data.
-* **Admin:** `admin` / `password`
-* **Faculty:** `faculty1` / `password` (Name: Dr. Smith)
-* **Student:** `arun` / `password` (Registration: STU-1001, demonstrates high-risk trajectory)
-* **Student B:** `bob` / `password` (Registration: STU-1002, demonstrates low-risk trajectory)
+## 👥 Demo Showcase Accounts
+When `SEED_DEMO_DATA=true` (or an admin calls `POST /api/admin/demo/provision`), `DataSeeder` idempotently provisions six public demo accounts (auth provider `DEMO`). Their credentials are listed on the login page.
 
-*Note on Safe Startup:* The `spring.jpa.hibernate.ddl-auto` is set to `update`, which prevents destructive schema changes.
+| Username | Role | Data |
+|---|---|---|
+| `demo.student.a` | Student (STU-1001) | Anonymized student-supplied reference data |
+| `demo.student.b` | Student (STU-1002) | Synthetic: top performer |
+| `demo.student.c` | Student (STU-1003) | Synthetic: average performer |
+| `demo.student.d` | Student (STU-1004) | Synthetic: high risk |
+| `demo.faculty.1` | Faculty (CSE 204) | Synthetic |
+| `demo.faculty.2` | Faculty (CSE 213) | Synthetic |
+
+There is no public admin account. Real (non-`DEMO`) accounts are never modified by provisioning.
+
+---
+
+## ✅ Tests
+```powershell
+cd backend; .mvnw.cmd test          # unit + Spring integration (+ PostgreSQL Testcontainers when Docker is running)
+cd frontend; npm run lint; npm test; npm run build   # build = tsc -b && vite build
+```
+On Windows with Docker Desktop 29+, set `DOCKER_HOST=npipe:////./pipe/dockerDesktopLinuxEngine` so Testcontainers finds Docker; without Docker the PostgreSQL test is skipped locally (it always runs in CI).
 
 ---
 
@@ -85,11 +106,7 @@ STU-1002,CS101,95.0,Midterm,85.0,100.0
 ---
 
 ## 📈 Risk Scoring
-The `RuleBasedRiskEngineImpl` calculates risk dynamically based on standard deviations:
-1. Iterates over all imported `Attendance` records.
-2. Iterates over all imported `Marks` records.
-3. Automatically triggers HIGH RISK if average attendance drops below 75% or aggregate marks drop below 50%.
-4. Emits a historical snapshot (`RiskAssessment`) preventing constant data mutation.
+See [docs/risk-engine.md](docs/risk-engine.md). The formula lives only in `RiskFormula.java` (backend); the frontend renders the backend explanation.
 
 ---
 

@@ -5,7 +5,6 @@ import com.edupulse.repository.*;
 import com.edupulse.service.RiskAssessmentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,51 +17,43 @@ import java.util.Optional;
 @Component
 @Transactional
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.seeder.enabled", havingValue = "true")
+@lombok.RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
-    @Autowired
-    private FacultyRepository facultyRepository;
+    private final FacultyRepository facultyRepository;
 
-    @Autowired
-    private CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
 
-    @Autowired
-    private AttendanceRepository attendanceRepository;
+    private final AttendanceRepository attendanceRepository;
 
-    @Autowired
-    private MarkRepository markRepository;
+    private final MarkRepository markRepository;
 
-    @Autowired
-    private AssessmentRepository assessmentRepository;
+    private final AssessmentRepository assessmentRepository;
 
-    @Autowired
-    private AssignmentRepository assignmentRepository;
+    private final AssignmentRepository assignmentRepository;
 
-    @Autowired
-    private AssignmentSubmissionRepository submissionRepository;
+    private final AssignmentSubmissionRepository submissionRepository;
 
-    @Autowired
-    private InterventionRepository interventionRepository;
+    private final InterventionRepository interventionRepository;
 
-    @Autowired
-    private RiskAssessmentService riskAssessmentService;
+    private final RiskAssessmentService riskAssessmentService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${app.seeder.enabled:false}")
     private boolean seederEnabled;
 
     @Value("${app.seeder.demo-password:DemoEduPulse2026!}")
     private String demoPassword;
+
+    @Value("${app.seeder.admin-password:}")
+    private String demoAdminPassword;
 
     @Override
     @Transactional
@@ -88,15 +79,20 @@ public class DataSeeder implements CommandLineRunner {
 
         String encodedPassword = passwordEncoder.encode(demoPassword);
 
-        // 1. Create or verify Demo Admin User
-        User adminUser = getOrCreateDemoUser(
-                "admin",
-                new String[]{"demo.admin"},
-                Role.ADMIN,
-                "Administrator",
-                "admin@edupulse.srmap.edu.in",
-                encodedPassword
-        );
+        // 1. Demo admin: only provisioned when a SEPARATE, non-public admin password is configured
+        //    (DEMO_ADMIN_PASSWORD). The public demo password is never used for ADMIN access.
+        if (demoAdminPassword != null && !demoAdminPassword.isBlank()) {
+            getOrCreateDemoUser(
+                    "admin",
+                    new String[]{"demo.admin"},
+                    Role.ADMIN,
+                    "Administrator",
+                    "admin@edupulse.srmap.edu.in",
+                    passwordEncoder.encode(demoAdminPassword)
+            );
+        } else {
+            log.info("DEMO_ADMIN_PASSWORD not set: demo admin account is not created or modified.");
+        }
 
         // 2. Create Faculty 1: Faculty A (assigned CSE 204)
         User faculty1User = getOrCreateDemoUser(
@@ -141,9 +137,6 @@ public class DataSeeder implements CommandLineRunner {
         facultyRepository.save(faculty2);
 
         // Backwards compatibility: ensure legacy usernames 'roopa', 'aditya', 'faculty' authenticate if present
-        ensureLegacyUser("roopa", Role.FACULTY, "Faculty A", "demo.faculty.1@edupulse.srmap.edu.in", encodedPassword);
-        ensureLegacyUser("aditya", Role.FACULTY, "Faculty B", "demo.faculty.2@edupulse.srmap.edu.in", encodedPassword);
-        ensureLegacyUser("faculty", Role.FACULTY, "Faculty A", "demo.faculty.1@edupulse.srmap.edu.in", encodedPassword);
 
         // 4. Seed 7 SRM AP Courses
         Course cse203 = courseRepository.findByCode("CSE 203").orElseGet(() ->
@@ -225,7 +218,6 @@ public class DataSeeder implements CommandLineRunner {
                 "demo.student.a@edupulse.srmap.edu.in",
                 encodedPassword
         );
-        ensureLegacyUser("student_a", Role.STUDENT, "Student A — Reference", "demo.student.a@edupulse.srmap.edu.in", encodedPassword);
 
         Student studentA = syncDemoStudent(studentAUser, "STU-1001", "Computer Science & Engineering", 5, 9.1);
         if (attendanceRepository.findByStudentId(studentA.getId()).size() != 276 || markRepository.findByStudentId(studentA.getId()).isEmpty()) {
@@ -281,7 +273,6 @@ public class DataSeeder implements CommandLineRunner {
                 "demo.student.b@edupulse.srmap.edu.in",
                 encodedPassword
         );
-        ensureLegacyUser("aarav", Role.STUDENT, "Student B — Top Performer", "demo.student.b@edupulse.srmap.edu.in", encodedPassword);
 
         Student studentB = syncDemoStudent(studentBUser, "STU-1002", "Computer Science & Engineering", 5, 9.4);
         if (attendanceRepository.findByStudentId(studentB.getId()).size() != 276 || markRepository.findByStudentId(studentB.getId()).isEmpty()) {
@@ -337,7 +328,6 @@ public class DataSeeder implements CommandLineRunner {
                 "demo.student.c@edupulse.srmap.edu.in",
                 encodedPassword
         );
-        ensureLegacyUser("bhavna", Role.STUDENT, "Student C — Average Performer", "demo.student.c@edupulse.srmap.edu.in", encodedPassword);
 
         Student studentC = syncDemoStudent(studentCUser, "STU-1003", "Computer Science & Engineering", 5, 7.2);
         if (attendanceRepository.findByStudentId(studentC.getId()).size() != 276 || markRepository.findByStudentId(studentC.getId()).isEmpty()) {
@@ -395,7 +385,6 @@ public class DataSeeder implements CommandLineRunner {
                 "demo.student.d@edupulse.srmap.edu.in",
                 encodedPassword
         );
-        ensureLegacyUser("arun", Role.STUDENT, "Student D — High Risk", "demo.student.d@edupulse.srmap.edu.in", encodedPassword);
 
         Student studentD = syncDemoStudent(studentDUser, "STU-1004", "Computer Science & Engineering", 5, 5.1);
         long studentDAbsent = attendanceRepository.findByStudentId(studentD.getId()).stream()
@@ -521,18 +510,6 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
     }
 
-    private void ensureLegacyUser(String legacyUsername, Role role, String name, String email, String encodedPassword) {
-        if (userRepository.findByUsername(legacyUsername).isEmpty()) {
-            userRepository.save(User.builder()
-                    .username(legacyUsername)
-                    .passwordHash(encodedPassword)
-                    .role(role)
-                    .name(name)
-                    .email(email)
-                    .authProvider(AuthProvider.DEMO)
-                    .build());
-        }
-    }
 
     private Assessment getOrCreateAssessment(Course course, String name, double maxMarks, double weightage) {
         return assessmentRepository.findAll().stream()
@@ -561,6 +538,10 @@ public class DataSeeder implements CommandLineRunner {
     private Student syncDemoStudent(User user, String studentNumber, String department, int semester, double cgpa) {
         studentRepository.findByStudentNumber(studentNumber).ifPresent(other -> {
             if (!other.getId().equals(user.getId())) {
+                if (other.getUser() == null || other.getUser().getAuthProvider() != AuthProvider.DEMO) {
+                    throw new IllegalStateException("Registration number " + studentNumber
+                            + " belongs to a non-demo account; refusing to modify real student records.");
+                }
                 other.setStudentNumber("TEMP-" + other.getId() + "-" + System.currentTimeMillis());
                 studentRepository.saveAndFlush(other);
             }

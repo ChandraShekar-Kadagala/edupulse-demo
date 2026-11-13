@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { Activity, Eye, EyeOff, Sparkles, UserCheck, GraduationCap, Building2, Copy, Check, ShieldCheck, ArrowRight, Info } from 'lucide-react';
+import { Activity, Eye, EyeOff, Sparkles, GraduationCap, Building2, Copy, Check, ShieldCheck, Info } from 'lucide-react';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 
 interface ShowcaseStudent {
@@ -114,17 +114,8 @@ export default function Login() {
       role: 'FACULTY',
       title: 'Assistant Professor',
       course: 'CSE 213',
-      courseName: 'Database Systems',
+      courseName: 'Advanced Java Programming',
       profile: 'Faculty Instructor & Course Evaluator for CSE 213'
-    },
-    {
-      username: 'admin',
-      name: 'Administrator',
-      role: 'ADMIN',
-      title: 'System Administrator',
-      course: 'Department Admin',
-      courseName: 'CSE Department Administration',
-      profile: 'Full governance, audit logs, and cohort administration access'
     }
   ];
 

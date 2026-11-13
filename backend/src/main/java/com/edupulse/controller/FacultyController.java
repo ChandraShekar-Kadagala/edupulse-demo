@@ -4,7 +4,6 @@ import com.edupulse.dto.FacultyDashboardDto;
 import com.edupulse.dto.FacultyDto;
 import com.edupulse.security.UserDetailsImpl;
 import com.edupulse.service.FacultyService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,10 +14,10 @@ import java.util.List;
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}", maxAge = 3600)
 @RestController
 @RequestMapping("/api/faculty")
+@lombok.RequiredArgsConstructor
 public class FacultyController {
 
-    @Autowired
-    private FacultyService facultyService;
+    private final FacultyService facultyService;
 
     @GetMapping
     @PreAuthorize("hasRole('FACULTY') or hasRole('ADMIN') or hasRole('STUDENT')")

@@ -2,7 +2,6 @@ package com.edupulse.service;
 
 import com.edupulse.model.*;
 import com.edupulse.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,27 +17,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@lombok.RequiredArgsConstructor
 public class CsvImportService {
 
     private static final long MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
-    @Autowired
-    private AttendanceRepository attendanceRepository;
+    private final AttendanceRepository attendanceRepository;
 
-    @Autowired
-    private MarkRepository markRepository;
+    private final MarkRepository markRepository;
 
-    @Autowired
-    private AssessmentRepository assessmentRepository;
+    private final AssessmentRepository assessmentRepository;
 
-    @Autowired
-    private CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
 
-    @Autowired
-    private AuditLogRepository auditLogRepository;
+    private final AuditLogRepository auditLogRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> processCsv(MultipartFile file) throws Exception {

@@ -9,7 +9,6 @@ import com.edupulse.service.AcademicAnalyticsService;
 import com.edupulse.service.RiskAssessmentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
@@ -22,39 +21,30 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@lombok.RequiredArgsConstructor
 public class SrmPortalIntegrationService {
 
     private static final Logger log = LoggerFactory.getLogger(SrmPortalIntegrationService.class);
 
-    @Autowired
-    private SrmPortalParserService parserService;
+    private final SrmPortalParserService parserService;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
-    @Autowired
-    private CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
 
-    @Autowired
-    private AttendanceRepository attendanceRepository;
+    private final AttendanceRepository attendanceRepository;
 
-    @Autowired
-    private AssessmentRepository assessmentRepository;
+    private final AssessmentRepository assessmentRepository;
 
-    @Autowired
-    private MarkRepository markRepository;
+    private final MarkRepository markRepository;
 
-    @Autowired
-    private AuditLogRepository auditLogRepository;
+    private final AuditLogRepository auditLogRepository;
 
-    @Autowired
-    private AcademicAnalyticsService analyticsService;
+    private final AcademicAnalyticsService analyticsService;
 
-    @Autowired
-    private RiskAssessmentService riskAssessmentService;
+    private final RiskAssessmentService riskAssessmentService;
 
-    @Autowired
-    private ResourceLoader resourceLoader;
+    private final ResourceLoader resourceLoader;
 
     private LocalDateTime lastSyncTime = null;
     private String lastSyncStatus = "IDLE";

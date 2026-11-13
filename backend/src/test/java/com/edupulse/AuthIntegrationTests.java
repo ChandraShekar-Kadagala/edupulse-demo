@@ -66,7 +66,7 @@ public class AuthIntegrationTests {
 
         Student student = Student.builder()
                 .user(user)
-                .studentNumber("AP25110070436")
+                .studentNumber("SYN-TEST-0001")
                 .department("CS")
                 .build();
         studentRepository.save(student);
@@ -98,7 +98,7 @@ public class AuthIntegrationTests {
     @Test
     public void testValidLoginWithRegistrationNumber() throws Exception {
         LoginRequest req = new LoginRequest();
-        req.setUsername("AP25110070436");
+        req.setUsername("SYN-TEST-0001");
         req.setPassword("password");
 
         mockMvc.perform(post("/api/auth/login")

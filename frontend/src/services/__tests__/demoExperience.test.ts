@@ -4,7 +4,7 @@ describe('Demo Experience & Showcase Safety', () => {
 
   describe('Login Error Parsing', () => {
     it('correctly extracts "error" property from backend 401 response (Bad credentials)', () => {
-      const errorResponse = {
+      const errorResponse: { response?: { status: number; data?: { error?: string; message?: string } } } = {
         response: {
           status: 401,
           data: {
@@ -21,7 +21,7 @@ describe('Demo Experience & Showcase Safety', () => {
     });
 
     it('falls back to "message" property if error is not present', () => {
-      const errorResponse = {
+      const errorResponse: { response?: { status: number; data?: { error?: string; message?: string } } } = {
         response: {
           status: 400,
           data: {

@@ -19,6 +19,7 @@ public class RiskEngineExplanationDto {
     private ComponentExplanation missingAssignmentsComponent;
     private List<SubjectRiskDto> subjectRisks;
     private String formulaDescription;
+    private String formulaVersion;
     private String recommendedIntervention;
     private String dataSourceProvenance;
     private LocalDateTime calculatedAt;

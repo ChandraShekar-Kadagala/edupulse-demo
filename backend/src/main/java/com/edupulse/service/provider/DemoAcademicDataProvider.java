@@ -3,7 +3,6 @@ package com.edupulse.service.provider;
 import com.edupulse.model.*;
 import com.edupulse.repository.*;
 import com.edupulse.service.RiskAssessmentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -11,22 +10,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@lombok.RequiredArgsConstructor
 public class DemoAcademicDataProvider implements AcademicDataProvider {
 
-    @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
-    private AssessmentRepository assessmentRepository;
-    @Autowired
-    private MarkRepository markRepository;
-    @Autowired
-    private AttendanceRepository attendanceRepository;
-    @Autowired
-    private RiskAssessmentService riskAssessmentService;
-    @Autowired
-    private AuditLogRepository auditLogRepository;
+    private final StudentRepository studentRepository;
+    private final CourseRepository courseRepository;
+    private final AssessmentRepository assessmentRepository;
+    private final MarkRepository markRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final RiskAssessmentService riskAssessmentService;
+    private final AuditLogRepository auditLogRepository;
 
     @Override
     public String getProviderName() {

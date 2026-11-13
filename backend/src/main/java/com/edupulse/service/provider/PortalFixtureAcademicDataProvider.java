@@ -4,17 +4,15 @@ import com.edupulse.model.DataProvenance;
 import com.edupulse.model.Student;
 import com.edupulse.repository.StudentRepository;
 import com.edupulse.service.provider.portal.SrmPortalIntegrationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("portalFixtureAcademicDataProvider")
+@lombok.RequiredArgsConstructor
 public class PortalFixtureAcademicDataProvider implements AcademicDataProvider {
 
-    @Autowired
-    private SrmPortalIntegrationService portalIntegrationService;
+    private final SrmPortalIntegrationService portalIntegrationService;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
     @Override
     public String getProviderName() {

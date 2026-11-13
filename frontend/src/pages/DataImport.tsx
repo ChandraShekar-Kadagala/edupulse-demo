@@ -5,7 +5,7 @@ import Papa from 'papaparse';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { AlertTriangle, Upload, CheckCircle, Download, FileText } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Download } from 'lucide-react';
 
 interface ParsedRow {
   student_id: string;

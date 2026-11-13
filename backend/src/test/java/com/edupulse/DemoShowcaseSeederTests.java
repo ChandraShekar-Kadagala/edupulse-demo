@@ -31,7 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @org.springframework.test.context.TestPropertySource(properties = {
-        "app.seeder.enabled=true"
+        "app.seeder.enabled=true",
+        "app.seeder.admin-password=Test-Only-Admin-Pass-1"
 })
 public class DemoShowcaseSeederTests {
 
@@ -222,7 +223,13 @@ public class DemoShowcaseSeederTests {
     public void testPasswordsStoredUsingConfiguredPasswordEncoder() {
         dataSeeder.seedDemoData();
 
-        for (String username : new String[]{"admin", "demo.faculty.1", "demo.faculty.2", "demo.student.a", "demo.student.b", "demo.student.c", "demo.student.d"}) {
+        // Admin uses the separate, non-public DEMO_ADMIN_PASSWORD, never the public demo password.
+        User adminUser = userRepository.findByUsername("admin").orElseThrow();
+        assertTrue(passwordEncoder.matches("Test-Only-Admin-Pass-1", adminUser.getPasswordHash()));
+        assertFalse(passwordEncoder.matches("DemoEduPulse2026!", adminUser.getPasswordHash()),
+                "Admin must not be reachable with the public demo password");
+
+        for (String username : new String[]{"demo.faculty.1", "demo.faculty.2", "demo.student.a", "demo.student.b", "demo.student.c", "demo.student.d"}) {
             User user = userRepository.findByUsername(username).orElseThrow();
             String hash = user.getPasswordHash();
             assertTrue(hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$"),
@@ -314,7 +321,7 @@ public class DemoShowcaseSeederTests {
         assertEquals("DEMO_SHOWCASE", json.get("demoMarker").asText());
         assertEquals("demo.student.a", json.get("defaultStudentUsername").asText());
         assertEquals("demo.faculty.1", json.get("defaultFacultyUsername").asText());
-        assertEquals("admin", json.get("defaultAdminUsername").asText());
+        assertFalse(json.has("defaultAdminUsername"), "Admin is not a public demo account");
         assertTrue(json.has("students"));
         assertEquals(4, json.get("students").size());
         assertTrue(json.has("facultyList"));

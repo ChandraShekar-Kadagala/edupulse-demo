@@ -3,44 +3,34 @@ package com.edupulse.service;
 import com.edupulse.dto.*;
 import com.edupulse.model.*;
 import com.edupulse.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@lombok.RequiredArgsConstructor
 public class FacultyService {
 
-    @Autowired
-    private FacultyRepository facultyRepository;
+    private final FacultyRepository facultyRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
-    @Autowired
-    private CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
 
-    @Autowired
-    private AttendanceRepository attendanceRepository;
+    private final AttendanceRepository attendanceRepository;
 
-    @Autowired
-    private MarkRepository markRepository;
+    private final MarkRepository markRepository;
 
-    @Autowired
-    private AssessmentRepository assessmentRepository;
+    private final AssessmentRepository assessmentRepository;
 
-    @Autowired
-    private AssignmentSubmissionRepository submissionRepository;
+    private final AssignmentSubmissionRepository submissionRepository;
 
-    @Autowired
-    private RiskAssessmentService riskAssessmentService;
+    private final RiskAssessmentService riskAssessmentService;
 
-    @Autowired
-    private InterventionRepository interventionRepository;
+    private final InterventionRepository interventionRepository;
 
     public List<FacultyDto> getAllFacultyProfiles() {
         List<Faculty> allFaculty = facultyRepository.findAll();

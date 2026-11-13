@@ -1,4 +1,9 @@
 spring:
+  # In-memory H2 for quick local UI work only. The Flyway migrations are PostgreSQL-specific, so
+  # this profile lets Hibernate build the schema. Use the default profile + docker-compose PostgreSQL
+  # (or the Testcontainers test) to exercise the real migrations.
+  flyway:
+    enabled: false
   datasource:
     url: jdbc:h2:mem:edupulse;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver

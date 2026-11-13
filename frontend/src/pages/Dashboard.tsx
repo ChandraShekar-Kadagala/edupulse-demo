@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { 
-  Activity, 
-  Users, 
-  AlertTriangle, 
-  CheckCircle, 
-  TrendingUp, 
-  Sparkles, 
-  ArrowRight, 
-  RefreshCw, 
+import {
+  Activity,
+  Users,
+  AlertTriangle,
+  TrendingUp,
+  Sparkles,
+  ArrowRight,
+  RefreshCw,
   BarChart2,
   BookOpen,
   GraduationCap,
@@ -19,8 +18,8 @@ import {
   AlertCircle,
   ShieldAlert,
   Info,
-  CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Award
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import api, { academicApi, getSafeErrorMessage } from '../services/api';
@@ -37,13 +36,10 @@ export default function Dashboard() {
   const [summary, setSummary] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
   const [facultyDashboard, setFacultyDashboard] = useState<FacultyDashboard | null>(null);
-  const [facultyList, setFacultyList] = useState<Faculty[]>([]);
+  const [, setFacultyList] = useState<Faculty[]>([]);
   const [selectedCourseTab, setSelectedCourseTab] = useState<'CSE 204' | 'CSE 213'>('CSE 204');
 
-  // Role Redirection: Students should immediately go to their personalized analysis page
-  if (user?.role === 'STUDENT') {
-    return <Navigate to={'/students/' + user.id} replace />;
-  }
+  const isStudent = user?.role === 'STUDENT';
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -92,8 +88,8 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (!isStudent) fetchDashboardData();
+  }, [isStudent]);
 
   // Handler to switch courses (for Admin or dual faculty perspective)
   const handleSwitchCourse = async (courseCode: 'CSE 204' | 'CSE 213') => {
@@ -108,6 +104,12 @@ export default function Dashboard() {
       console.warn("Could not load alternate faculty dashboard:", e);
     }
   };
+
+  // Role redirection: students go straight to their personal analysis page.
+  // Kept below all hooks so hook order is identical on every render.
+  if (isStudent && user) {
+    return <Navigate to={'/students/' + user.id} replace />;
+  }
 
   if (loading) {
     return (
@@ -154,7 +156,6 @@ export default function Dashboard() {
   const courseName = facultyDashboard?.courseName || (courseCode === 'CSE 204' ? 'DESIGN AND ANALYSIS OF ALGORITHMS' : 'ADVANCED JAVA PROGRAMMING');
   const conductedSessions = facultyDashboard?.totalConductedSessions || (courseCode === 'CSE 204' ? 48 : 49);
   const classroom = facultyDashboard?.classroom || '(C 305), (S 404)';
-  const slotDetails = facultyDashboard?.slotDetails || (courseCode === 'CSE 204' ? 'Mon (09:00-10:50), Wed (10:00-10:50), Fri (01:00-02:50)' : 'Mon (01:00-01:50), Thu (09:00-10:50), Fri (09:00-10:50)');
 
   // Student records for this course
   const studentRecords = facultyDashboard?.students && facultyDashboard.students.length > 0

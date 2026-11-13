@@ -25,5 +25,10 @@ The engine evaluates the following factors:
 
 *Note: The total score is strictly capped at 100.*
 
+## 3a. Implementation (single source of truth)
+- The formula lives only in `backend/src/main/java/com/edupulse/service/risk/RiskFormula.java` (version `rules-v1`), covered by `RiskFormulaTest`.
+- The frontend never computes official scores; it renders the backend `riskEngineExplanation` DTO (score, level, per-component points, formula text, formula version, provenance).
+- Missing attendance / marks data contributes zero (pending assessments are excluded, never zeroed). The level is derived from the unrounded total.
+
 ## 4. Historical Snapshots
-To prevent data loss and allow for trend analysis (Before vs. After Intervention), risk calculations do NOT overwrite existing assessments. Every time the engine runs, a new `RiskAssessment` record is generated with a `calculatedAt` timestamp and immutable `RiskFactor` children.
+To prevent data loss and allow for trend analysis (Before vs. After Intervention), risk calculations do NOT overwrite existing assessments. Explicit recalculation (`POST /api/students/{id}/risk/recalculate`, imports, syncs) always appends a new `RiskAssessment` with a `calculatedAt` timestamp and immutable `RiskFactor` children. Read paths (profile views, dashboards) use `ensureCurrentSnapshot`, which appends a snapshot only when the result differs from the latest one, so snapshot history reflects real changes rather than page views.

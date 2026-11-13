@@ -1,34 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { 
-  AlertCircle, TrendingDown, Clock, Activity, Target, CheckCircle2, 
-  FileText, Database, ShieldAlert, Sparkles, RefreshCw, Calendar, 
-  BookOpen, Calculator, Award, ArrowRight, UserCheck, Check
+import {
+  Activity,
+  Target,
+  FileText,
+  RefreshCw,
+  Calendar,
+  BookOpen,
+  Calculator,
+  Award,
+  ArrowRight,
+  UserCheck,
+  ArrowLeft,
+  Search,
+  Lock,
+  UserX
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { getSafeErrorMessage } from '../services/api';
 import type { StudentAcademicAnalytics, TimetableSlot } from '../types';
 
 export default function StudentProfile() {
   const { id } = useParams();
   const { user } = useAuth();
-  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState<any>(null);
   const [riskAssessment, setRiskAssessment] = useState<any>(null);
   const [interventions, setInterventions] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<StudentAcademicAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isNotFound, setIsNotFound] = useState(false);
+  const [isForbidden, setIsForbidden] = useState(false);
   const [targetScenario, setTargetScenario] = useState<'min' | 'rec' | 'stretch'>('rec');
 
   const fetchStudentData = async () => {
     try {
+      setLoading(true);
       setError(null);
+      setIsNotFound(false);
+      setIsForbidden(false);
+
       const [studentRes, riskRes, intRes, analyticsRes] = await Promise.all([
         api.get('/students/' + id),
         api.get('/students/' + id + '/risk').catch(() => ({ data: null })),
@@ -41,7 +55,14 @@ export default function StudentProfile() {
       setAnalytics(analyticsRes.data);
     } catch (err: any) {
       console.error("Failed to load student profile:", err);
-      setError(getSafeErrorMessage(err, "Failed to load student analytics from server."));
+      const status = err.response?.status;
+      if (status === 404) {
+        setIsNotFound(true);
+      } else if (status === 403) {
+        setIsForbidden(true);
+      } else {
+        setError(getSafeErrorMessage(err, "Failed to load student academic analytics from server."));
+      }
     } finally {
       setLoading(false);
     }
@@ -64,11 +85,108 @@ export default function StudentProfile() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-3 text-gray-500 dark:text-gray-400">
         <RefreshCw className="h-8 w-8 animate-spin text-indigo-600" />
-        <p className="text-sm">Loading complete academic analytics & timetable...</p>
+        <p className="text-sm font-medium">Loading complete academic analytics & timetable...</p>
       </div>
     );
   }
 
+  // 404 Not Found UI
+  if (isNotFound) {
+    return (
+      <div className="p-6 md:p-12 max-w-xl mx-auto text-center space-y-6">
+        <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-3xl mx-auto flex items-center justify-center shadow-inner">
+          <UserX className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <Badge variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300">
+            HTTP 404 — Record Not Found
+          </Badge>
+          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">
+            Student Profile Not Found
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+            The requested student ID (<span className="font-mono font-bold text-gray-800 dark:text-gray-200">ID: {id}</span>) does not exist in the EduPulse database.
+          </p>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 text-xs text-left space-y-2">
+          <span className="font-bold text-gray-700 dark:text-gray-300">Available Demo Showcase Profiles:</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono">
+            <Link to="/students/53" className="p-2 rounded bg-white dark:bg-gray-800 border hover:border-indigo-500 text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
+              <span>Student A (STU-1001)</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Link to="/students/55" className="p-2 rounded bg-white dark:bg-gray-800 border hover:border-indigo-500 text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
+              <span>Student B (STU-1002)</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Link to="/students/57" className="p-2 rounded bg-white dark:bg-gray-800 border hover:border-indigo-500 text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
+              <span>Student C (STU-1003)</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Link to="/students/3" className="p-2 rounded bg-white dark:bg-gray-800 border hover:border-indigo-500 text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
+              <span>Student D (STU-1004)</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center gap-3">
+          <Link to="/dashboard">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-1.5" /> Return to Dashboard
+            </Button>
+          </Link>
+          {user?.role !== 'STUDENT' && (
+            <Link to="/students">
+              <Button size="sm">
+                <Search className="w-4 h-4 mr-1.5" /> Student Directory
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 403 Forbidden UI
+  if (isForbidden) {
+    return (
+      <div className="p-6 md:p-12 max-w-xl mx-auto text-center space-y-6">
+        <div className="w-16 h-16 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-3xl mx-auto flex items-center justify-center shadow-inner">
+          <Lock className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <Badge variant="destructive">
+            HTTP 403 — Access Restricted
+          </Badge>
+          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">
+            Access to Cohort Record Restricted
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+            Student accounts are authorized only to inspect their own verified academic record.
+          </p>
+        </div>
+
+        <div className="flex items-center justify-center gap-3">
+          {user?.id && (
+            <Link to={'/students/' + user.id}>
+              <Button size="sm">
+                <UserCheck className="w-4 h-4 mr-1.5" /> Open My Academic Profile
+              </Button>
+            </Link>
+          )}
+          <Link to="/dashboard">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-1.5" /> Dashboard
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Error with retry UI
   if (error && !student) {
     return (
       <div className="p-8 text-center space-y-4 max-w-lg mx-auto">
@@ -89,29 +207,26 @@ export default function StudentProfile() {
   const isMedRisk = riskAssessment?.riskLevel === 'MEDIUM' || analytics?.riskLevel === 'MEDIUM';
   const riskColor = isHighRisk ? 'text-red-600 dark:text-red-400' : isMedRisk ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400';
 
-  const tooltipBg = theme === 'dark' ? '#1f2937' : '#ffffff';
-  const tooltipText = theme === 'dark' ? '#f3f4f6' : '#111827';
-  const tooltipBorder = theme === 'dark' ? '#374151' : '#e5e7eb';
-  const gridStroke = theme === 'dark' ? '#374151' : '#e5e7eb';
-  const axisStroke = theme === 'dark' ? '#9ca3af' : '#6b7280';
 
-  // Group timetable by Day
+  // Group timetable by Day safely
   const timetableDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const timetableByDay = (analytics?.timetable || []).reduce((acc: Record<string, TimetableSlot[]>, slot) => {
-    if (!acc[slot.day]) acc[slot.day] = [];
-    acc[slot.day].push(slot);
+    if (slot && slot.day) {
+      if (!acc[slot.day]) acc[slot.day] = [];
+      acc[slot.day].push(slot);
+    }
     return acc;
   }, {});
 
-  // Calculate Converted Marks Totals
+  // Calculate Converted Marks Totals safely
   const totalConvertedObtained = (analytics?.assessmentBreakdown || [])
-    .filter(a => a.convertedMarks != null)
+    .filter(a => typeof a.convertedMarks === 'number')
     .reduce((sum, a) => sum + (a.convertedMarks || 0), 0);
   const totalMaxConvertedEvaluated = (analytics?.assessmentBreakdown || [])
-    .filter(a => a.convertedMarks != null)
+    .filter(a => typeof a.convertedMarks === 'number')
     .reduce((sum, a) => sum + (a.maxConvertedMarks || 0), 0);
   const totalMaxConvertedSemester = (analytics?.assessmentBreakdown || [])
-    .reduce((sum, a) => sum + (a.maxConvertedMarks || 0), 0);
+    .reduce((sum, a) => sum + (typeof a.maxConvertedMarks === 'number' ? a.maxConvertedMarks : 0), 0) || 50;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-2 sm:p-4 md:p-6 font-sans">
@@ -147,7 +262,7 @@ export default function StudentProfile() {
 
               <div className="flex items-center mt-2.5 gap-2 flex-wrap text-xs">
                 <Badge variant="outline" className="font-semibold bg-gray-50 dark:bg-gray-800">
-                  CGPA: {student.currentCgpa}
+                  CGPA: {student.currentCgpa ?? student.cgpa ?? 'N/A'}
                 </Badge>
                 <Badge variant="outline" className={analytics?.dataStatus === 'COMPLETE' ? 'text-green-700 dark:text-green-400 border-green-300' : 'text-amber-700 dark:text-amber-400 border-amber-300'}>
                   Status: {analytics?.dataStatus || 'COMPLETE'}
@@ -626,13 +741,29 @@ export default function StudentProfile() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900">
               {(analytics?.targetPlanner || []).map((tp, idx) => {
-                const targetScore = targetScenario === 'min' 
-                  ? tp.minImprovementTarget 
+                const scenarioObj = targetScenario === 'min' 
+                  ? (tp.minimumTarget || (typeof tp.minImprovementTarget === 'number' ? { targetScore: tp.minImprovementTarget } : undefined))
                   : targetScenario === 'stretch' 
-                  ? tp.stretchTarget 
-                  : tp.recommendedTarget;
+                  ? (typeof tp.stretchTarget === 'object' && tp.stretchTarget !== null ? tp.stretchTarget : (typeof tp.stretchTarget === 'number' ? { targetScore: tp.stretchTarget } : undefined))
+                  : (typeof tp.recommendedTarget === 'object' && tp.recommendedTarget !== null ? tp.recommendedTarget : (typeof tp.recommendedTarget === 'number' ? { targetScore: tp.recommendedTarget } : undefined));
 
-                const projectedScore = (tp.currentConvertedMarks || 0) + (targetScore || 0);
+                const targetScore = typeof scenarioObj?.targetScore === 'number' 
+                  ? scenarioObj.targetScore 
+                  : 0;
+
+                const currentConv = typeof tp.currentConvertedMarks === 'number' 
+                  ? tp.currentConvertedMarks 
+                  : 0;
+
+                const expectedTotal = typeof scenarioObj?.expectedConvertedTotal === 'number'
+                  ? scenarioObj.expectedConvertedTotal
+                  : (currentConv + targetScore);
+
+                const pendingMax = typeof tp.pendingAssessmentMaxMarks === 'number'
+                  ? tp.pendingAssessmentMaxMarks
+                  : (typeof tp.pendingWeightage === 'number' ? tp.pendingWeightage : 15);
+
+                const impactText = tp.riskImpactDescription || tp.targetAffectsRisk || scenarioObj?.rationale || 'Maintains academic buffer for end-semester exams.';
 
                 return (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
@@ -640,22 +771,22 @@ export default function StudentProfile() {
                       <span className="font-mono text-indigo-600 dark:text-indigo-400">{tp.courseCode}</span> - {tp.courseName}
                     </td>
                     <td className="px-4 py-3 text-center font-mono font-bold text-gray-700 dark:text-gray-300">
-                      {tp.currentConvertedMarks?.toFixed(2)}
+                      {currentConv.toFixed(2)}
                     </td>
                     <td className="px-4 py-3 font-medium text-emerald-600 dark:text-emerald-400">
                       {tp.pendingAssessmentName}
                     </td>
                     <td className="px-4 py-3 text-center font-mono">
-                      {tp.pendingWeightage?.toFixed(0)} marks
+                      {pendingMax.toFixed(0)} marks
                     </td>
                     <td className="px-4 py-3 text-center font-mono font-extrabold text-indigo-600 dark:text-indigo-400">
-                      {targetScore?.toFixed(2)} / {tp.pendingWeightage?.toFixed(0)}
+                      {targetScore.toFixed(2)} / {pendingMax.toFixed(0)}
                     </td>
                     <td className="px-4 py-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                      {projectedScore.toFixed(2)} marks
+                      {expectedTotal.toFixed(2)} marks
                     </td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">
-                      {tp.targetAffectsRisk}
+                      {impactText}
                     </td>
                   </tr>
                 );

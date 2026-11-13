@@ -3,7 +3,6 @@ package com.edupulse.service;
 import com.edupulse.dto.*;
 import com.edupulse.model.*;
 import com.edupulse.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,41 +14,32 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@lombok.RequiredArgsConstructor
 public class AcademicAnalyticsService {
 
     private static final double ATTENDANCE_THRESHOLD = 75.0;
     private static final double PASSING_MARKS_THRESHOLD = 50.0;
     private static final double HIGH_PERFORMANCE_THRESHOLD = 75.0;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
-    @Autowired
-    private AttendanceRepository attendanceRepository;
+    private final AttendanceRepository attendanceRepository;
 
-    @Autowired
-    private MarkRepository markRepository;
+    private final MarkRepository markRepository;
 
-    @Autowired
-    private AssessmentRepository assessmentRepository;
+    private final AssessmentRepository assessmentRepository;
 
-    @Autowired
-    private CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
 
-    @Autowired
-    private AssignmentSubmissionRepository submissionRepository;
+    private final AssignmentSubmissionRepository submissionRepository;
 
-    @Autowired
-    private InterventionRepository interventionRepository;
+    private final InterventionRepository interventionRepository;
 
-    @Autowired
-    private RiskAssessmentService riskAssessmentService;
+    private final RiskAssessmentService riskAssessmentService;
 
-    @Autowired
-    private AuditLogRepository auditLogRepository;
+    private final AuditLogRepository auditLogRepository;
 
-    @Autowired
-    private TimetableService timetableService;
+    private final TimetableService timetableService;
 
     @Transactional
     public StudentAcademicAnalyticsDto getStudentAnalytics(Long studentId) {
@@ -179,7 +169,7 @@ public class AcademicAnalyticsService {
         boolean hasTrends = !trendPoints.isEmpty();
 
         // 5. Risk Assessment & Transparent Explanation
-        riskAssessmentService.calculateRiskForStudent(studentId);
+        riskAssessmentService.ensureCurrentSnapshot(studentId);
         RiskAssessmentResponse riskResponse = riskAssessmentService.getLatestRiskAssessment(studentId);
         RiskEngineExplanationDto riskExplanation = riskAssessmentService.getRiskExplanation(studentId);
 
@@ -416,7 +406,6 @@ public class AcademicAnalyticsService {
 
         List<Student> students = studentRepository.findAll();
         for (Student s : students) {
-            riskAssessmentService.calculateRiskForStudent(s.getId());
             RiskAssessmentResponse risk = riskAssessmentService.getLatestRiskAssessment(s.getId());
             List<Attendance> att = attendanceRepository.findByStudentId(s.getId());
             List<Mark> marks = markRepository.findByStudentId(s.getId());

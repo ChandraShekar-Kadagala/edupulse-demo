@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import api, { getSafeErrorMessage } from '../services/api';
-import { ShieldCheck, AlertTriangle, RefreshCw, FileCode, CheckCircle2, Info, Lock, UploadCloud, BookOpen } from 'lucide-react';
+import { AlertTriangle, FileCode, CheckCircle2, Lock, UploadCloud, BookOpen } from 'lucide-react';
 
 interface IntegrationStatus {
   provider: string;
@@ -14,13 +13,13 @@ interface IntegrationStatus {
   lastSyncStatus?: string;
   lastSyncMessage?: string;
   provenance: string;
+  prototypeStatus?: string;
   message: string;
   availableDataStreams?: string[];
   supportedModes?: string[];
 }
 
 export default function AccountLinking() {
-  const { user } = useAuth();
   const [status, setStatus] = useState<IntegrationStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
