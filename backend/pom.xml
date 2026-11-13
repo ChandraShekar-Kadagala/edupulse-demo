@@ -133,6 +133,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>@{argLine} -Djdk.net.unixdomain.tmpdir=${project.build.directory}</argLine>
+					<!-- Same class order on every OS (Linux "filesystem" order is arbitrary). Each Spring
+					     test context also gets its own H2 database, so the suite passes in any order. -->
+					<runOrder>alphabetical</runOrder>
 				</configuration>
 			</plugin>
 			<plugin>

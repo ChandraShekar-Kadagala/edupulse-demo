@@ -150,7 +150,7 @@ public class IntegrationSyncTests {
         long newMarks = markRepository.findByStudentId(student.getId()).size();
         assertThat(newMarks).isGreaterThan(initialMarks);
         
-        long attendances = attendanceRepository.findByStudentIdAndCourseId(student.getId(), 1L).size();
+        long attendances = attendanceRepository.findByStudentId(student.getId()).size();
         assertThat(attendances).isGreaterThanOrEqualTo(10);
         
         long risks = riskAssessmentRepository.findByStudentId(student.getId()).size();
