@@ -453,3 +453,16 @@ export interface RiskHistory {
   interventions: { id: number; type: string | null; status: string | null; startedAt: string | null }[];
   note: string;
 }
+
+
+export interface ImportIssue { section: string; index: number; severity: string; message: string; }
+export interface ImportPreviewResponse {
+  sourceLabel: string;
+  live: boolean;
+  acceptedAttendance: number;
+  acceptedLedger: number;
+  cgpa: number | null;
+  rejected: number;
+  warnings: number;
+  issues: ImportIssue[];
+}

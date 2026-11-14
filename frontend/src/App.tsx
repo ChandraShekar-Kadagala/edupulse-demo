@@ -11,6 +11,7 @@ import DataImport from './pages/DataImport';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AccountLinking from './pages/AccountLinking';
+import ImportMyRecords from './pages/ImportMyRecords';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
@@ -51,6 +52,12 @@ export default function App() {
               </ProtectedRoute>
             } />
             
+            <Route path="import-records" element={
+              <ErrorBoundary fallbackTitle="Import Records Error">
+                <ImportMyRecords />
+              </ErrorBoundary>
+            } />
+
             <Route path="students/:id" element={
               <ErrorBoundary fallbackTitle="Student Profile Error">
                 <StudentProfile />
