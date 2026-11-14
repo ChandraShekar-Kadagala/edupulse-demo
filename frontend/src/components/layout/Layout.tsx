@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Activity, LayoutDashboard, Users, AlertTriangle, LogOut, FileText, Upload } from 'lucide-react';
+import { Activity, LayoutDashboard, Users, AlertTriangle, LogOut, FileText, Upload, FileDown } from 'lucide-react';
 import { cn } from '../../utils/utils';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
@@ -24,6 +24,7 @@ export default function Layout() {
     { to: '/students', icon: Users, label: 'Students', roles: ['ADMIN', 'FACULTY'] },
     { to: '/interventions', icon: AlertTriangle, label: 'Interventions', roles: ['ADMIN', 'FACULTY'] },
     { to: '/import', icon: Upload, label: 'Data Import', roles: ['ADMIN', 'FACULTY'] },
+    { to: '/import-records', icon: FileDown, label: 'Import my records', roles: ['STUDENT'] },
     { to: '/integration', icon: FileText, label: 'Account Linking', roles: ['STUDENT', 'ADMIN', 'FACULTY'] },
   ];
 
