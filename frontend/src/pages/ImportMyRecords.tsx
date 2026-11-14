@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Download, FileUp, Info, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -6,7 +6,7 @@ import { Badge } from '../components/ui/badge';
 import { EmptyState } from '../components/common/StateViews';
 import { buildExport, isEmptyExport, type AcademicExport } from '../features/import/parseReport';
 import { academicApi, getSafeErrorMessage } from '../services/api';
-import type { ImportPreviewResponse } from '../types';
+import type { ImportPreviewResponse, ImportConfirmResult } from '../types';
 
 /**
  * Student-controlled export. The student logs into the SRM portal themselves (their password, their
@@ -20,7 +20,31 @@ export default function ImportMyRecords() {
   const [error, setError] = useState<string | null>(null);
   const [serverCheck, setServerCheck] = useState<ImportPreviewResponse | null>(null);
   const [checking, setChecking] = useState(false);
+  const [consent, setConsent] = useState<boolean | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState<ImportConfirmResult | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    academicApi.getImportConsent().then((r) => setConsent(r.data.active)).catch(() => setConsent(null));
+  }, []);
+
+  const saveToProfile = async () => {
+    if (!result) return;
+    setSaving(true);
+    setError(null);
+    try {
+      if (!consent) {
+        await academicApi.grantImportConsent();
+        setConsent(true);
+      }
+      setSaved((await academicApi.confirmImport(result)).data);
+    } catch (e) {
+      setError(getSafeErrorMessage(e, 'Could not save your import.'));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const validateOnServer = async () => {
     if (!result) return;
@@ -145,7 +169,27 @@ export default function ImportMyRecords() {
                   <Button variant="outline" onClick={validateOnServer} disabled={checking}>
                     {checking ? 'Checking…' : 'Validate with EduPulse'}
                   </Button>
+                  <Button onClick={saveToProfile} disabled={saving}>
+                    {saving ? 'Saving…' : consent ? 'Save to my profile' : 'Consent & save to my profile'}
+                  </Button>
                 </div>
+                {consent === false && !saved && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Saving records your consent to import your academic data for risk analytics. You can delete it anytime.
+                  </p>
+                )}
+                {saved && (
+                  <div role="status" className="p-3 rounded-lg border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30 text-sm">
+                    <p className="font-semibold text-emerald-800 dark:text-emerald-300">
+                      {saved.duplicate ? 'Already imported — your profile is up to date.' : 'Saved to your profile.'}
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {saved.acceptedAttendance} attendance + {saved.acceptedLedger} result rows
+                      {saved.riskScore != null && <> · your risk is now <strong>{saved.riskScore}/100 ({saved.riskLevel})</strong></>}
+                    </p>
+                    <a href="/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:underline">View my profile →</a>
+                  </div>
+                )}
                 {serverCheck && (
                   <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 text-sm space-y-2">
                     <p className="font-semibold text-gray-900 dark:text-gray-100">

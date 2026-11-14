@@ -83,7 +83,7 @@ CREATE TABLE academic_import_batches (
     report_type    VARCHAR(32),                -- ATTENDANCE | EXAM_LEDGER | MIXED
     report_date    DATE,
     uploaded_at    TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    content_sha256 CHAR(64),
+    content_sha256 VARCHAR(64),
     status         VARCHAR(16) NOT NULL,        -- PREVIEW | CONFIRMED | DISCARDED
     accepted_rows  INT NOT NULL DEFAULT 0,
     rejected_rows  INT NOT NULL DEFAULT 0,
@@ -115,9 +115,9 @@ CREATE TABLE exam_results (
     batch_id     BIGINT REFERENCES academic_import_batches(id),
     semester     VARCHAR(32) NOT NULL,
     month_year   VARCHAR(16),
-    credit       NUMERIC(4,1),
+    credit       DOUBLE PRECISION,
     grade        VARCHAR(4),
-    grade_points NUMERIC(4,2),
+    grade_points DOUBLE PRECISION,
     result       VARCHAR(16),
     attempt      INT NOT NULL DEFAULT 1,
     CONSTRAINT uk_exam_result UNIQUE (student_id, course_id, semester, attempt)

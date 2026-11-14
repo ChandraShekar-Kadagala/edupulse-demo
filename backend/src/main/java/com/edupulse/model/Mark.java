@@ -19,4 +19,8 @@ public class Mark {
     private Assessment assessment;
     
     private Double marksObtained;
+
+    /** Import batch this mark came from (V3); null for seeded/CSV/portal marks. */
+    @Column(name = "import_batch_id")
+    private Long importBatchId;
 }

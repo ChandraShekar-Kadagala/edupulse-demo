@@ -11,7 +11,8 @@ import type {
   DemoStatus,
   EffectivenessReport,
   RiskHistory,
-  ImportPreviewResponse
+  ImportPreviewResponse,
+  ImportConfirmResult
 } from '../types';
 
 const api = axios.create({
@@ -96,6 +97,9 @@ export const academicApi = {
   getInterventions: () => api.get<Intervention[]>('/interventions'),
   getInterventionEffectiveness: () => api.get<EffectivenessReport>('/analytics/interventions/effectiveness'),
   previewImport: (payload: unknown) => api.post<ImportPreviewResponse>('/students/me/imports/preview', payload),
+  confirmImport: (payload: unknown) => api.post<ImportConfirmResult>('/students/me/imports/confirm', payload),
+  getImportConsent: () => api.get<{ active: boolean }>('/students/me/imports/consent'),
+  grantImportConsent: () => api.post<{ active: boolean }>('/students/me/imports/consent'),
 };
 
 export default api;

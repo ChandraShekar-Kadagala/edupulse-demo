@@ -466,3 +466,14 @@ export interface ImportPreviewResponse {
   warnings: number;
   issues: ImportIssue[];
 }
+
+
+export interface ImportConfirmResult {
+  batchId: number;
+  duplicate: boolean;
+  acceptedAttendance: number;
+  acceptedLedger: number;
+  cgpa: number | null;
+  riskScore: number | null;
+  riskLevel: string | null;
+}

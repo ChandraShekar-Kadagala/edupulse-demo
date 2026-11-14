@@ -29,13 +29,16 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
     private final RiskAssessmentRepository riskAssessmentRepository;
     private final StudentRepository studentRepository;
     private final AttendanceRepository attendanceRepository;
+    private final AttendanceSnapshotRepository attendanceSnapshotRepository;
     private final MarkRepository markRepository;
     private final AssignmentSubmissionRepository submissionRepository;
 
     /** Inputs to the formula, gathered from the student's current academic records. */
     record RiskInputs(
             List<Attendance> attendances,
+            List<AttendanceSnapshot> snapshots,
             long presentClasses,
+            long totalClasses,
             Double attendancePercentage,
             List<Mark> evaluatedMarks,
             Double averageMarksPercentage,
@@ -43,14 +46,28 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
             long missingOrLate) {
 
         boolean hasNoData() {
-            return attendances.isEmpty() && evaluatedMarks.isEmpty() && submissions.isEmpty();
+            return attendances.isEmpty() && snapshots.isEmpty() && evaluatedMarks.isEmpty() && submissions.isEmpty();
         }
     }
 
     RiskInputs gatherInputs(Long studentId) {
+        // Dated attendance rows are authoritative. When there are none (e.g. a student self-import), the
+        // latest per-course attendance snapshot is used instead — real dated aggregates, never fabricated.
         List<Attendance> attendances = attendanceRepository.findByStudentId(studentId);
-        long present = attendances.stream().filter(a -> a.getStatus() == AttendanceStatus.PRESENT).count();
-        Double attendancePct = attendances.isEmpty() ? null : (double) present / attendances.size() * 100.0;
+        List<AttendanceSnapshot> snapshots = List.of();
+        long present;
+        long total;
+        Double attendancePct;
+        if (!attendances.isEmpty()) {
+            present = attendances.stream().filter(a -> a.getStatus() == AttendanceStatus.PRESENT).count();
+            total = attendances.size();
+            attendancePct = (double) present / total * 100.0;
+        } else {
+            snapshots = latestSnapshotPerCourse(studentId);
+            present = snapshots.stream().mapToLong(AttendanceSnapshot::getPresent).sum();
+            total = snapshots.stream().mapToLong(AttendanceSnapshot::getConducted).sum();
+            attendancePct = total > 0 ? (double) present / total * 100.0 : null;
+        }
 
         // Only completed assessments count; pending / not-conducted ones are excluded, never zeroed.
         List<Mark> evaluated = markRepository.findByStudentId(studentId).stream()
@@ -67,7 +84,16 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
                             && s.getSubmittedAt().isAfter(s.getAssignment().getDueDate())))
                 .count();
 
-        return new RiskInputs(attendances, present, attendancePct, evaluated, avgMarks, submissions, missingOrLate);
+        return new RiskInputs(attendances, snapshots, present, total, attendancePct, evaluated, avgMarks, submissions, missingOrLate);
+    }
+
+    /** Latest attendance snapshot for each course the student has imported (one per course). */
+    private List<AttendanceSnapshot> latestSnapshotPerCourse(Long studentId) {
+        return attendanceSnapshotRepository.findByStudentId(studentId).stream()
+                .filter(s -> s.getCourse() != null)
+                .collect(Collectors.groupingBy(s -> s.getCourse().getId(),
+                        Collectors.maxBy(java.util.Comparator.comparing(AttendanceSnapshot::getAsOfDate))))
+                .values().stream().flatMap(java.util.Optional::stream).toList();
     }
 
     private Student requireStudent(Long studentId) {
@@ -117,7 +143,7 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
                     .factorName("Low Attendance")
                     .impactLevel(pct < 60.0 ? "HIGH" : "MEDIUM")
                     .description(String.format(Locale.US, "Attendance is %.1f%% (%d/%d sessions, threshold: 75.0%%)",
-                            pct, in.presentClasses(), in.attendances().size()))
+                            pct, in.presentClasses(), in.totalClasses()))
                     .build());
         }
         if (result.marksPenalty() > 0) {
@@ -275,6 +301,29 @@ public class RuleBasedRiskEngineImpl implements RiskAssessmentService {
                     .riskStatus(status)
                     .details(details)
                     .build());
+        }
+        // Snapshot-based subjects (imported attendance has no dated rows to group by course).
+        if (in.attendances().isEmpty()) {
+            for (AttendanceSnapshot s : in.snapshots()) {
+                Course c = s.getCourse();
+                double cPct = s.getConducted() > 0 ? (double) s.getPresent() / s.getConducted() * 100.0 : 100.0;
+                List<Mark> cMarks = in.evaluatedMarks().stream()
+                        .filter(m -> m.getAssessment().getCourse() != null && m.getAssessment().getCourse().getId().equals(c.getId()))
+                        .toList();
+                Double cMarkPct = cMarks.isEmpty() ? null : cMarks.stream()
+                        .mapToDouble(m -> (m.getMarksObtained() / m.getAssessment().getMaxMarks()) * 100.0)
+                        .average().orElseThrow();
+                String status = (cPct < 75.0 || (cMarkPct != null && cMarkPct < 50.0)) ? "HIGH"
+                        : (cPct < 80.0 || (cMarkPct != null && cMarkPct < 60.0)) ? "MEDIUM" : "LOW";
+                String details = String.format(Locale.US, "Attendance: %.1f%% (%d/%d classes, imported)%s",
+                        cPct, s.getPresent(), s.getConducted(),
+                        cMarkPct != null ? String.format(Locale.US, " | Evaluated Marks: %.1f%%", cMarkPct) : "");
+                subjectRisks.add(RiskEngineExplanationDto.SubjectRiskDto.builder()
+                        .courseCode(c.getCode()).courseName(c.getName())
+                        .attendancePercentage(RiskFormula.round1(cPct))
+                        .marksPercentage(cMarkPct != null ? RiskFormula.round1(cMarkPct) : null)
+                        .riskStatus(status).details(details).build());
+            }
         }
         subjectRisks.sort((a, b) -> a.getCourseCode().compareTo(b.getCourseCode()));
         return subjectRisks;
