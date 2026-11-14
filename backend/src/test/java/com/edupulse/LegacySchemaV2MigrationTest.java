@@ -82,7 +82,7 @@ class LegacySchemaV2MigrationTest {
         try (Statement st = c.createStatement()) {
             for (String t : TABLES) {
                 try (ResultSet rs = st.executeQuery("SELECT count(*) || ':' || md5(coalesce(string_agg(j, '|' ORDER BY j), '')) FROM "
-                        + "(SELECT (to_jsonb(x) - 'data_provenance')::text j FROM " + t + " x) s")) {
+                        + "(SELECT (to_jsonb(x) - 'data_provenance' - 'import_batch_id')::text j FROM " + t + " x) s")) {
                     rs.next();
                     out.put(t, rs.getString(1));
                 }
@@ -134,6 +134,10 @@ class LegacySchemaV2MigrationTest {
                     assertEquals("BASELINE", rs.getString(2));
                     assertTrue(rs.next());
                     assertEquals("2", rs.getString(1));
+                    assertEquals("SQL", rs.getString(2));
+                    assertTrue(rs.getBoolean(3));
+                    assertTrue(rs.next());
+                    assertEquals("3", rs.getString(1));  // V3 academic imports
                     assertEquals("SQL", rs.getString(2));
                     assertTrue(rs.getBoolean(3));
                     assertFalse(rs.next());
