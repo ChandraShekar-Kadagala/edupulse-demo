@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { EmptyState } from '../components/common/StateViews';
-import { buildExport, isEmptyExport, type AcademicExport } from '../features/import/parseReport';
+import { buildExport, isEmptyExport, mergeExports, type AcademicExport } from '../features/import/parseReport';
 import { academicApi, getSafeErrorMessage } from '../services/api';
 import type { ImportPreviewResponse, ImportConfirmResult } from '../types';
 
@@ -59,10 +59,9 @@ export default function ImportMyRecords() {
     }
   };
 
-  const parseOne = async (file: File): Promise<AcademicExport> => {
+  const fileToExport = async (file: File): Promise<AcademicExport> => {
     const content = await file.text();
     if (/\.json$/i.test(file.name) || content.trimStart().startsWith('{')) {
-      // Already-extracted export from the EduPulse Chrome extension.
       const parsed = JSON.parse(content) as Partial<AcademicExport>;
       return {
         sourceType: 'STUDENT_MANUAL_IMPORT',
@@ -75,42 +74,24 @@ export default function ImportMyRecords() {
         profile: parsed.profile ?? {},
       };
     }
-    return buildExport(content, { reportDate: reportDate || null });
+    return buildExport(content, { reportDate: null });
   };
 
-  /** Merge several files (e.g. an attendance export + an internal-marks export) into one import. */
-  const mergeExports = (parts: AcademicExport[]): AcademicExport => {
-    const out: AcademicExport = {
-      sourceType: 'STUDENT_MANUAL_IMPORT', exportedAt: new Date().toISOString(),
-      reportDate: reportDate || null, attendance: [], ledger: [], internals: [], cgpa: null, profile: {},
-    };
-    const seenAtt = new Set<string>(), seenLed = new Set<string>(), seenInt = new Set<string>();
-    for (const p of parts) {
-      p.attendance.forEach((r) => { if (!seenAtt.has(r.subjectCode)) { seenAtt.add(r.subjectCode); out.attendance.push(r); } });
-      p.ledger.forEach((r) => { const k = `${r.subjectCode}|${r.semester}|${r.attempt}`; if (!seenLed.has(k)) { seenLed.add(k); out.ledger.push(r); } });
-      p.internals.forEach((r) => { if (!seenInt.has(r.subjectCode)) { seenInt.add(r.subjectCode); out.internals.push(r); } });
-      if (out.cgpa == null && p.cgpa) out.cgpa = p.cgpa;
-      out.profile = { ...p.profile, ...out.profile };
-    }
-    return out;
-  };
-
-  const handleFiles = async (files: FileList) => {
+  const handleFiles = async (files: File[]) => {
     setError(null);
     setResult(null);
     setSaved(null);
     setServerCheck(null);
-    const list = Array.from(files);
-    if (list.some((f) => f.size > 3 * 1024 * 1024)) {
-      setError('One of those files is larger than 3 MB. Please select your report export files.');
+    if (files.some((f) => f.size > 3 * 1024 * 1024)) {
+      setError('One of those files is larger than 3 MB. Pick a single saved report page or an extension export.');
       return;
     }
     try {
-      const parts = await Promise.all(list.map(parseOne));
-      setFileName(list.map((f) => f.name).join(', '));
-      setResult(mergeExports(parts));
+      const parts = await Promise.all(files.map(fileToExport));
+      setFileName(files.map((f) => f.name).join(', '));
+      setResult(mergeExports(parts, reportDate || null));
     } catch {
-      setError('Could not read those files. Use the saved report page (.html) or the extension export (.json).');
+      setError('Could not read those files. Use saved report pages (.html) or the extension exports (.json).');
     }
   };
 
@@ -141,7 +122,7 @@ export default function ImportMyRecords() {
         <CardContent className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
           <ol className="list-decimal pl-5 space-y-1">
             <li>Log into the SRM AP Student Corner <strong>yourself</strong>, in your own browser, and open your report page.</li>
-            <li>Best: use the EduPulse Chrome extension on each report (attendance, internal marks) and export a .json each. You can select <strong>both files together</strong> below and they are merged. (A saved .html page also works.)</li>
+            <li>Save that page (Ctrl+S), <strong>or</strong> use the EduPulse Chrome extension to export a .json from each report. If your attendance and marks are on separate pages, export both and select both files here together.</li>
             <li>Load the saved file below. It is read on <strong>your device</strong>; your password and the CAPTCHA never reach EduPulse.</li>
           </ol>
           <p className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -163,11 +144,12 @@ export default function ImportMyRecords() {
               className="mt-1 block rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-1.5 text-sm" />
           </label>
           <input ref={fileInput} type="file" multiple accept=".html,.htm,.json,text/html,application/json" className="hidden"
-            onChange={(e) => e.target.files && e.target.files.length > 0 && handleFiles(e.target.files)} />
+            onChange={(e) => e.target.files && e.target.files.length > 0 && handleFiles(Array.from(e.target.files))} />
           <Button onClick={() => fileInput.current?.click()}>
-            <FileUp className="w-4 h-4 mr-2" aria-hidden="true" /> Choose report file(s) — you can pick both
+            <FileUp className="w-4 h-4 mr-2" aria-hidden="true" /> Choose report file(s) (.html or .json)
           </Button>
           {fileName && <p className="text-xs text-gray-500">Loaded: {fileName}</p>}
+          <p className="text-[11px] text-gray-500 dark:text-gray-400">Tip: you can select several files at once (e.g. your attendance file and your marks file) — they are merged into one import.</p>
           {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
         </CardContent>
       </Card>

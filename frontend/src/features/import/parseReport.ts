@@ -294,6 +294,27 @@ export function buildExport(html: string, options: { reportDate?: string | null 
   };
 }
 
+/**
+ * Merge several exports into one — e.g. an attendance file and a separate internal-marks file, since the
+ * portal shows those on different pages. Rows are de-duplicated; the first non-null CGPA wins.
+ */
+export function mergeExports(parts: AcademicExport[], reportDate?: string | null): AcademicExport {
+  function uniqueBy<T>(rows: T[], key: (r: T) => string): T[] {
+    const seen = new Set<string>();
+    return rows.filter((r) => (seen.has(key(r)) ? false : (seen.add(key(r)), true)));
+  }
+  return {
+    sourceType: 'STUDENT_MANUAL_IMPORT',
+    exportedAt: new Date().toISOString(),
+    reportDate: reportDate || parts.find((p) => p.reportDate)?.reportDate || null,
+    attendance: uniqueBy(parts.flatMap((p) => p.attendance), (r) => r.subjectCode),
+    internals: uniqueBy(parts.flatMap((p) => p.internals), (r) => r.subjectCode),
+    ledger: uniqueBy(parts.flatMap((p) => p.ledger), (r) => `${r.subjectCode}|${r.semester}|${r.attempt}`),
+    cgpa: parts.map((p) => p.cgpa).find((c) => c != null) ?? null,
+    profile: Object.assign({}, ...parts.map((p) => p.profile)),
+  };
+}
+
 /** True when nothing academic was found — the UI shows a "couldn't read this page" state instead of a false success. */
 export function isEmptyExport(e: AcademicExport): boolean {
   return e.attendance.length === 0 && e.ledger.length === 0 && e.internals.length === 0

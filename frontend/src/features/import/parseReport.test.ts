@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { buildExport, isEmptyExport, parseAttendance, parseCgpa, parseExamLedger, parseInternals, stripProfile } from './parseReport';
+import { buildExport, isEmptyExport, mergeExports, parseAttendance, parseCgpa, parseExamLedger, parseInternals, stripProfile } from './parseReport';
 
 // All HTML below is synthetic (SYN* codes, placeholder names). No real student or portal data.
 
@@ -159,6 +159,19 @@ describe('buildExport', () => {
     expect(e.cgpa).toBe('8.85');
     expect(e.profile.registerNo).toBe('SYN-0001');
     expect(JSON.stringify(e).toLowerCase()).not.toContain('"live"');
+  });
+
+  it('merges an attendance export and a separate marks export into one', () => {
+    const att = buildExport(ATTENDANCE_HTML);
+    const marks = buildExport(`
+      <table class="table table-striped table-bordered">
+        <tr><th>Subject Code</th><th>Subject Description</th><th>Marks Obtained</th><th>Max.Marks</th></tr>
+        <tr><td>SYN 101</td><td>Synthetic One</td><td>40</td><td>50</td></tr>
+      </table>`);
+    const m = mergeExports([att, marks]);
+    expect(m.attendance).toHaveLength(2);
+    expect(m.internals).toHaveLength(1);
+    expect(m.internals[0].subjectCode).toBe('SYN 101');
   });
 
   it('flags an unreadable page instead of reporting false success', () => {
