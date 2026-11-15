@@ -100,19 +100,19 @@ export default function AccountLinking() {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">University Academic Integration</h1>
-        <p className="mt-1 text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">University Academic Integration</h1>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           EduPulse integrates with institutional academic data pipelines to empower students with attendance, assessment, and risk analytics.
         </p>
       </div>
 
       {/* Primary Integration Card */}
-      <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-        <div className="p-6">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-900 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-200 dark:border-gray-800">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold text-gray-900">SRM AP Academic Portal Integration</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">SRM AP Academic Portal Integration</h2>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   Pipeline Active
                 </span>
@@ -162,9 +162,9 @@ export default function AccountLinking() {
           {/* Technical Details */}
           <div className="py-5">
             <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-              <div className="sm:col-span-1 bg-gray-50 p-3 rounded">
-                <dt className="text-xs font-medium text-gray-500 uppercase">Active Provenance Mode</dt>
-                <dd className="mt-1 text-sm font-semibold text-gray-900">
+              <div className="sm:col-span-1 bg-gray-50 dark:bg-gray-800/50 p-3 rounded">
+                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Active Provenance Mode</dt>
+                <dd className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                   {status?.provenance === 'INSTITUTIONAL_PORTAL_REPORT'
                     ? '📄 Authentic Portal Report Ingestion'
                     : status?.provenance === 'INSTITUTIONAL_PORTAL_FIXTURE'
@@ -172,15 +172,15 @@ export default function AccountLinking() {
                     : status?.provenance || 'N/A'}
                 </dd>
               </div>
-              <div className="sm:col-span-1 bg-gray-50 p-3 rounded">
-                <dt className="text-xs font-medium text-gray-500 uppercase">Last Synchronized</dt>
-                <dd className="mt-1 text-sm font-semibold text-gray-900">
+              <div className="sm:col-span-1 bg-gray-50 dark:bg-gray-800/50 p-3 rounded">
+                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Synchronized</dt>
+                <dd className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                   {status?.lastSync && status.lastSync !== 'N/A' ? new Date(status.lastSync).toLocaleString() : 'Never'}
                 </dd>
               </div>
-              <div className="sm:col-span-2 bg-gray-50 p-3 rounded">
-                <dt className="text-xs font-medium text-gray-500 uppercase">System Status & Transparency</dt>
-                <dd className="mt-1 text-xs text-gray-700">
+              <div className="sm:col-span-2 bg-gray-50 dark:bg-gray-800/50 p-3 rounded">
+                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">System Status & Transparency</dt>
+                <dd className="mt-1 text-xs text-gray-700 dark:text-gray-300">
                   {status?.message || 'Academic portal integration is configured via verified HTML DOM parsers.'}
                 </dd>
               </div>

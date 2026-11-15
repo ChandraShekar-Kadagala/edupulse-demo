@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML Tables &amp; Forms</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0B1220;--cyan:#43C7F4;--cyanD:#0A7AA6;--cyanL:#E9F8FE;--slate:#566273;--slateL:#94A3B8;--line:#DDE3EA;--soft:#F5F7FA;--green:#2E7D4F;--greenL:#EAF5EE;--amber:#9A6210;--amberL:#FBF3E3;--red:#B23A34;--redL:#FBECEB}
+html,body{background:#fff}
+body{font-family:"Segoe UI",Inter,Arial,sans-serif;color:var(--navy);font-size:8.2pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@media screen{body{background:#CBD2DA}.page{margin:8mm auto;box-shadow:0 2px 12px rgba(0,0,0,.2)}}
+.page{width:210mm;height:297mm;padding:10mm 12mm 13mm;position:relative;overflow:hidden;break-after:page;page-break-after:always;background:#fff;display:flex;flex-direction:column}
+.page:last-child{break-after:auto;page-break-after:auto}
+.pc{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.pf{position:absolute;left:12mm;right:12mm;bottom:6mm;display:flex;justify-content:space-between;font-size:6.6pt;color:var(--slate);border-top:.6px solid var(--line);padding-top:1.4mm}
+.pf .pn{font-family:Consolas,monospace;font-weight:700;color:var(--navy)}
+.pf .pn b{color:var(--cyanD)}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:4mm;border-bottom:1.3px solid var(--navy);padding-bottom:2mm;margin-bottom:3mm}
+.ph .sec{font:700 6.8pt/1 Consolas,monospace;letter-spacing:.16em;color:var(--cyanD);display:flex;align-items:center;gap:1.6mm}
+.ph .sec i{display:inline-block;width:5mm;height:1.3mm;background:var(--cyan);border-radius:1px}
+.ph h1{font-size:17pt;font-weight:700;letter-spacing:-.01em;line-height:1.1;margin-top:1.2mm}
+.chips{display:flex;flex-wrap:wrap;gap:1mm;justify-content:flex-end;max-width:78mm}
+.chips span{font:600 6.6pt/1.3 Consolas,monospace;border:1px solid var(--line);border-radius:3px;padding:.3mm 1.2mm;background:var(--soft);white-space:nowrap}
+h2{font-size:9.6pt;font-weight:700;margin-bottom:1.2mm;display:flex;align-items:center;gap:1.6mm}
+h2 .n{font:700 6.6pt Consolas,monospace;color:#fff;background:var(--navy);border-radius:2px;padding:.2mm 1.1mm}
+h3{font:700 6.6pt/1.2 Consolas,monospace;letter-spacing:.12em;color:var(--slate);margin-bottom:1mm;text-transform:uppercase}
+p{margin-bottom:1.4mm}
+code,.mono{font-family:Consolas,"Cascadia Code",monospace}
+code{font-size:7.6pt;color:#08597A;background:#EEF6FA;border-radius:2px;padding:0 .6mm;white-space:nowrap}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:3.4mm}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3mm}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:2.6mm}
+.mt{margin-top:2.6mm}.mt1{margin-top:1.4mm}
+.card{border:1px solid var(--line);border-radius:5px;padding:2.4mm 2.8mm;background:#fff}
+.card.soft{background:var(--soft)}
+.card.nav{background:var(--navy);color:#fff;border-color:var(--navy)}
+.card.nav code{background:#1C2A40;color:#9FE3FA}
+.note{border-left:2.4px solid var(--cyan);background:var(--cyanL);padding:1.6mm 2.4mm;border-radius:0 4px 4px 0;font-size:7.6pt}
+.warn{border-left:2.4px solid var(--amber);background:var(--amberL);padding:1.6mm 2.4mm;border-radius:0 4px 4px 0;font-size:7.6pt}
+.bad{border-left:2.4px solid var(--red);background:var(--redL);padding:1.6mm 2.4mm;border-radius:0 4px 4px 0;font-size:7.6pt}
+.good{border-left:2.4px solid var(--green);background:var(--greenL);padding:1.6mm 2.4mm;border-radius:0 4px 4px 0;font-size:7.6pt}
+.bd{display:inline-block;font:700 5.8pt/1.35 Consolas,monospace;letter-spacing:.1em;border-radius:2px;padding:0 1.1mm;vertical-align:1px;margin-right:1mm}
+.bd.src{background:var(--navy);color:var(--cyan)}
+.bd.pro{background:var(--cyan);color:var(--navy)}
+.bd.x{background:var(--red);color:#fff}.bd.ok{background:var(--green);color:#fff}.bd.w{background:var(--amber);color:#fff}
+.srcdef{font-size:7.8pt;border:1px solid var(--navy);border-radius:4px;padding:1.4mm 2.2mm;margin-bottom:1.6mm}
+ul.tight{padding-left:3.6mm}ul.tight li{margin-bottom:.5mm}
+/* code + output */
+pre.code{font:7pt/1.36 Consolas,"Cascadia Code",monospace;background:#F4F7FA;border:1px solid var(--line);border-left:2.4px solid var(--navy);border-radius:4px;padding:1.8mm 2.2mm;white-space:pre;overflow:hidden;color:#24303F}
+pre.code.sm{font-size:6.55pt;line-height:1.32}
+pre .t{color:#0A6E96;font-weight:600}pre .a{color:#8A4B08}pre .v{color:#2E7D4F}pre .c{color:#8792A2;font-style:italic}
+textarea.src{display:none}
+.co{display:grid;grid-template-columns:1.12fr 1fr;gap:2.6mm;align-items:stretch}
+.lbl{font:700 5.9pt/1 Consolas,monospace;letter-spacing:.14em;color:var(--slate);margin-bottom:1mm}
+.expl{font-size:7.5pt;color:#2A3646;margin-top:1.2mm}
+.browser{border:1px solid #9AA6B5;border-radius:5px;overflow:hidden;background:#fff}
+.browser .bar{height:4.4mm;background:var(--soft);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:1mm;padding:0 1.6mm}
+.browser .bar i{width:1.5mm;height:1.5mm;border-radius:50%;background:#C9D1DB;display:block}
+.browser .bar span{margin-left:1.4mm;font:6pt Consolas,monospace;color:var(--slate);background:#fff;border:1px solid var(--line);border-radius:6px;padding:0 2mm;flex:1}
+.view{padding:2.4mm 2.8mm;font-size:7.8pt}
+.view .f{margin-bottom:1.6mm}
+.view .f>label,.view .lb{display:block;font-weight:600;margin-bottom:.5mm}
+.view input[type=text],.view input[type=email],.view input[type=number],.view input[type=tel],.view input[type=date]{font:inherit;font-size:7.6pt;border:1px solid #94A3B8;border-radius:3px;padding:.5mm 1.6mm;height:5.6mm;width:100%;background:#fff;color:var(--navy)}
+.view input[disabled]{background:#EEF1F4;color:#98A2AE;border-color:#CBD2DA}
+.view input[readonly]{background:#F7F9FB}
+.view input.sim-focus{outline:2.4px solid var(--cyan);outline-offset:1.5px;border-color:var(--navy)}
+.view input[type=radio],.view input[type=checkbox]{width:3mm;height:3mm;vertical-align:-.6mm;margin-right:1mm;accent-color:#0B1220}
+.view .opt{display:inline-block;margin-right:3mm;font-weight:400}
+.view button,.view input[type=button]{font:inherit;font-size:7.4pt;padding:.8mm 3mm;border-radius:3px;border:1px solid var(--navy);background:var(--navy);color:#fff;margin-right:1.4mm}
+.view button.ghost,.view input[type=button]{background:#fff;color:var(--navy)}
+.view fieldset{border:1px solid #94A3B8;border-radius:4px;padding:1mm 2.2mm 1.6mm;margin-bottom:1.6mm}
+.view legend{font-weight:700;padding:0 1mm;font-size:7.6pt}
+.view table{border-collapse:collapse;width:100%;font-size:7.4pt}
+.view caption{font-weight:700;text-align:left;padding-bottom:1mm;font-size:7.8pt}
+.view th,.view td{border:1px solid #B8C2CE;padding:.6mm 1.4mm;text-align:left}
+.view thead th{background:var(--navy);color:#fff}
+.view tfoot td{background:var(--cyanL);font-weight:700}
+.view tbody tr:nth-child(even) td{background:var(--soft)}
+/* reference tables */
+table.ref{border-collapse:collapse;width:100%;font-size:7.3pt}
+table.ref th{background:var(--navy);color:#fff;text-align:left;font:700 6.2pt Consolas,monospace;letter-spacing:.08em;padding:1mm 1.4mm;text-transform:uppercase}
+table.ref td{border-bottom:1px solid var(--line);padding:.75mm 1.4mm;vertical-align:top}
+table.ref tr:nth-child(even) td{background:#FAFBFC}
+table.ref td:first-child{font-family:Consolas,monospace;font-weight:700;color:#08597A;white-space:nowrap}
+table.ref.tiny{font-size:6.9pt}table.ref.fx{table-layout:fixed}table.ref.fx code{white-space:normal;word-break:break-word}table.ref.fx td:first-child{white-space:normal}table.ref.tiny td{padding:.55mm 1.2mm}
+/* memory strip */
+.mem{display:grid;grid-template-columns:1.15fr 1fr 1fr 1.15fr;border:1px solid var(--navy);border-radius:5px;overflow:hidden;margin-top:auto;flex-shrink:0}
+.mem>div{padding:1.7mm 2.4mm;font-size:7.2pt;line-height:1.35;border-left:1px solid var(--line)}
+.mem>div:first-child{border-left:0}
+.mem b{display:inline;font:inherit;font-weight:700}.mem>div>b:first-child{display:block;font:700 5.9pt/1.2 Consolas,monospace;letter-spacing:.13em;margin-bottom:.6mm}
+.mem .r{background:var(--navy);color:#fff}.mem .r b{color:var(--cyan)}
+.mem .e b{color:var(--green)}.mem .m b{color:var(--red)}.mem .q b{color:var(--cyanD)}
+.spacer{flex:1;min-height:2mm}
+/* flows */
+.flow{display:flex;align-items:stretch;gap:0}
+.flow>div{flex:1;border:1px solid var(--line);border-radius:4px;padding:1.3mm 1.6mm;font-size:7pt;background:#fff;position:relative}
+.flow>div b{display:block;font-size:7.4pt}
+.flow>span{display:flex;align-items:center;color:var(--cyanD);font-weight:700;padding:0 .8mm;font-size:9pt}
+/* svg */
+svg{display:block;width:100%;height:auto}
+svg text{white-space:pre;font-family:"Segoe UI",Inter,Arial,sans-serif;fill:#0B1220}
+svg .m,svg .m text,svg .m tspan{font-family:Consolas,"Cascadia Code",monospace}
+.fig{font-size:6.6pt;color:var(--slate);margin-top:.8mm}
+.fig b{color:var(--navy);font-family:Consolas,monospace;letter-spacing:.06em}
+/* cover */
+.cover .kick{font:700 7pt Consolas,monospace;letter-spacing:.2em;color:var(--cyanD)}
+.cover h1{font-size:40pt;line-height:1;letter-spacing:-.025em;margin:2mm 0 2mm}
+.cover h1 span{color:var(--cyan)}
+.cover .sub{font-size:11.5pt;color:var(--slate);max-width:150mm}
+.road{display:grid;grid-template-columns:repeat(4,1fr);gap:1.6mm}
+.road div{border:1px solid var(--line);border-radius:4px;padding:1.2mm 1.8mm;font-size:7.2pt;display:flex;gap:1.6mm;align-items:baseline}
+.road div b{font:700 7pt Consolas,monospace;color:var(--cyanD)}
+.chain{display:flex;flex-wrap:wrap;gap:1mm;align-items:center;font:600 6.8pt Consolas,monospace}
+.chain span{background:var(--navy);color:#fff;border-radius:3px;padding:.5mm 1.6mm}
+.chain i{color:var(--cyanD);font-style:normal}
+.qa{columns:2;column-gap:4.4mm;font-size:7.75pt;line-height:1.4}
+.qa .q{break-inside:avoid;margin-bottom:2.1mm;border-bottom:1px dashed var(--line);padding-bottom:1.7mm}
+.qa .q>b{display:block;font-size:7.9pt}
+.qa .q b em{font:700 5.8pt Consolas,monospace;font-style:normal;letter-spacing:.1em;color:#fff;background:var(--cyanD);border-radius:2px;padding:0 1mm;margin-right:1mm;vertical-align:1px}
+.cmp{border:1px solid var(--line);border-radius:5px;overflow:hidden;font-size:7pt}
+.cmp .h{background:var(--navy);color:#fff;font:700 6.6pt Consolas,monospace;padding:1mm 2mm;letter-spacing:.05em}
+.cmp .b{display:grid;grid-template-columns:1fr 1fr}
+.cmp .b.three{grid-template-columns:1fr 1fr 1fr}
+.cmp .b>div{padding:1.2mm 1.8mm;border-left:1px solid var(--line);line-height:1.32}
+.cmp .b>div:first-child{border-left:0}
+.cmp .b>div>b{display:block;font-family:Consolas,monospace;color:#08597A;font-size:7pt}
+.rev{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2mm}
+.rev div{border:1px solid var(--line);border-radius:4px;padding:1.5mm 2.2mm;font-size:7.5pt;line-height:1.38}
+.rev div b{display:block;font:700 6.6pt Consolas,monospace;color:var(--cyanD);letter-spacing:.06em;margin-bottom:.4mm}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1.6mm}
+.stats div{background:var(--navy);color:#fff;border-radius:4px;padding:1.6mm 2mm;font-size:6.6pt}
+.stats div b{display:block;font-size:14pt;color:var(--cyan);line-height:1.1}
+</style>
+</head>
+<body>
+
+<!-- ============================ PAGE 1 : COVER ============================ -->
+<section class="page cover">
+<div class="pc">
+  <div class="kick">VISUAL DEVELOPER HANDBOOK · RESPONSIVE WEB DESIGN · HTML5</div>
+  <h1>HTML Tables <span>&amp;</span> Forms</h1>
+  <p class="sub">From HTML Fundamentals to Real-World Form Engineering and Data Tables.</p>
+
+  <div class="mt">
+  <svg viewBox="0 0 920 430" role="img" aria-label="Relationship between HTML structure, user input, submitted data and displayed table">
+    <defs>
+      <marker id="c-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#0A7AA6"/></marker>
+      <pattern id="c-dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="#DDE3EA"/></pattern>
+    </defs>
+    <rect x="0" y="0" width="920" height="430" rx="14" fill="url(#c-dots)"/>
+    <!-- A code -->
+    <g transform="translate(16,24)">
+      <rect width="190" height="300" rx="10" fill="#0B1220"/>
+      <circle cx="16" cy="16" r="4" fill="#E06C64"/><circle cx="30" cy="16" r="4" fill="#E5B454"/><circle cx="44" cy="16" r="4" fill="#5DBB7E"/>
+      <text x="178" y="20" text-anchor="end" class="m" font-size="10" fill="#94A3B8" style="fill:#94A3B8">booking.html</text>
+      <g class="m" font-size="11.5">
+        <text x="14" y="52" style="fill:#43C7F4">&lt;form <tspan style="fill:#F2C57C">action</tspan><tspan style="fill:#E2E8F0">=</tspan><tspan style="fill:#9BE3B8">"/book"</tspan>&gt;</text>
+        <text x="14" y="74" style="fill:#43C7F4">  &lt;label&gt;<tspan style="fill:#E2E8F0">Name</tspan>&lt;/label&gt;</text>
+        <text x="14" y="96" style="fill:#43C7F4">  &lt;input <tspan style="fill:#F2C57C">name</tspan><tspan style="fill:#E2E8F0">=</tspan><tspan style="fill:#9BE3B8">"guest"</tspan>&gt;</text>
+        <text x="14" y="118" style="fill:#43C7F4">  &lt;input <tspan style="fill:#F2C57C">type</tspan><tspan style="fill:#E2E8F0">=</tspan><tspan style="fill:#9BE3B8">"radio"</tspan></text>
+        <text x="14" y="140" style="fill:#F2C57C">    name<tspan style="fill:#E2E8F0">=</tspan><tspan style="fill:#9BE3B8">"room"</tspan><tspan style="fill:#43C7F4">&gt;</tspan></text>
+        <text x="14" y="162" style="fill:#43C7F4">  &lt;button&gt;<tspan style="fill:#E2E8F0">Book</tspan>&lt;/button&gt;</text>
+        <text x="14" y="184" style="fill:#43C7F4">&lt;/form&gt;</text>
+        <text x="14" y="216" style="fill:#43C7F4">&lt;table&gt;</text>
+        <text x="14" y="238" style="fill:#43C7F4">  &lt;tr&gt;&lt;th&gt;<tspan style="fill:#E2E8F0">Guest</tspan>&lt;/th&gt;</text>
+        <text x="14" y="260" style="fill:#43C7F4">  &lt;tr&gt;&lt;td&gt;<tspan style="fill:#E2E8F0">Asha</tspan>&lt;/td&gt;</text>
+        <text x="14" y="282" style="fill:#43C7F4">&lt;/table&gt;</text>
+      </g>
+    </g>
+    <!-- B browser form -->
+    <g transform="translate(228,24)">
+      <rect width="236" height="300" rx="10" fill="#fff" stroke="#0B1220" stroke-width="1.5"/>
+      <path d="M0 26 H236" stroke="#DDE3EA"/>
+      <circle cx="14" cy="13" r="3.5" fill="#C9D1DB"/><circle cx="26" cy="13" r="3.5" fill="#C9D1DB"/><circle cx="38" cy="13" r="3.5" fill="#C9D1DB"/>
+      <rect x="52" y="6" width="170" height="14" rx="7" fill="#F5F7FA" stroke="#DDE3EA"/>
+      <text x="60" y="17" class="m" font-size="9.5" style="fill:#566273">localhost/booking</text>
+      <text x="18" y="56" font-size="15" font-weight="700">Book a room</text>
+      <text x="18" y="80" font-size="11" font-weight="600">Full name</text>
+      <rect x="15" y="85" width="206" height="28" rx="6" fill="none" stroke="#43C7F4" stroke-width="3"/>
+      <rect x="18" y="88" width="200" height="22" rx="4" fill="#fff" stroke="#0B1220"/>
+      <text x="26" y="103" font-size="11">Asha Rao</text><path d="M75 93 V106" stroke="#0B1220" stroke-width="1.4"/>
+      <text x="18" y="134" font-size="11" font-weight="600">Room</text>
+      <circle cx="25" cy="150" r="6" fill="#fff" stroke="#566273" stroke-width="1.4"/><text x="36" y="154" font-size="11">Standard</text>
+      <circle cx="113" cy="150" r="6" fill="#fff" stroke="#0B1220" stroke-width="1.4"/><circle cx="113" cy="150" r="3" fill="#0B1220"/><text x="124" y="154" font-size="11">Deluxe</text>
+      <text x="18" y="180" font-size="11" font-weight="600">Extras</text>
+      <rect x="19" y="188" width="12" height="12" rx="2" fill="#0B1220"/><path d="M22 194 l3 3 l5 -6" stroke="#fff" stroke-width="1.8" fill="none"/>
+      <text x="37" y="198" font-size="11">Breakfast</text>
+      <rect x="18" y="226" width="104" height="30" rx="6" fill="#0B1220"/><text x="70" y="245" text-anchor="middle" font-size="11.5" font-weight="600" style="fill:#fff">Book room</text>
+      <rect x="132" y="226" width="86" height="30" rx="6" fill="#fff" stroke="#0B1220"/><text x="175" y="245" text-anchor="middle" font-size="11.5">Reset</text>
+      <text x="18" y="284" font-size="9.5" style="fill:#566273">&lt;form&gt; rendered by the browser</text>
+    </g>
+    <!-- arrow B->C -->
+    <path d="M470 160 H524" stroke="#0A7AA6" stroke-width="2" marker-end="url(#c-ar)"/>
+    <text x="497" y="150" text-anchor="middle" class="m" font-size="9.5" style="fill:#0A7AA6">HTTP</text>
+    <!-- C server -->
+    <g transform="translate(530,100)">
+      <rect width="112" height="120" rx="10" fill="#fff" stroke="#566273" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <rect x="30" y="14" width="52" height="10" rx="2" fill="#0B1220"/><rect x="30" y="28" width="52" height="10" rx="2" fill="#0B1220"/><rect x="30" y="42" width="52" height="10" rx="2" fill="#0B1220"/>
+      <circle cx="74" cy="19" r="2" fill="#43C7F4"/><circle cx="74" cy="33" r="2" fill="#43C7F4"/><circle cx="74" cy="47" r="2" fill="#43C7F4"/>
+      <text x="56" y="72" text-anchor="middle" font-size="12" font-weight="700">Server</text>
+      <text x="56" y="88" text-anchor="middle" class="m" font-size="10.5">/book</text>
+      <text x="56" y="104" text-anchor="middle" font-size="9.5" style="fill:#566273">validates · stores</text>
+    </g>
+    <text x="586" y="238" text-anchor="middle" font-size="9.5" style="fill:#566273">backend — outside HTML</text>
+    <text x="586" y="84" text-anchor="middle" class="m" font-size="9.5" style="fill:#0A7AA6">guest=Asha+Rao</text>
+    <path d="M648 160 H684" stroke="#0A7AA6" stroke-width="2" marker-end="url(#c-ar)"/>
+    <!-- D table -->
+    <g transform="translate(690,24)">
+      <rect width="214" height="300" rx="10" fill="#fff" stroke="#0B1220" stroke-width="1.5"/>
+      <path d="M0 26 H214" stroke="#DDE3EA"/>
+      <circle cx="14" cy="13" r="3.5" fill="#C9D1DB"/><circle cx="26" cy="13" r="3.5" fill="#C9D1DB"/><circle cx="38" cy="13" r="3.5" fill="#C9D1DB"/>
+      <rect x="52" y="6" width="148" height="14" rx="7" fill="#F5F7FA" stroke="#DDE3EA"/>
+      <text x="60" y="17" class="m" font-size="9.5" style="fill:#566273">localhost/bookings</text>
+      <text x="14" y="56" font-size="12.5" font-weight="700">Guest bookings</text>
+      <rect x="14" y="68" width="186" height="24" fill="#0B1220"/>
+      <text x="20" y="84" font-size="10.5" font-weight="700" style="fill:#fff">Guest</text><text x="80" y="84" font-size="10.5" font-weight="700" style="fill:#fff">Room</text><text x="140" y="84" font-size="10.5" font-weight="700" style="fill:#fff">Status</text>
+      <rect x="14" y="92" width="186" height="24" fill="#fff" stroke="#DDE3EA"/><rect x="14" y="116" width="186" height="24" fill="#F5F7FA" stroke="#DDE3EA"/><rect x="14" y="140" width="186" height="24" fill="#fff" stroke="#DDE3EA"/>
+      <text x="20" y="108" font-size="10.5">Asha</text><text x="80" y="108" font-size="10.5">Deluxe</text><text x="140" y="108" font-size="10" style="fill:#2E7D4F">Confirmed</text>
+      <text x="20" y="132" font-size="10.5">Ravi</text><text x="80" y="132" font-size="10.5">Suite</text><text x="140" y="132" font-size="10" style="fill:#9A6210">Pending</text>
+      <text x="20" y="156" font-size="10.5">Mei</text><text x="80" y="156" font-size="10.5">Standard</text><text x="140" y="156" font-size="10" style="fill:#2E7D4F">Confirmed</text>
+      <rect x="14" y="164" width="186" height="24" fill="#E9F8FE" stroke="#0A7AA6"/>
+      <text x="20" y="180" font-size="10.5" font-weight="700">3 bookings (colspan)</text>
+      <text x="14" y="284" font-size="9.5" style="fill:#566273">&lt;table&gt; rendered by the browser</text>
+    </g>
+    <!-- step chips -->
+    <g font-size="10.5">
+      <g transform="translate(16,346)"><circle cx="12" cy="12" r="12" fill="#43C7F4"/><text x="12" y="16" text-anchor="middle" font-weight="700" class="m">01</text><text x="32" y="11" font-size="12" font-weight="700">STRUCTURE</text><text x="32" y="28" style="fill:#566273">HTML tags define the</text><text x="32" y="42" style="fill:#566273">form and the table</text></g>
+      <g transform="translate(250,346)"><circle cx="12" cy="12" r="12" fill="#43C7F4"/><text x="12" y="16" text-anchor="middle" font-weight="700" class="m">02</text><text x="32" y="11" font-size="12" font-weight="700">USER INPUT</text><text x="32" y="28" style="fill:#566273">People type, pick and</text><text x="32" y="42" style="fill:#566273">check the controls</text></g>
+      <g transform="translate(478,346)"><circle cx="12" cy="12" r="12" fill="#43C7F4"/><text x="12" y="16" text-anchor="middle" font-weight="700" class="m">03</text><text x="32" y="11" font-size="12" font-weight="700">SUBMITTED DATA</text><text x="32" y="28" style="fill:#566273">Browser sends name=value</text><text x="32" y="42" style="fill:#566273">pairs to the action URL</text></g>
+      <g transform="translate(710,346)"><circle cx="12" cy="12" r="12" fill="#43C7F4"/><text x="12" y="16" text-anchor="middle" font-weight="700" class="m">04</text><text x="32" y="11" font-size="12" font-weight="700">DISPLAYED INFO</text><text x="32" y="28" style="fill:#566273">Stored data comes back</text><text x="32" y="42" style="fill:#566273">as rows in a table</text></g>
+      <path d="M200 358 H240" stroke="#0A7AA6" stroke-width="1.5" marker-end="url(#c-ar)"/>
+      <path d="M430 358 H468" stroke="#0A7AA6" stroke-width="1.5" marker-end="url(#c-ar)"/>
+      <path d="M660 358 H700" stroke="#0A7AA6" stroke-width="1.5" marker-end="url(#c-ar)"/>
+    </g>
+  </svg>
+  </div>
+
+  <div class="g2 mt">
+    <div>
+      <h2>Why this handbook exists</h2>
+      <p>Almost every real website is two things: a way to <b>collect</b> information (forms) and a way to <b>show</b> information (tables). A hotel takes a booking through a form and lists bookings in a table. A university collects admissions through a form and publishes results in a table.</p>
+      <p>This guide teaches each element the way a senior developer would explain it at your desk: <b>why</b> it exists, <b>how</b> the browser treats it, <b>when</b> to reach for it, and the <b>mistake</b> everybody makes first.</p>
+    </div>
+    <div>
+      <h2>One connected story</h2>
+      <ul class="tight">
+        <li><b>Hotel booking website</b> — form basics, buttons, the final project.</li>
+        <li><b>University admission form</b> — labels and validation attributes.</li>
+        <li><b>Student registration portal</b> — inputs, <code>name</code>, <code>id</code>.</li>
+        <li><b>Feedback form</b> — keyboard focus and tab order.</li>
+        <li><b>Academic results dashboard</b> — tables, groups, <code>colspan</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="mt">Learning roadmap</h3>
+  <div class="road">
+    <div><b>02</b>Forms, action, method, GET/POST</div>
+    <div><b>03</b>Input types &amp; 12 attributes</div>
+    <div><b>04</b>Labels: implicit &amp; explicit</div>
+    <div><b>05</b>Buttons, fieldset, legend</div>
+    <div><b>06</b>Focus state &amp; keyboard use</div>
+    <div><b>07</b>Table fundamentals</div>
+    <div><b>08</b>Table groups, caption, colspan</div>
+    <div><b>09</b>Integrated hotel project</div>
+    <div><b>10</b>Validator, DOM inspector, DevTools</div>
+    <div><b>11</b>Developer reference</div>
+    <div><b>12</b>20 interview questions</div>
+    <div><b>13</b>Mind map &amp; revision sheet</div>
+  </div>
+
+  <div class="g2 mt" style="align-items:center">
+    <div>
+      <h3>How every topic is taught</h3>
+      <div class="chain"><span>CONCEPT</span><i>→</i><span>ANALOGY</span><i>→</i><span>VISUAL</span><i>→</i><span>CODE</span><i>→</i><span>OUTPUT</span><i>→</i><span>USAGE</span><i>→</i><span>MISTAKE</span><i>→</i><span>INTERVIEW</span></div>
+    </div>
+    <div style="font-size:7.4pt">
+      <h3>Reading the badges</h3>
+      <span class="bd src">SOURCE</span> freeCodeCamp review definition &nbsp; <span class="bd pro">PRO NOTE</span> supplementary professional knowledge<br>
+      <span class="bd x">WRONG</span> common mistake &nbsp; <span class="bd ok">RIGHT</span> correct pattern &nbsp; Every page ends with a <b>memory strip</b>.
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <h3>By the last page you will be able to</h3>
+  <div class="g3" style="gap:2mm">
+    <div class="card soft"><b>Build forms</b> that send exactly the data you intend — correct <code>action</code>, <code>method</code> and <code>name</code> on every control.</div>
+    <div class="card soft"><b>Connect labels</b> implicitly or explicitly, and explain why it matters to screen-reader and keyboard users.</div>
+    <div class="card soft"><b>Configure inputs</b> with types and constraint attributes — and know why the server must still validate.</div>
+    <div class="card soft"><b>Structure data tables</b> with caption, thead, tbody, tfoot, header cells and <code>colspan</code>.</div>
+    <div class="card soft"><b>Inspect the DOM</b> and explain why it can differ from your source file.</div>
+    <div class="card soft"><b>Debug</b> markup with the validator and DevTools — Elements, Styles, Console and Network.</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Visual Master Guide</span><span class="pn"><b>01</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 2 : FORMS FOUNDATION ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>02 · HTML FORMS</div><h1>The Complete Foundation</h1></div><div class="chips"><span>&lt;form&gt;</span><span>action</span><span>method</span><span>GET</span><span>POST</span></div></header>
+<div class="pc">
+  <div class="g2" style="grid-template-columns:1fr 1.05fr">
+    <div>
+      <div class="srcdef"><span class="bd src">SOURCE</span>The <code>form</code> element creates an HTML form for user input. <code>action</code> is the URL where the form data is sent; <code>method</code> is the HTTP method used to send it — most commonly <code>GET</code> or <code>POST</code>.</div>
+      <h2>What a form really is</h2>
+      <p>A form is a <b>container that collects values from controls and packages them for delivery</b>. On its own it shows nothing; it gives every <code>input</code>, <code>button</code> and <code>label</code> inside it a shared purpose: “these values travel together to one address”.</p>
+      <div class="card soft">
+        <h3>Analogy · the hotel registration card</h3>
+        <table class="ref tiny" style="background:#fff">
+          <tr><td>Paper card</td><td><code>&lt;form&gt;</code> — the container</td></tr>
+          <tr><td>Blank boxes</td><td><code>&lt;input&gt;</code> — where guests write</td></tr>
+          <tr><td>Printed captions</td><td><code>&lt;label&gt;</code> — “Full name”, “Email”</td></tr>
+          <tr><td>Reception desk</td><td><code>action</code> — where the card goes</td></tr>
+          <tr><td>Postcard / envelope</td><td><code>method</code> — <b>GET</b> writes data on the outside (URL); <b>POST</b> puts it inside (request body)</td></tr>
+        </table>
+      </div>
+      <p class="mt1" style="font-size:7.6pt">Forms exist because HTTP needs structured data. Without a form you would have to build the request by hand; with one, the browser does the encoding, validation and sending for you.</p>
+    </div>
+    <div>
+      <svg viewBox="0 0 470 330" role="img" aria-label="Form anatomy diagram of a hotel booking form">
+        <rect x="6" y="20" width="300" height="304" rx="8" fill="#fff" stroke="#0A7AA6" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="12" y="13" class="m" font-size="10.5" style="fill:#0A7AA6">&lt;form action="/book" method="post"&gt;</text>
+        <rect x="20" y="42" width="272" height="168" rx="6" fill="#F5F7FA" stroke="#94A3B8"/>
+        <rect x="30" y="35" width="94" height="14" fill="#fff"/>
+        <text x="36" y="46" font-size="11" font-weight="700">Guest details</text>
+        <text x="34" y="70" font-size="10.5" font-weight="600">Full name</text>
+        <rect x="34" y="76" width="244" height="22" rx="4" fill="#fff" stroke="#94A3B8"/>
+        <text x="42" y="91" font-size="10.5" font-style="italic" style="fill:#94A3B8">e.g. Asha Rao</text>
+        <text x="34" y="118" font-size="10.5" font-weight="600">Email</text>
+        <rect x="34" y="124" width="244" height="22" rx="4" fill="#fff" stroke="#94A3B8"/>
+        <text x="42" y="139" font-size="10.5">asha@mail.com</text>
+        <text x="34" y="166" font-size="10.5" font-weight="600">Guests</text>
+        <rect x="34" y="172" width="80" height="22" rx="4" fill="#fff" stroke="#94A3B8"/>
+        <text x="42" y="187" font-size="10.5">2</text>
+        <path d="M102 178 l4 -4 l4 4z M102 188 l4 4 l4 -4z" fill="#566273"/>
+        <text x="22" y="236" font-size="10.5" font-weight="700">Room:</text>
+        <circle cx="70" cy="232" r="6" fill="#fff" stroke="#566273" stroke-width="1.3"/><text x="81" y="236" font-size="10.5">Standard</text>
+        <circle cx="150" cy="232" r="6" fill="#fff" stroke="#0B1220" stroke-width="1.3"/><circle cx="150" cy="232" r="3" fill="#0B1220"/><text x="161" y="236" font-size="10.5">Deluxe</text>
+        <rect x="22" y="258" width="110" height="28" rx="5" fill="#0B1220"/><text x="77" y="276" text-anchor="middle" font-size="11" font-weight="600" style="fill:#fff">Book room</text>
+        <rect x="142" y="258" width="80" height="28" rx="5" fill="#fff" stroke="#0B1220"/><text x="182" y="276" text-anchor="middle" font-size="11">Reset</text>
+        <text x="22" y="312" font-size="9.5" style="fill:#566273">Only named controls inside the form are sent.</text>
+        <g class="m" font-size="10.5">
+          <path d="M306 24 H316" stroke="#0A7AA6"/><circle cx="306" cy="24" r="2.5" fill="#0A7AA6"/><text x="320" y="28">&lt;form&gt;</text>
+          <path d="M124 42 C200 40, 260 46, 316 48" stroke="#0A7AA6" fill="none"/><circle cx="124" cy="42" r="2.5" fill="#0A7AA6"/><text x="320" y="52">&lt;legend&gt;</text>
+          <path d="M292 70 H316" stroke="#0A7AA6"/><circle cx="292" cy="70" r="2.5" fill="#0A7AA6"/><text x="320" y="74">&lt;fieldset&gt;</text>
+          <path d="M66 110 H316" stroke="#0A7AA6" stroke-dasharray="2 2"/><circle cx="66" cy="110" r="2.5" fill="#0A7AA6"/><text x="320" y="114">&lt;label&gt;</text>
+          <path d="M278 135 H316" stroke="#0A7AA6"/><circle cx="278" cy="135" r="2.5" fill="#0A7AA6"/><text x="320" y="139">&lt;input type="email"&gt;</text>
+          <path d="M114 183 H316" stroke="#0A7AA6" stroke-dasharray="2 2"/><circle cx="114" cy="183" r="2.5" fill="#0A7AA6"/><text x="320" y="187">&lt;input type="number"&gt;</text>
+          <path d="M206 232 H316" stroke="#0A7AA6" stroke-dasharray="2 2"/><circle cx="206" cy="232" r="2.5" fill="#0A7AA6"/><text x="320" y="236">&lt;input type="radio"&gt;</text>
+          <path d="M222 272 H316" stroke="#0A7AA6"/><circle cx="222" cy="272" r="2.5" fill="#0A7AA6"/><text x="320" y="268">&lt;button&gt; ×2</text><text x="320" y="282" font-size="9.5" style="fill:#566273">submit + reset</text>
+        </g>
+      </svg>
+      <div class="fig"><b>FIG 1</b> Form anatomy — a hotel booking wireframe with every part named.</div>
+    </div>
+  </div>
+
+  <div class="mt">
+  <svg viewBox="0 0 920 214" role="img" aria-label="Form submission data flow from browser to server">
+    <defs><marker id="f-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#0B1220"/></marker>
+    <marker id="f-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#B23A34"/></marker></defs>
+    <rect x="0" y="0" width="584" height="214" rx="10" fill="#E9F8FE"/>
+    <rect x="600" y="0" width="320" height="214" rx="10" fill="#EEF1F5"/>
+    <text x="14" y="19" font-size="10.5" font-weight="700" letter-spacing="1.2" style="fill:#0A7AA6">BROWSER SIDE · runs on the user's device</text>
+    <text x="614" y="19" font-size="10.5" font-weight="700" letter-spacing="1.2" style="fill:#566273">SERVER SIDE · your backend (not HTML)</text>
+    <g font-size="10">
+      <g transform="translate(14,32)"><rect width="128" height="72" rx="7" fill="#fff" stroke="#0B1220"/><text x="10" y="20" font-size="11.5" font-weight="700">1  Fill controls</text><text x="10" y="40" style="fill:#566273">User types, picks</text><text x="10" y="54" style="fill:#566273">and checks inputs</text></g>
+      <g transform="translate(156,32)"><rect width="128" height="72" rx="7" fill="#fff" stroke="#0B1220"/><text x="10" y="20" font-size="11.5" font-weight="700">2  Click submit</text><text x="10" y="40" class="m" font-size="9.5">type="submit"</text><text x="10" y="54" style="fill:#566273">or Enter in a field</text></g>
+      <g transform="translate(298,32)"><rect width="128" height="72" rx="7" fill="#fff" stroke="#0B1220"/><text x="10" y="20" font-size="11.5" font-weight="700">3  Check rules</text><text x="10" y="40" class="m" font-size="9.5">required min max</text><text x="10" y="54" class="m" font-size="9.5">minlength type</text></g>
+      <g transform="translate(440,32)"><rect width="132" height="72" rx="7" fill="#fff" stroke="#0B1220"/><text x="10" y="20" font-size="11.5" font-weight="700">4  Build data set</text><text x="10" y="40" class="m" font-size="9.5">name=value pairs</text><text x="10" y="54" style="fill:#566273">skips no-name/disabled</text></g>
+      <g transform="translate(626,32)"><rect width="134" height="72" rx="7" fill="#fff" stroke="#566273" stroke-dasharray="5 3"/><text x="10" y="20" font-size="11.5" font-weight="700">5  Endpoint /book</text><text x="10" y="40" style="fill:#566273">Re-validates (never</text><text x="10" y="54" style="fill:#566273">trusts the browser)</text></g>
+      <g transform="translate(774,32)"><rect width="134" height="72" rx="7" fill="#fff" stroke="#566273" stroke-dasharray="5 3"/><text x="10" y="20" font-size="11.5" font-weight="700">6  Store &amp; reply</text><text x="10" y="40" style="fill:#566273">Saves booking, sends</text><text x="10" y="54" style="fill:#566273">a page or redirect</text></g>
+    </g>
+    <path d="M142 68 H154" stroke="#0B1220" stroke-width="1.5" marker-end="url(#f-ar)"/>
+    <path d="M284 68 H296" stroke="#0B1220" stroke-width="1.5" marker-end="url(#f-ar)"/>
+    <path d="M426 68 H438" stroke="#0B1220" stroke-width="1.5" marker-end="url(#f-ar)"/>
+    <path d="M572 68 H624" stroke="#0A7AA6" stroke-width="2.4" marker-end="url(#f-ar)"/><text x="598" y="60" text-anchor="middle" class="m" font-size="10" font-weight="700" style="fill:#0A7AA6">HTTP</text>
+    <path d="M760 68 H772" stroke="#0B1220" stroke-width="1.5" marker-end="url(#f-ar)"/>
+    <path d="M362 104 V124" stroke="#B23A34" stroke-width="1.5" marker-end="url(#f-arr)"/>
+    <rect x="298" y="126" width="128" height="40" rx="6" fill="#FBECEB" stroke="#B23A34"/>
+    <text x="306" y="142" font-size="10" font-weight="700" style="fill:#B23A34">Invalid → message,</text><text x="306" y="157" font-size="10" style="fill:#B23A34">nothing is sent</text>
+    <rect x="14" y="120" width="270" height="82" rx="7" fill="#fff" stroke="#DDE3EA"/>
+    <text x="24" y="138" font-size="10" font-weight="700" letter-spacing="1" style="fill:#0A7AA6">WHAT IS (AND IS NOT) SENT</text>
+    <text x="24" y="155" font-size="10">✓ value of every control with a name</text>
+    <text x="24" y="170" font-size="10">✓ only checked radios and checkboxes</text>
+    <text x="24" y="185" font-size="10" style="fill:#B23A34">✗ labels, legends, placeholders, disabled</text>
+    <rect x="440" y="120" width="468" height="82" rx="7" fill="#fff" stroke="#0B1220"/>
+    <text x="452" y="138" font-size="10" font-weight="700" letter-spacing="1">ON THE WIRE · what the server receives</text>
+    <text x="452" y="160" class="m" font-size="10.5"><tspan style="fill:#8A4B08">method="get" </tspan> → GET /book?guest=Asha+Rao&amp;guests=2</text>
+    <text x="452" y="180" class="m" font-size="10.5"><tspan style="fill:#8A4B08">method="post"</tspan> → POST /book   (body) guest=Asha+Rao&amp;guests=2</text>
+    <text x="452" y="196" font-size="9.5" style="fill:#566273">Spaces become “+”, special characters are percent-encoded.</text>
+  </svg>
+  <div class="fig"><b>FIG 2</b> Form submission data flow. Steps 1–4 are the browser; steps 5–6 only happen if a real backend exists at the <code>action</code> URL.</div>
+  </div>
+
+  <div class="g2 mt" style="grid-template-columns:1.25fr 1fr">
+    <div>
+      <div class="co">
+        <div><div class="lbl">HTML SOURCE</div>
+<textarea class="src" data-lang="html"><form action="/book" method="post">
+  <label for="guest">Full name</label>
+  <input type="text" id="guest"
+         name="guest" required>
+  <button type="submit">Book room</button>
+</form></textarea></div>
+        <div><div class="lbl">BROWSER OUTPUT</div><div class="browser"><div class="bar"><i></i><i></i><i></i><span>hotel/book</span></div><div class="view">
+          <div class="f"><label for="p2-guest">Full name</label><input type="text" id="p2-guest" value=""></div><button type="button">Book room</button></div></div></div>
+      </div>
+      <p class="expl"><b>Read it as:</b> “When <i>Book room</i> is clicked, check that <code>guest</code> is filled, then POST <code>guest=…</code> to <code>/book</code>.” <span class="bd pro">PRO NOTE</span>Omit <code>method</code> and the browser uses GET; omit <code>action</code> and it submits to the current page URL.</p>
+    </div>
+    <div>
+      <table class="ref">
+        <tr><th></th><th>GET</th><th>POST</th></tr>
+        <tr><td>Data goes</td><td>URL query string</td><td>Request body</td></tr>
+        <tr><td>Visible</td><td>Address bar, history, logs</td><td>Not in the URL</td></tr>
+        <tr><td>Bookmark</td><td>Yes — shareable link</td><td>No</td></tr>
+        <tr><td>Size</td><td>Limited by URL length</td><td>Large data, files</td></tr>
+        <tr><td>Use for</td><td>Search, filters, room availability</td><td>Bookings, sign-ups, logins</td></tr>
+        <tr><td>Rule</td><td>Reading data</td><td>Changing data</td></tr>
+      </table>
+      <div class="warn mt1"><b>Security:</b> POST hides data from the URL but does <b>not</b> encrypt it. Only HTTPS encrypts. Never send passwords with GET.</div>
+    </div>
+  </div>
+  <div class="g2 mt" style="gap:2.6mm">
+    <div class="card" style="border-color:var(--cyan)"><h3 style="color:var(--cyanD)">Browser-side form handling (HTML does this)</h3>Renders controls · lets users type and choose · checks <code>required</code>, <code>min</code>, <code>maxlength</code>, <code>type</code> · encodes <code>name=value</code> pairs · sends the HTTP request · displays the response page.</div>
+    <div class="card"><h3>Server-side processing (needs Node, Java, PHP, Python…)</h3>Receives the request at the <code>action</code> URL · re-validates every value · checks room availability · stores the booking in a database · returns a confirmation page or redirect.</div>
+  </div>
+
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b>action = <i>where</i>, method = <i>how</i>. GET is a postcard, POST is an envelope.</div>
+    <div class="e"><b>EXAMPLE</b>Hotel search form → GET (shareable results URL). Booking form → POST.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Believing the HTML form “saves” data. HTML only sends; a backend must receive and store.</div>
+    <div class="q"><b>INTERVIEW</b>“Where does form data go with GET vs POST, and which should a login form use?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Forms Foundation</span><span class="pn"><b>02</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 3 : INPUTS & ATTRIBUTES ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>03 · INPUTS</div><h1>Inputs and Form Attributes</h1></div><div class="chips"><span>&lt;input&gt;</span><span>type</span><span>placeholder</span><span>value</span><span>name</span><span>size</span><span>min</span><span>max</span><span>minlength</span><span>maxlength</span><span>required</span><span>disabled</span><span>readonly</span></div></header>
+<div class="pc">
+  <div class="srcdef"><span class="bd src">SOURCE</span>The <code>input</code> element creates a field for user input. Its <code>type</code> attribute decides the kind of field — for example <code>text</code>, <code>email</code>, <code>number</code>, <code>radio</code>, <code>checkbox</code>. One tag, many personalities: <code>type</code> is the switch.</div>
+  <svg viewBox="0 0 920 168" role="img" aria-label="Comparison of five input types">
+    <g font-size="10.5">
+      <g transform="translate(0,0)"><rect width="176" height="166" rx="8" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <text x="12" y="20" class="m" font-size="11.5" font-weight="700" style="fill:#0A7AA6">type="text"</text>
+        <rect x="12" y="30" width="152" height="24" rx="4" fill="#fff" stroke="#94A3B8"/><text x="20" y="46">Asha Rao</text>
+        <text x="12" y="76" font-weight="700">Accepts</text><text x="12" y="90" style="fill:#566273">Any single-line text</text>
+        <text x="12" y="110" font-weight="700">Browser help</text><text x="12" y="124" style="fill:#566273">None — no format check</text>
+        <text x="12" y="146" class="m" font-size="10" style="fill:#2E7D4F">fullname=Asha+Rao</text></g>
+      <g transform="translate(186,0)"><rect width="176" height="166" rx="8" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <text x="12" y="20" class="m" font-size="11.5" font-weight="700" style="fill:#0A7AA6">type="email"</text>
+        <rect x="12" y="30" width="152" height="24" rx="4" fill="#fff" stroke="#94A3B8"/><text x="20" y="46">asha@mail.com</text>
+        <text x="12" y="76" font-weight="700">Accepts</text><text x="12" y="90" style="fill:#566273">Text shaped name@domain</text>
+        <text x="12" y="110" font-weight="700">Browser help</text><text x="12" y="124" style="fill:#566273">Blocks “asha.mail”; @ keys</text>
+        <text x="12" y="146" class="m" font-size="10" style="fill:#2E7D4F">email=asha%40mail.com</text></g>
+      <g transform="translate(372,0)"><rect width="176" height="166" rx="8" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <text x="12" y="20" class="m" font-size="11.5" font-weight="700" style="fill:#0A7AA6">type="number"</text>
+        <rect x="12" y="30" width="70" height="24" rx="4" fill="#fff" stroke="#94A3B8"/><text x="20" y="46">2</text><path d="M68 36 l4 -4 l4 4z M68 46 l4 4 l4 -4z" fill="#566273"/>
+        <text x="12" y="76" font-weight="700">Accepts</text><text x="12" y="90" style="fill:#566273">Numbers; obeys min/max</text>
+        <text x="12" y="110" font-weight="700">Browser help</text><text x="12" y="124" style="fill:#566273">Spinner, range check</text>
+        <text x="12" y="146" class="m" font-size="10" style="fill:#2E7D4F">guests=2</text></g>
+      <g transform="translate(558,0)"><rect width="176" height="166" rx="8" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <text x="12" y="20" class="m" font-size="11.5" font-weight="700" style="fill:#0A7AA6">type="radio"</text>
+        <circle cx="20" cy="42" r="6" fill="#fff" stroke="#566273" stroke-width="1.3"/><text x="30" y="46">Std</text>
+        <circle cx="72" cy="42" r="6" fill="#fff" stroke="#0B1220" stroke-width="1.3"/><circle cx="72" cy="42" r="3" fill="#0B1220"/><text x="82" y="46">Dlx</text>
+        <circle cx="122" cy="42" r="6" fill="#fff" stroke="#566273" stroke-width="1.3"/><text x="132" y="46">Ste</text>
+        <text x="12" y="76" font-weight="700">Accepts</text><text x="12" y="90" style="fill:#566273">ONE choice per name group</text>
+        <text x="12" y="110" font-weight="700">Browser help</text><text x="12" y="124" style="fill:#566273">Picking one unpicks others</text>
+        <text x="12" y="146" class="m" font-size="10" style="fill:#2E7D4F">room=deluxe</text></g>
+      <g transform="translate(744,0)"><rect width="176" height="166" rx="8" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <text x="12" y="20" class="m" font-size="11.5" font-weight="700" style="fill:#0A7AA6">type="checkbox"</text>
+        <rect x="14" y="36" width="12" height="12" rx="2" fill="#0B1220"/><path d="M17 42 l3 3 l5 -6" stroke="#fff" stroke-width="1.8" fill="none"/><text x="32" y="46">Breakfast</text>
+        <rect x="96" y="36" width="12" height="12" rx="2" fill="#fff" stroke="#566273" stroke-width="1.3"/><text x="114" y="46">Spa</text>
+        <text x="12" y="76" font-weight="700">Accepts</text><text x="12" y="90" style="fill:#566273">Independent on / off</text>
+        <text x="12" y="110" font-weight="700">Browser help</text><text x="12" y="124" style="fill:#566273">Unchecked = not sent</text>
+        <text x="12" y="146" class="m" font-size="10" style="fill:#2E7D4F">extras=breakfast</text></g>
+    </g>
+  </svg>
+  <div class="fig"><b>FIG 3</b> The five source input types: what each accepts, what the browser does for free, and the <span class="mono">name=value</span> pair it submits. <span class="bd pro">PRO NOTE</span>Other types you will meet: <code>password</code> <code>tel</code> <code>date</code> <code>url</code> <code>search</code> <code>range</code> <code>file</code> <code>hidden</code> <code>submit</code>. A checkbox with no <code>value</code> submits <code>on</code>.</div>
+
+  <h2 class="mt"><span class="n">MATRIX</span>Every source input attribute at a glance</h2>
+  <table class="ref tiny">
+    <tr><th>Attribute</th><th>What it does</th><th>Works with</th><th>Example</th><th>Watch out</th></tr>
+    <tr><td>type</td><td>Chooses the kind of control and its built-in behaviour</td><td>input, button</td><td><code>type="email"</code></td><td>Missing or unknown → falls back to <code>text</code></td></tr>
+    <tr><td>placeholder</td><td>Grey hint showing <i>what</i> to enter</td><td>text-like inputs</td><td><code>placeholder="you@uni.edu"</code></td><td>Not a label: vanishes on typing, never submitted</td></tr>
+    <tr><td>value</td><td>The control's data; for <code>type="button"</code> it sets the button text</td><td>all inputs</td><td><code>value="1"</code></td><td>Pre-filled value IS submitted unless changed</td></tr>
+    <tr><td>name</td><td>Key in submitted data; same name groups radio buttons</td><td>every submittable control</td><td><code>name="guests"</code></td><td>No <code>name</code> → the field is never sent</td></tr>
+    <tr><td>size</td><td>How many characters are <b>visible</b> (field width)</td><td>text, email, tel, url, search, password</td><td><code>size="10"</code></td><td>Does NOT limit length — that is <code>maxlength</code></td></tr>
+    <tr><td>min</td><td>Smallest allowed value</td><td>number, range, date</td><td><code>min="1"</code></td><td>Compares values, not character counts</td></tr>
+    <tr><td>max</td><td>Largest allowed value</td><td>number, range, date</td><td><code>max="4"</code></td><td>User can type 9; submission is then blocked</td></tr>
+    <tr><td>minlength</td><td>Fewest characters required</td><td>text-like inputs</td><td><code>minlength="2"</code></td><td>Empty field passes — add <code>required</code></td></tr>
+    <tr><td>maxlength</td><td>Most characters allowed</td><td>text-like inputs</td><td><code>maxlength="60"</code></td><td>Ignored by <code>type="number"</code> — use <code>max</code></td></tr>
+    <tr><td>required</td><td>Must be filled (or a radio in the group chosen) before submit</td><td>most inputs</td><td><code>required</code></td><td>Boolean: <code>required="false"</code> is still required</td></tr>
+    <tr><td>disabled</td><td>Turns control off: greyed, not focusable, <b>not submitted</b></td><td>inputs, buttons, fieldset</td><td><code>disabled</code></td><td>Its value never reaches the server</td></tr>
+    <tr><td>readonly</td><td>Visible and focusable but not editable; <b>still submitted</b></td><td>text-like inputs</td><td><code>readonly</code></td><td>Has no effect on checkbox / radio</td></tr>
+  </table>
+
+  <div class="g3 mt">
+    <div class="card">
+      <h3>One input, four different jobs</h3>
+      <pre class="code sm" style="margin-bottom:1.4mm">&lt;input <span style="background:#E3ECF8;font-weight:700">id="mail"</span> <span style="background:#DDF1FA;font-weight:700">name="email"</span>
+       <span style="background:#E4F3E9;font-weight:700">value=""</span> <span style="background:#FAF0DC;font-weight:700">placeholder="you@uni.edu"</span>&gt;</pre>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2mm;font-size:6.9pt;line-height:1.3">
+        <div style="background:#E3ECF8;border-radius:3px;padding:1mm 1.4mm"><b>id</b> — unique hook for <code>&lt;label for&gt;</code>, CSS, JS. Not sent.</div>
+        <div style="background:#DDF1FA;border-radius:3px;padding:1mm 1.4mm"><b>name</b> — the key the server reads: <code>email=…</code></div>
+        <div style="background:#E4F3E9;border-radius:3px;padding:1mm 1.4mm"><b>value</b> — the data itself; typing changes it.</div>
+        <div style="background:#FAF0DC;border-radius:3px;padding:1mm 1.4mm"><b>placeholder</b> — grey hint; disappears; never sent.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>disabled vs readonly</h3>
+      <div class="view" style="padding:0">
+        <div class="f"><label for="p3-d">Coupon (disabled)</label><input type="text" id="p3-d" value="SUMMER10" disabled></div>
+        <div class="f"><label for="p3-r">Booking ID (readonly)</label><input type="text" id="p3-r" value="HV-1042" readonly></div>
+      </div>
+      <table class="ref tiny"><tr><th></th><th>disabled</th><th>readonly</th></tr>
+        <tr><td>Edit?</td><td>No</td><td>No</td></tr>
+        <tr><td>Focus / copy?</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Submitted?</td><td><b style="color:var(--red)">No</b></td><td><b style="color:var(--green)">Yes</b></td></tr></table>
+    </div>
+    <div class="card">
+      <h3>size ≠ maxlength · min/max</h3>
+<textarea class="src" data-lang="html" data-size="sm"><input type="text" name="pin"
+       size="4" maxlength="6">
+<input type="number" name="guests"
+       min="1" max="4" value="1"></textarea>
+      <div class="view" style="padding:1.4mm 0 0"><input type="text" size="4" maxlength="6" value="560034" style="width:auto"> &nbsp;<input type="number" min="1" max="4" value="1" style="width:14mm"></div>
+      <p class="expl" style="margin-top:1mm">The PIN box <b>shows</b> 4 characters but <b>accepts</b> 6 — it scrolls. <code>size</code> is width in character units; <code>maxlength</code> is the hard limit.</p>
+    </div>
+  </div>
+  <div class="card mt" style="display:grid;grid-template-columns:1.4fr auto 1fr;gap:3mm;align-items:center">
+    <div><h3>Why <span style="text-transform:none">name</span> matters during submission</h3>
+<textarea class="src" data-lang="html" data-size="sm"><input type="text" name="student" value="Asha Rao">
+<input type="email" value="asha@uni.edu">  <!-- no name -->
+<input type="number" name="year" value="2" disabled></textarea></div>
+    <div style="font-size:16pt;color:var(--cyanD);font-weight:700">→</div>
+    <div><h3>What the server receives</h3><pre class="code sm" style="border-left-color:var(--green)">student=Asha+Rao</pre>
+    <p class="expl">Email is lost (no <code>name</code>); year is dropped (<code>disabled</code>). Three fields on screen, <b>one</b> value delivered.</p></div>
+  </div>
+
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b>id is for the <i>page</i>, name is for the <i>server</i>, value is the <i>data</i>, placeholder is a <i>hint</i>.</div>
+    <div class="e"><b>EXAMPLE</b>Student portal: <code>name="roll"</code> <code>minlength="7"</code> <code>maxlength="7"</code> <code>required</code>.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Forgetting <code>name</code>: the field looks perfect but the server receives nothing.</div>
+    <div class="q"><b>INTERVIEW</b>“Which is submitted — a disabled or a readonly field? Why does that matter for a booking ID?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Inputs &amp; Attributes</span><span class="pn"><b>03</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 4 : LABELS ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>04 · LABELS</div><h1>Labels and Input Association</h1></div><div class="chips"><span>&lt;label&gt;</span><span>for</span><span>id</span><span>implicit</span><span>explicit</span></div></header>
+<div class="pc">
+  <div class="g2" style="grid-template-columns:1fr 1.15fr">
+    <div>
+      <div class="srcdef"><span class="bd src">SOURCE</span>The <code>label</code> element creates a label for an input. The <code>for</code> attribute specifies which input the label is for. <b>Implicit</b> association wraps the input inside the label; <b>explicit</b> association uses <code>for</code>.</div>
+      <p><b>Why it exists.</b> Text that merely <i>sits near</i> an input means nothing to the browser. A label creates a <b>programmatic link</b>: the browser, screen readers and voice-control software all know “this caption names that control”.</p>
+      <div class="card soft"><h3>Analogy · name tags at an admission desk</h3>
+      <b>Implicit</b> = the student stands <i>inside</i> a booth with their name on it — no lookup needed. <b>Explicit</b> = a name tag reading “Seat 12” and a chair labelled <i>id 12</i> — they can be far apart; the matching number connects them.</div>
+    </div>
+    <div>
+      <svg viewBox="0 0 470 140" role="img" aria-label="Implicit label association diagram">
+        <rect x="10" y="22" width="450" height="76" rx="10" fill="#E9F8FE" stroke="#0A7AA6" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="18" y="15" class="m" font-size="11" font-weight="700" style="fill:#0A7AA6">&lt;label&gt;  … contains …  &lt;/label&gt;</text>
+        <text x="30" y="66" font-size="14" font-weight="700">Email</text>
+        <rect x="100" y="42" width="346" height="38" rx="6" fill="#fff" stroke="#0B1220" stroke-width="1.4"/>
+        <text x="112" y="66" class="m" font-size="11">&lt;input type="email" name="email"&gt;</text>
+        <text x="10" y="118" font-size="11" font-weight="700">IMPLICIT · containment is the connection</text>
+        <text x="10" y="134" font-size="10.5" style="fill:#566273">No id or for needed. Clicking anywhere in the blue box focuses the input.</text>
+      </svg>
+      <svg viewBox="0 0 470 150" role="img" aria-label="Explicit label association diagram" style="margin-top:2mm">
+        <defs><marker id="l-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="#0A7AA6"/></marker></defs>
+        <rect x="10" y="40" width="168" height="62" rx="8" fill="#fff" stroke="#0B1220" stroke-width="1.4"/>
+        <text x="22" y="62" class="m" font-size="11" style="fill:#0A7AA6">&lt;label</text>
+        <text x="22" y="78" class="m" font-size="11"><tspan style="fill:#8A4B08">for</tspan>=<tspan font-weight="700" style="fill:#2E7D4F">"email"</tspan>&gt;</text>
+        <text x="22" y="94" font-size="11" font-weight="700">Email</text>
+        <rect x="292" y="40" width="168" height="62" rx="8" fill="#fff" stroke="#0B1220" stroke-width="1.4"/>
+        <text x="304" y="62" class="m" font-size="11" style="fill:#0A7AA6">&lt;input</text>
+        <text x="304" y="78" class="m" font-size="11"><tspan style="fill:#8A4B08">id</tspan>=<tspan font-weight="700" style="fill:#2E7D4F">"email"</tspan></text>
+        <text x="304" y="94" class="m" font-size="11">type="email"&gt;</text>
+        <path d="M150 40 C190 22, 280 22, 322 38" stroke="#0A7AA6" stroke-width="2" fill="none" marker-end="url(#l-ar)"/>
+        <text x="235" y="12" text-anchor="middle" font-size="10.5" font-weight="700" style="fill:#0A7AA6">for value = id value (exact, case-sensitive)</text>
+        <text x="235" y="76" text-anchor="middle" font-size="10" style="fill:#566273">can be apart</text>
+        <text x="235" y="89" text-anchor="middle" font-size="10" style="fill:#566273">in the markup</text>
+        <text x="10" y="126" font-size="11" font-weight="700">EXPLICIT · a matching pair of strings</text>
+        <text x="10" y="142" font-size="10.5" style="fill:#566273">Works in tables, grids and layouts where nesting is awkward.</text>
+      </svg>
+      <div class="fig"><b>FIG 4</b> Label-to-input relationship: containment (top) vs <span class="mono">for</span> → <span class="mono">id</span> reference (bottom).</div>
+    </div>
+  </div>
+
+  <div class="g2 mt">
+    <div>
+      <h2><span class="n">A</span>Implicit — university admission terms</h2>
+      <div class="co">
+<textarea class="src" data-lang="html" data-size="sm"><label>
+  <input type="checkbox"
+         name="terms" required>
+  I accept the admission terms
+</label></textarea>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span>uni/apply</span></div><div class="view"><label class="opt"><input type="checkbox" checked> I accept the admission terms</label><p style="font-size:6.6pt;color:var(--slate);margin-top:1.4mm">Clicking the sentence toggles the box — a far bigger target than a 13&nbsp;px square.</p></div></div>
+      </div>
+    </div>
+    <div>
+      <h2><span class="n">B</span>Explicit — admission email</h2>
+      <div class="co">
+<textarea class="src" data-lang="html" data-size="sm"><label for="email">Email</label>
+<input type="email"
+  id="email" name="email"
+  placeholder="you@uni.edu"></textarea>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span>uni/apply</span></div><div class="view"><div class="f"><label for="p4-email">Email</label><input type="email" id="p4-email" placeholder="you@uni.edu"></div><p style="font-size:6.6pt;color:var(--slate)">Clicking “Email” moves the text cursor into the field.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 mt" style="grid-template-columns:1fr 1.25fr">
+    <div class="card">
+      <h3>What happens when a user clicks a label</h3>
+      <div class="flow" style="margin-bottom:1.6mm"><div><b>Click “Email”</b>label is hit</div><span>→</span><div><b>Browser finds</b>its linked control</div><span>→</span><div><b>Text input</b> gets focus · <b>checkbox/radio</b> toggles</div></div>
+      <h3>Accessibility gains</h3>
+      <ul class="tight" style="font-size:7.5pt">
+        <li>Screen readers announce <i>“Email, edit text, required”</i> instead of just <i>“edit text”</i>.</li>
+        <li>Larger click / tap area — vital for small checkboxes and on phones.</li>
+        <li>Voice control: users can say “click Email”.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Correct vs incorrect</h3>
+      <div class="bad" style="margin-bottom:1mm"><span class="bd x">WRONG</span><code>&lt;label for="Email"&gt;</code> + <code>&lt;input id="email"&gt;</code> — case mismatch, no link.</div>
+      <div class="bad" style="margin-bottom:1mm"><span class="bd x">WRONG</span><code>&lt;label for="email"&gt;</code> + <code>&lt;input name="email"&gt;</code> — <code>for</code> matches <b>id</b>, never <b>name</b>.</div>
+      <div class="bad" style="margin-bottom:1mm"><span class="bd x">WRONG</span><code>&lt;input placeholder="Email"&gt;</code> with no label — hint vanishes while typing.</div>
+      <div class="good"><span class="bd ok">RIGHT</span>One label per control; unique <code>id</code>s on the page; <code>for</code> copied exactly from the <code>id</code>.</div>
+    </div>
+  </div>
+  <div class="g3 mt">
+    <div class="card soft"><h3>Choose implicit when…</h3>The label and control sit together: checkboxes, radios, “I agree” lines. Less markup, no ids to keep unique.</div>
+    <div class="card soft"><h3>Choose explicit when…</h3>Layout separates them (grid, table cell, two columns), or you need the <code>id</code> anyway for CSS/JS. Most production forms use explicit labels.</div>
+    <div class="card soft"><h3><span class="bd pro">PRO NOTE</span> Both at once</h3>Nesting <i>and</i> <code>for</code>/<code>id</code> together is valid and extra-robust. A control may have several labels, but a label labels only one control.</div>
+  </div>
+
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b><code>for</code> points to <b>id</b>. Inside = implicit, pointing = explicit.</div>
+    <div class="e"><b>EXAMPLE</b>Registration portal: <code>&lt;label for="roll"&gt;</code> + <code>&lt;input id="roll" name="roll"&gt;</code>.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Using placeholder as the only label, or duplicating an <code>id</code> so two labels fight.</div>
+    <div class="q"><b>INTERVIEW</b>“Clicking my label does nothing. What three things do you check?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Labels</span><span class="pn"><b>04</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 5 : BUTTONS / FIELDSET ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>05 · BUTTONS &amp; GROUPS</div><h1>Buttons, Fieldset and Legend</h1></div><div class="chips"><span>&lt;button&gt;</span><span>submit</span><span>reset</span><span>button</span><span>&lt;fieldset&gt;</span><span>&lt;legend&gt;</span></div></header>
+<div class="pc">
+  <div class="srcdef"><span class="bd src">SOURCE</span>The <code>button</code> element creates a clickable button; its <code>type</code> (<code>submit</code>, <code>reset</code>, <code>button</code>) controls what happens when it is activated. <code>fieldset</code> groups related inputs; <code>legend</code> adds a caption describing that group.</div>
+  <svg viewBox="0 0 920 172" role="img" aria-label="Comparison of submit, reset and button behaviour">
+    <defs><marker id="b-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#566273"/></marker></defs>
+    <g font-size="10.5">
+      <g transform="translate(0,0)"><rect width="296" height="170" rx="9" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <rect x="14" y="14" width="116" height="32" rx="6" fill="#0B1220"/><text x="72" y="35" text-anchor="middle" font-size="12" font-weight="600" style="fill:#fff">Book room</text>
+        <text x="142" y="35" class="m" font-size="11.5" font-weight="700" style="fill:#0A7AA6">type="submit"</text>
+        <path d="M72 50 V70" stroke="#566273" stroke-width="1.5" marker-end="url(#b-ar)"/>
+        <rect x="14" y="74" width="268" height="84" rx="7" fill="#fff" stroke="#0B1220"/>
+        <text x="26" y="94" font-size="11.5" font-weight="700">Sends the form</text>
+        <text x="26" y="112" style="fill:#566273">Runs validation, then sends every named</text>
+        <text x="26" y="127" style="fill:#566273">value to action using method.</text>
+        <text x="26" y="146" font-weight="700" style="fill:#0A7AA6">Default type of &lt;button&gt;.</text></g>
+      <g transform="translate(312,0)"><rect width="296" height="170" rx="9" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <rect x="14" y="14" width="116" height="32" rx="6" fill="#fff" stroke="#9A6210" stroke-width="1.5"/><text x="72" y="35" text-anchor="middle" font-size="12" font-weight="600">Clear form</text>
+        <text x="142" y="35" class="m" font-size="11.5" font-weight="700" style="fill:#9A6210">type="reset"</text>
+        <path d="M72 50 V70" stroke="#566273" stroke-width="1.5" marker-end="url(#b-ar)"/>
+        <rect x="14" y="74" width="268" height="84" rx="7" fill="#fff" stroke="#9A6210"/>
+        <text x="26" y="94" font-size="11.5" font-weight="700">Restores initial values</text>
+        <text x="26" y="112" style="fill:#566273">Every control returns to its HTML value</text>
+        <text x="26" y="127" style="fill:#566273">/ checked state — not always empty.</text>
+        <text x="26" y="146" font-weight="700" style="fill:#9A6210">Nothing is sent. Easy to click by accident.</text></g>
+      <g transform="translate(624,0)"><rect width="296" height="170" rx="9" fill="#F5F7FA" stroke="#DDE3EA"/>
+        <rect x="14" y="14" width="116" height="32" rx="6" fill="#fff" stroke="#566273" stroke-width="1.5"/><text x="72" y="35" text-anchor="middle" font-size="12" font-weight="600">Check dates</text>
+        <text x="142" y="35" class="m" font-size="11.5" font-weight="700" style="fill:#566273">type="button"</text>
+        <path d="M72 50 V70" stroke="#566273" stroke-width="1.5" marker-end="url(#b-ar)"/>
+        <rect x="14" y="74" width="268" height="84" rx="7" fill="#fff" stroke="#566273"/>
+        <text x="26" y="94" font-size="11.5" font-weight="700">Does nothing by itself</text>
+        <text x="26" y="112" style="fill:#566273">A plain clickable control. Behaviour</text>
+        <text x="26" y="127" style="fill:#566273">comes only from JavaScript you attach.</text>
+        <text x="26" y="146" font-weight="700" style="fill:#566273">Never submits, never resets.</text></g>
+    </g>
+  </svg>
+  <div class="fig"><b>FIG 5</b> Button behaviour comparison inside a form.</div>
+
+  <div class="g2 mt" style="grid-template-columns:1.3fr 1fr">
+    <div>
+      <div class="co" style="grid-template-columns:1.65fr 1fr">
+<textarea class="src" data-lang="html" data-size="sm"><form action="/book" method="post">
+  <button type="submit">Book room</button>
+  <button type="reset">Clear form</button>
+  <button type="button">Check dates</button>
+  <input type="button" value="Help">
+</form></textarea>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span>hotel/book</span></div><div class="view"><button type="button">Book room</button><button type="button" class="ghost">Clear form</button><p style="margin-top:1.4mm"><button type="button" class="ghost">Check dates</button><input type="button" value="Help"></p></div></div>
+      </div>
+      <p class="expl"><span class="bd src">SOURCE</span>For <code>&lt;input type="button"&gt;</code> the <code>value</code> attribute is the button's text. <code>&lt;button&gt;</code> takes its text from its content instead.</p>
+    </div>
+    <div class="warn" style="font-size:7.5pt">
+      <b>Why you always write the type explicitly</b><br>
+      A <code>&lt;button&gt;</code> with no <code>type</code> is a <b>submit</b> button. Put an “Add another guest” or “Show password” button inside a form without <code>type="button"</code> and every click submits the booking half-finished. Writing the type also tells the next developer your intent.
+      <div class="bad mt1" style="background:#fff"><span class="bd x">WRONG</span><code>&lt;button&gt;Add guest&lt;/button&gt;</code> → submits</div>
+      <div class="good mt1" style="background:#fff"><span class="bd ok">RIGHT</span><code>&lt;button type="button"&gt;Add guest&lt;/button&gt;</code></div>
+    </div>
+  </div>
+
+  <div class="g2 mt" style="grid-template-columns:1fr 1.12fr">
+    <div>
+      <svg viewBox="0 0 440 246" role="img" aria-label="Fieldset and legend grouping diagram">
+        <rect x="4" y="14" width="432" height="228" rx="8" fill="#fff" stroke="#0A7AA6" stroke-dasharray="6 4"/>
+        <text x="10" y="10" class="m" font-size="10.5" style="fill:#0A7AA6">&lt;form&gt;</text>
+        <rect x="18" y="36" width="404" height="92" rx="6" fill="#F5F7FA" stroke="#0B1220" stroke-width="1.4"/>
+        <rect x="28" y="29" width="84" height="14" fill="#fff"/><text x="34" y="40" font-size="11.5" font-weight="700">Room type</text>
+        <text x="122" y="31" class="m" font-size="10" style="fill:#0A7AA6">← &lt;legend&gt; = caption</text>
+        <text x="414" y="52" text-anchor="end" class="m" font-size="10" style="fill:#566273">&lt;fieldset&gt;</text>
+        <circle cx="40" cy="76" r="6" fill="#fff" stroke="#566273" stroke-width="1.3"/><text x="52" y="80" font-size="11">Standard</text>
+        <circle cx="150" cy="76" r="6" fill="#fff" stroke="#0B1220" stroke-width="1.3"/><circle cx="150" cy="76" r="3" fill="#0B1220"/><text x="162" y="80" font-size="11">Deluxe</text>
+        <circle cx="250" cy="76" r="6" fill="#fff" stroke="#566273" stroke-width="1.3"/><text x="262" y="80" font-size="11">Suite</text>
+        <text x="34" y="110" class="m" font-size="10" style="fill:#566273">same name="room" → only one can be chosen</text>
+        <rect x="18" y="150" width="404" height="80" rx="6" fill="#F5F7FA" stroke="#0B1220" stroke-width="1.4"/>
+        <rect x="28" y="143" width="128" height="14" fill="#fff"/><text x="34" y="154" font-size="11.5" font-weight="700">Additional services</text>
+        <text x="414" y="166" text-anchor="end" class="m" font-size="10" style="fill:#566273">&lt;fieldset&gt;</text>
+        <rect x="34" y="178" width="12" height="12" rx="2" fill="#0B1220"/><path d="M37 184 l3 3 l5 -6" stroke="#fff" stroke-width="1.8" fill="none"/><text x="52" y="188" font-size="11">Breakfast</text>
+        <rect x="144" y="178" width="12" height="12" rx="2" fill="#fff" stroke="#566273" stroke-width="1.3"/><text x="162" y="188" font-size="11">Airport pickup</text>
+        <text x="34" y="216" class="m" font-size="10" style="fill:#566273">each checkbox independent → 0, 1 or many</text>
+      </svg>
+      <div class="fig"><b>FIG 6</b> Fieldset &amp; legend grouping. A screen reader says <i>“Room type, group — Deluxe, radio button, 2 of 3”</i>.</div>
+    </div>
+    <div>
+      <div class="co" style="grid-template-columns:1.35fr 1fr">
+<textarea class="src" data-lang="html" data-size="sm"><fieldset>
+  <legend>Room type</legend>
+  <label>
+    <input type="radio" name="room"
+           value="standard" required>
+    Standard
+  </label>
+  <label>
+    <input type="radio" name="room"
+           value="deluxe"> Deluxe
+  </label>
+  <label>
+    <input type="radio" name="room"
+           value="suite"> Suite
+  </label>
+</fieldset></textarea>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span>hotel/book</span></div><div class="view"><fieldset><legend>Room type</legend><label class="opt"><input type="radio" name="p5r"> Standard</label><br><label class="opt"><input type="radio" name="p5r" checked> Deluxe</label><br><label class="opt"><input type="radio" name="p5r"> Suite</label></fieldset></div></div>
+      </div>
+      <p class="expl">Same <code>name</code> = one group (<span class="bd src">SOURCE</span>only one can be selected). Different <code>value</code>s tell the server <i>which</i> one: <code>room=deluxe</code>. <code>required</code> on one radio makes the whole group required.</p>
+    </div>
+  </div>
+
+  <div class="g3 mt">
+    <div class="card soft"><h3>&lt;button&gt; vs &lt;input type="button"&gt;</h3><code>&lt;button&gt;</code> can contain text, icons and markup; its text is its content. <code>&lt;input type="button" value="Help"&gt;</code> is a void element whose text comes only from <code>value</code>. Prefer <code>&lt;button&gt;</code>.</div>
+    <div class="card soft"><h3><span class="bd pro">PRO NOTE</span> fieldset superpowers</h3><code>&lt;fieldset disabled&gt;</code> disables every control inside it at once. <code>&lt;legend&gt;</code> must be the <b>first</b> child. Fieldsets can nest (e.g. “Guest 2” inside “Guests”).</div>
+    <div class="bad"><span class="bd x">WRONG</span>Reset placed next to submit — one slip wipes a long admission form.<br><span class="bd x">WRONG</span>A fieldset around a single field, or a legend outside the fieldset.</div>
+  </div>
+  <h3 class="mt">What a screen-reader user hears in the grouped booking form</h3>
+  <div class="flow"><div><b>Tab into group</b>“Room type, group”</div><span>→</span><div><b>First radio</b>“Standard, radio button, not checked, 1 of 3”</div><span>→</span><div><b>Arrow down</b>“Deluxe, radio button, checked, 2 of 3”</div><span>→</span><div><b>Tab out</b>“Additional services, group”</div><span>→</span><div><b>Space</b>“Breakfast, checkbox, checked”</div></div>
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b>submit <i>sends</i>, reset <i>rewinds</i>, button <i>waits for JS</i>. Fieldset = box, legend = its title.</div>
+    <div class="e"><b>EXAMPLE</b>Feedback form: “Rating” fieldset with 5 radios sharing <code>name="rating"</code>.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Radios with different <code>name</code>s — users can select all of them at once.</div>
+    <div class="q"><b>INTERVIEW</b>“What is the default type of a button, and what bug does that cause?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Buttons &amp; Grouping</span><span class="pn"><b>05</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 6 : FOCUS ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>06 · INTERACTION</div><h1>Form Interaction and the Focused State</h1></div><div class="chips"><span>:focus</span><span>Tab</span><span>Shift+Tab</span><span>outline</span><span>:focus-visible</span></div></header>
+<div class="pc">
+  <div class="g2">
+    <div>
+      <div class="srcdef"><span class="bd src">SOURCE</span>The <b>focused state</b> is the state of an input field when it is selected by the user.</div>
+      <p><b>In plain English:</b> focus is “the control that will receive the next key you press”. Exactly <b>one</b> element on a page has focus at a time.</p>
+    </div>
+    <div class="card soft"><h3>Analogy · the single microphone</h3>On a panel only the person holding the microphone is heard. Pressing <b>Tab</b> passes the microphone to the next speaker; clicking someone hands it straight to them.</div>
+  </div>
+  <div class="mt" style="padding:0 22mm">
+      <svg viewBox="0 0 660 136" role="img" aria-label="Unfocused versus focused input">
+        <defs><marker id="fo-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#0A7AA6"/></marker></defs>
+        <text x="10" y="18" font-size="11.5" font-weight="700" letter-spacing="1.2" style="fill:#566273">UNFOCUSED</text>
+        <text x="10" y="44" font-size="12" font-weight="600">Email</text>
+        <rect x="10" y="52" width="250" height="32" rx="5" fill="#fff" stroke="#94A3B8" stroke-width="1.3"/>
+        <text x="22" y="73" font-size="12" style="fill:#94A3B8">you@example.com</text>
+        <text x="10" y="108" font-size="11" style="fill:#566273">Idle. Keystrokes go elsewhere.</text>
+        <text x="10" y="124" font-size="11" style="fill:#566273">No :focus styles applied.</text>
+        <path d="M278 58 H374" stroke="#0A7AA6" stroke-width="2" marker-end="url(#fo-ar)"/>
+        <text x="326" y="50" text-anchor="middle" font-size="10.5" font-weight="700" style="fill:#0A7AA6">focus</text>
+        <text x="326" y="74" text-anchor="middle" font-size="9.5" style="fill:#566273">click · Tab · label</text>
+        <path d="M374 88 H278" stroke="#94A3B8" stroke-width="2" marker-end="url(#fo-ar)"/>
+        <text x="326" y="104" text-anchor="middle" font-size="10.5" font-weight="700" style="fill:#566273">blur</text>
+        <text x="390" y="18" font-size="11.5" font-weight="700" letter-spacing="1.2" style="fill:#0A7AA6">FOCUSED</text>
+        <text x="390" y="44" font-size="12" font-weight="600">Email</text>
+        <rect x="385" y="47" width="260" height="42" rx="8" fill="none" stroke="#43C7F4" stroke-width="3.5"/>
+        <rect x="390" y="52" width="250" height="32" rx="5" fill="#fff" stroke="#0B1220" stroke-width="1.5"/>
+        <text x="402" y="73" font-size="12">asha@</text><path d="M440 60 V78" stroke="#0B1220" stroke-width="1.6"/>
+        <text x="390" y="108" font-size="11" style="fill:#0B1220">Receives every keystroke.</text>
+        <text x="390" y="124" font-size="11" style="fill:#0B1220">input:focus { … } rules are active.</text>
+      </svg>
+      <div class="fig"><b>FIG 7</b> Unfocused vs focused input. The cyan ring is the <b>focus indicator</b>.</div>
+  </div>
+
+  <div class="g3 mt" style="grid-template-columns:1fr 1fr 1.05fr">
+    <div class="card">
+      <h3>How a control receives focus</h3>
+      <table class="ref tiny">
+        <tr><td>Mouse</td><td>Click the input itself</td></tr>
+        <tr><td>Label</td><td>Click its linked <code>&lt;label&gt;</code></td></tr>
+        <tr><td>Tab</td><td>Next focusable element</td></tr>
+        <tr><td>Shift+Tab</td><td>Previous element</td></tr>
+        <tr><td>Touch</td><td>Tap the field (keyboard opens)</td></tr>
+        <tr><td>Arrows</td><td>Move between radios in one group</td></tr>
+      </table>
+      <p class="expl"><span class="bd pro">PRO NOTE</span>The <code>autofocus</code> attribute and JavaScript <code>el.focus()</code> can also set focus. Leaving focus is called <b>blur</b>. Disabled controls can never be focused; readonly ones can.</p>
+    </div>
+    <div class="card">
+      <h3>Tab order follows source order</h3>
+      <svg viewBox="0 0 300 200" role="img" aria-label="Tab order through a feedback form">
+        <defs><marker id="t-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#0A7AA6"/></marker></defs>
+        <text x="40" y="14" font-size="11" font-weight="700">Feedback form</text>
+        <g font-size="10">
+          <text x="40" y="34">Name</text><rect x="40" y="38" width="240" height="20" rx="3" fill="#fff" stroke="#94A3B8"/>
+          <text x="40" y="76">Email</text><rect x="40" y="80" width="240" height="20" rx="3" fill="#fff" stroke="#0B1220"/><rect x="37" y="77" width="246" height="26" rx="5" fill="none" stroke="#43C7F4" stroke-width="2.5"/>
+          <text x="40" y="120">Rating</text><circle cx="88" cy="116" r="5" fill="#fff" stroke="#566273"/><circle cx="108" cy="116" r="5" fill="#fff" stroke="#566273"/><circle cx="128" cy="116" r="5" fill="#fff" stroke="#566273"/><circle cx="148" cy="116" r="5" fill="#fff" stroke="#566273"/><circle cx="168" cy="116" r="5" fill="#fff" stroke="#566273"/>
+          <text x="40" y="144">Comment</text><rect x="40" y="148" width="240" height="20" rx="3" fill="#fff" stroke="#94A3B8"/>
+          <rect x="40" y="176" width="70" height="20" rx="4" fill="#0B1220"/><text x="75" y="190" text-anchor="middle" style="fill:#fff">Send</text>
+        </g>
+        <g font-size="10" font-weight="700" class="m">
+          <circle cx="16" cy="48" r="9" fill="#43C7F4"/><text x="16" y="52" text-anchor="middle">1</text>
+          <circle cx="16" cy="90" r="9" fill="#0B1220"/><text x="16" y="94" text-anchor="middle" style="fill:#fff">2</text>
+          <circle cx="16" cy="116" r="9" fill="#43C7F4"/><text x="16" y="120" text-anchor="middle">3</text>
+          <circle cx="16" cy="158" r="9" fill="#43C7F4"/><text x="16" y="162" text-anchor="middle">4</text>
+          <circle cx="16" cy="186" r="9" fill="#43C7F4"/><text x="16" y="190" text-anchor="middle">5</text>
+        </g>
+        <path d="M16 58 V78 M16 100 V104 M16 126 V146 M16 168 V174" stroke="#0A7AA6" stroke-width="1.4" marker-end="url(#t-ar)"/>
+      </svg>
+      <div class="fig"><b>FIG 8</b> Focus currently on step 2. A radio group is <i>one</i> Tab stop.</div>
+    </div>
+    <div class="card">
+      <h3>Styling focus with CSS</h3>
+<textarea class="src" data-lang="css" data-size="sm">input {
+  border: 1px solid #94A3B8;
+}
+input:focus {
+  outline: 3px solid #43C7F4;
+  outline-offset: 2px;
+  border-color: #0B1220;
+}</textarea>
+      <div class="view" style="padding:1.6mm 0 0">
+        <div class="f"><label for="p6-a">Normal</label><input type="text" id="p6-a" value="Ravi"></div>
+        <div class="f"><label for="p6-b">Focused (simulated)</label><input type="text" id="p6-b" class="sim-focus" value="Ravi K"></div>
+      </div>
+      <div class="bad"><span class="bd x">WRONG</span><code>input:focus { outline: none; }</code> with no replacement — keyboard users lose their place.</div>
+    </div>
+  </div>
+
+  <div class="g2 mt" style="grid-template-columns:1.2fr 1fr">
+    <div class="card">
+      <h3>Why visible focus indicators matter</h3>
+      <p style="font-size:7.6pt">Keyboard-only users, people with motor impairments and screen-magnifier users navigate with <b>Tab</b>. Without a visible indicator they cannot tell which field they are typing into — like typing with your eyes closed. WCAG success criterion <b>2.4.7 Focus Visible</b> requires a visible focus indicator for keyboard users.</p>
+      <p style="font-size:7.6pt;margin:0"><span class="bd pro">PRO NOTE</span><code>:focus-visible</code> shows the ring for keyboard focus but usually hides it for mouse clicks; <code>fieldset:focus-within</code> can highlight a whole group while any child has focus.</p>
+    </div>
+    <div class="card soft">
+      <h3>Accessible interaction checklist</h3>
+      <ul class="tight" style="font-size:7.5pt">
+        <li>Every control reachable with Tab, in a logical order.</li>
+        <li>Focus ring clearly visible (contrast ≥ 3:1 with background).</li>
+        <li>Clicking a label focuses or toggles its control.</li>
+        <li>Never use colour alone to mark the focused or invalid field.</li>
+        <li>Test by unplugging the mouse: can you book a room?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card mt" style="padding:1.8mm 2.6mm">
+    <h3><span class="bd pro">PRO NOTE</span> Focus among the other interaction states</h3>
+    <table class="ref tiny"><tr><th>Pseudo-class</th><th>Matches when…</th><th>Typical style</th><th>Example on the booking form</th></tr>
+      <tr><td>:hover</td><td>the pointer is over the element</td><td>subtle background</td><td>“Book room” darkens under the mouse</td></tr>
+      <tr><td>:focus</td><td>the element will receive keystrokes</td><td>clear outline ring</td><td>Email field shows the cyan ring</td></tr>
+      <tr><td>:active</td><td>it is being pressed right now</td><td>pressed / inset look</td><td>button while the mouse is down</td></tr>
+      <tr><td>:disabled</td><td>the control has <code>disabled</code></td><td>greyed, no pointer</td><td>sold-out room radio</td></tr>
+    </table>
+  </div>
+  <h3 class="mt">Interaction flow · feedback form, keyboard only</h3>
+  <div class="flow"><div><b>Page loads</b>nothing focused</div><span>→</span><div><b>Tab</b>Name gets focus, <code>:focus</code> ring on</div><span>→</span><div><b>Type</b>keys go into Name</div><span>→</span><div><b>Tab</b>Name blurs, Email focuses</div><span>→</span><div><b>Arrows</b>pick a rating radio</div><span>→</span><div><b>Enter</b>submits the form</div></div>
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b>Focus = <i>who gets the next keystroke</i>. Remove the outline only if you replace it.</div>
+    <div class="e"><b>EXAMPLE</b>Feedback form: Tab → Name → Email → Rating → Comment → Send.</div>
+    <div class="m"><b>COMMON MISTAKE</b>A global <code>*:focus{outline:none}</code> copied from a CSS reset.</div>
+    <div class="q"><b>INTERVIEW</b>“What is the difference between <code>:focus</code> and <code>:focus-visible</code>?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Focus &amp; Interaction</span><span class="pn"><b>06</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 7 : TABLE FUNDAMENTALS ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>07 · TABLES</div><h1>HTML Table Fundamentals</h1></div><div class="chips"><span>&lt;table&gt;</span><span>&lt;tr&gt;</span><span>&lt;th&gt;</span><span>&lt;td&gt;</span></div></header>
+<div class="pc">
+  <div class="g2" style="grid-template-columns:1fr 1fr">
+    <div>
+      <div class="srcdef"><span class="bd src">SOURCE</span>The <code>table</code> element creates an HTML table. <code>tr</code> creates a row, <code>th</code> creates a header cell and <code>td</code> creates a data cell.</div>
+      <p><b>What a table is:</b> data that only makes sense when read <b>across a row and down a column at the same time</b>. “88” means nothing; “Asha Rao’s Maths mark is 88” needs both directions.</p>
+    </div>
+    <div class="card soft"><h3>Analogy · the printed marksheet</h3>
+    Each student gets one <b>line</b> (row). Each subject gets one <b>vertical slot</b> (column). The bold top line names the columns (header cells). Every other box holds one value (data cells). HTML describes this sheet <b>row by row</b>, left to right.</div>
+  </div>
+
+  <div class="mt">
+  <svg viewBox="0 0 920 226" role="img" aria-label="Annotated student marksheet table">
+    <text x="40" y="18" class="m" font-size="11.5" font-weight="700" style="fill:#0A7AA6">&lt;table&gt; — the whole grid</text>
+    <rect x="40" y="28" width="560" height="162" fill="#fff" stroke="#0B1220" stroke-width="2"/>
+    <rect x="40" y="28" width="560" height="34" fill="#0B1220"/>
+    <g font-size="12" font-weight="700" style="fill:#fff" text-anchor="middle">
+      <text x="95" y="50" style="fill:#fff">Roll No</text><text x="240" y="50" style="fill:#fff">Name</text><text x="397" y="50" style="fill:#fff">Maths</text><text x="532" y="50" style="fill:#fff">Physics</text>
+    </g>
+    <path d="M150 28 V190 M330 28 V190 M465 28 V190 M40 94 H600 M40 126 H600 M40 158 H600" stroke="#B8C2CE"/>
+    <rect x="40" y="126" width="560" height="32" fill="#F5F7FA" opacity=".9"/>
+    <g font-size="12">
+      <text x="52" y="83" class="m">21CS001</text><text x="342" y="83" visibility="hidden">.</text><text x="162" y="83">Asha Rao</text><text x="397" y="83" text-anchor="middle">88</text><text x="532" y="83" text-anchor="middle">91</text>
+      <text x="52" y="115" class="m">21CS002</text><text x="162" y="115">Ravi Kumar</text><text x="397" y="115" text-anchor="middle">76</text><text x="532" y="115" text-anchor="middle">84</text>
+      <text x="52" y="147" class="m">21CS003</text><text x="162" y="147">Mei Lin</text><text x="397" y="147" text-anchor="middle">93</text><text x="532" y="147" text-anchor="middle">89</text>
+      <text x="52" y="179" class="m">21CS004</text><text x="162" y="179">Kiran Das</text><text x="397" y="179" text-anchor="middle">81</text><text x="532" y="179" text-anchor="middle">78</text>
+    </g>
+    <rect x="34" y="96" width="572" height="28" rx="4" fill="none" stroke="#43C7F4" stroke-width="2.6"/>
+    <rect x="333" y="24" width="129" height="170" rx="4" fill="none" stroke="#9A6210" stroke-width="1.6" stroke-dasharray="5 4"/>
+    <text x="397" y="212" text-anchor="middle" font-size="10.5" style="fill:#9A6210">column = the same position in every row (no column tag needed)</text>
+    <g>
+      <path d="M600 45 H630" stroke="#0B1220"/><circle cx="600" cy="45" r="3" fill="#0B1220"/>
+      <text x="638" y="44" class="m" font-size="12" font-weight="700">&lt;th&gt; header cell</text><text x="638" y="59" font-size="10.5" style="fill:#566273">Names a column · bold &amp; centred by default</text>
+      <path d="M600 78 H630" stroke="#0B1220"/><circle cx="600" cy="78" r="3" fill="#0B1220"/>
+      <text x="638" y="82" class="m" font-size="12" font-weight="700">&lt;td&gt; data cell</text><text x="638" y="97" font-size="10.5" style="fill:#566273">Holds exactly one value</text>
+      <path d="M606 110 H630" stroke="#0A7AA6" stroke-width="1.6"/><circle cx="606" cy="110" r="3" fill="#0A7AA6"/>
+      <text x="638" y="120" class="m" font-size="12" font-weight="700" style="fill:#0A7AA6">&lt;tr&gt; table row</text><text x="638" y="135" font-size="10.5" style="fill:#566273">A horizontal line of th / td cells</text>
+      <text x="638" y="166" font-size="10.5" style="fill:#566273">Rule: every row should cover the</text><text x="638" y="180" font-size="10.5" style="fill:#566273">same number of columns.</text>
+    </g>
+  </svg>
+  <div class="fig"><b>FIG 9</b> Annotated student marksheet — row, header cell, data cell and the implied column.</div>
+  </div>
+
+  <div class="g2 mt" style="grid-template-columns:1.35fr 1fr">
+    <div>
+      <div class="co">
+<textarea class="src" data-lang="html"><table>
+  <tr>
+    <th>Roll No</th>
+    <th>Name</th>
+    <th>Maths</th>
+  </tr>
+  <tr>
+    <td>21CS001</td>
+    <td>Asha Rao</td>
+    <td>88</td>
+  </tr>
+  <tr>
+    <td>21CS002</td>
+    <td>Ravi Kumar</td>
+    <td>76</td>
+  </tr>
+</table></textarea>
+        <div><div class="browser"><div class="bar"><i></i><i></i><i></i><span>results.html</span></div><div class="view">
+          <table style="font-size:7.4pt"><tr><th style="background:#fff;color:var(--navy);text-align:center">Roll No</th><th style="background:#fff;color:var(--navy);text-align:center">Name</th><th style="background:#fff;color:var(--navy);text-align:center">Maths</th></tr><tr><td>21CS001</td><td>Asha Rao</td><td>88</td></tr><tr><td>21CS002</td><td>Ravi Kumar</td><td>76</td></tr></table>
+          <p style="font-size:6.6pt;color:var(--slate);margin-top:1.4mm">Unstyled output: header cells are bold and centred; borders shown here for clarity — real tables have none until CSS adds them.</p></div></div>
+          <div class="card soft mt1" style="font-size:7.2pt"><h3>Hierarchy</h3><span class="mono">table</span> → <span class="mono">tr</span> → <span class="mono">th</span> | <span class="mono">td</span><br>Cells live in rows; rows live in the table. Text never sits directly in a <code>tr</code>.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <table class="ref tiny">
+        <tr><th></th><th>&lt;th&gt;</th><th>&lt;td&gt;</th></tr>
+        <tr><td>Role</td><td>Describes data (a heading)</td><td>Is the data</td></tr>
+        <tr><td>Default look</td><td>Bold, centred</td><td>Normal, left</td></tr>
+        <tr><td>Screen reader</td><td>Read as the header for its cells</td><td>Read with its header</td></tr>
+        <tr><td>Example</td><td>“Maths”</td><td>“88”</td></tr>
+      </table>
+      <div class="note mt1"><span class="bd pro">PRO NOTE</span>Add <code>scope="col"</code> to column headers and <code>scope="row"</code> to row headers (e.g. a student's name) so assistive technology pairs every cell with the right header.</div>
+      <div class="warn mt1"><b>Use tables for tabular data only.</b> Building page layout with tables makes screen readers announce “table, 3 columns” for a menu. Use CSS Grid/Flexbox for layout.</div>
+      <div class="bad mt1"><span class="bd x">WRONG</span>Rows with different cell counts, or using <code>&lt;th&gt;</code> just to get bold text.</div>
+    </div>
+  </div>
+
+  <div class="g3 mt">
+    <div class="card soft"><h3>Where real projects use tables</h3><span class="bd ok">YES</span>results dashboards, class timetables, room-rate charts, invoices, league standings.<br><span class="bd x">NO</span>navigation menus, page layout, product card grids.</div>
+    <div class="card"><h3>Row headers with scope="row"</h3>
+<textarea class="src" data-lang="html" data-size="sm"><tr>
+  <th scope="row">Asha Rao</th>
+  <td>88</td>
+  <td>91</td>
+</tr></textarea></div>
+    <div class="card soft"><h3>How assistive tech reads it</h3>Moving across Asha's row a screen reader says <i>“Asha Rao, Maths, 88”</i> then <i>“Physics, 91”</i> — row header + column header + value. Without <code>th</code> it would only say <i>“88”</i>.</div>
+  </div>
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b><b>T</b>able holds <b>R</b>ows; rows hold cells — <b>H</b>eaders describe, <b>D</b>ata delivers.</div>
+    <div class="e"><b>EXAMPLE</b>Results dashboard: one <code>tr</code> per student, one <code>td</code> per subject mark.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Thinking in columns: HTML has no “column of cells” — you write rows.</div>
+    <div class="q"><b>INTERVIEW</b>“When should you NOT use a table? What replaces it?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Table Fundamentals</span><span class="pn"><b>07</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 8 : ADVANCED TABLES ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>08 · TABLE STRUCTURE</div><h1>Groups, Captions and Colspan</h1></div><div class="chips"><span>&lt;thead&gt;</span><span>&lt;tbody&gt;</span><span>&lt;tfoot&gt;</span><span>&lt;caption&gt;</span><span>colspan</span></div></header>
+<div class="pc">
+  <div class="srcdef"><span class="bd src">SOURCE</span><code>thead</code> groups the header content, <code>tbody</code> the body content and <code>tfoot</code> the footer content of a table. <code>caption</code> adds a title to the table. <code>colspan</code> specifies how many columns a cell should span.</div>
+  <div class="g2">
+    <div>
+      <svg viewBox="0 0 440 262" role="img" aria-label="Table anatomy with caption, thead, tbody and tfoot">
+        <rect x="14" y="8" width="300" height="26" rx="3" fill="#fff" stroke="#DDE3EA"/>
+        <text x="164" y="26" text-anchor="middle" font-size="12" font-weight="700">Semester 3 Results</text>
+        <rect x="14" y="40" width="300" height="30" fill="#0B1220"/>
+        <g font-size="11" font-weight="700"><text x="24" y="60" style="fill:#fff">Subject</text><text x="150" y="60" style="fill:#fff">Credits</text><text x="240" y="60" style="fill:#fff">Marks</text></g>
+        <rect x="14" y="70" width="300" height="90" fill="#fff" stroke="#B8C2CE"/>
+        <path d="M14 100 H314 M14 130 H314" stroke="#DDE3EA"/>
+        <g font-size="11"><text x="24" y="89">Web Technologies</text><text x="150" y="89">4</text><text x="240" y="89">88</text>
+        <text x="24" y="119">Data Structures</text><text x="150" y="119">4</text><text x="240" y="119">91</text>
+        <text x="24" y="149">Discrete Maths</text><text x="150" y="149">3</text><text x="240" y="149">89</text></g>
+        <rect x="14" y="160" width="300" height="30" fill="#E9F8FE" stroke="#0A7AA6"/>
+        <text x="24" y="180" font-size="11" font-weight="700">Total</text><text x="240" y="180" font-size="11" font-weight="700">268</text>
+        <g class="m" font-size="11" font-weight="700">
+          <path d="M324 10 h6 v22 h-6" stroke="#566273" fill="none"/><text x="338" y="25">&lt;caption&gt;</text>
+          <path d="M324 42 h6 v26 h-6" stroke="#0B1220" fill="none"/><text x="338" y="54">&lt;thead&gt;</text><text x="338" y="67" font-size="9.5" font-weight="400" style="fill:#566273">column headers</text>
+          <path d="M324 72 h6 v86 h-6" stroke="#0B1220" fill="none"/><text x="338" y="112">&lt;tbody&gt;</text><text x="338" y="125" font-size="9.5" font-weight="400" style="fill:#566273">the data rows</text>
+          <path d="M324 162 h6 v26 h-6" stroke="#0A7AA6" fill="none"/><text x="338" y="174" style="fill:#0A7AA6">&lt;tfoot&gt;</text><text x="338" y="187" font-size="9.5" font-weight="400" style="fill:#566273">totals / summary</text>
+        </g>
+        <rect x="6" y="2" width="314" height="196" rx="6" fill="none" stroke="#0A7AA6" stroke-dasharray="5 4"/>
+        <text x="14" y="216" class="m" font-size="10.5" font-weight="700" style="fill:#0A7AA6">all inside &lt;table&gt;</text>
+        <text x="14" y="234" font-size="10.5" style="fill:#566273">Order in code: caption → thead → tbody → tfoot.</text>
+        <text x="14" y="250" font-size="10.5" style="fill:#566273">Each group contains &lt;tr&gt; rows, which contain cells.</text>
+      </svg>
+      <div class="fig"><b>FIG 10</b> HTML table anatomy — caption plus header, body and footer groups.</div>
+    </div>
+    <div>
+      <svg viewBox="0 0 440 262" role="img" aria-label="Colspan illustration">
+        <g class="m" font-size="11" font-weight="700" style="fill:#566273" text-anchor="middle">
+          <text x="70" y="16" style="fill:#566273">col 1</text><text x="170" y="16" style="fill:#566273">col 2</text><text x="270" y="16" style="fill:#566273">col 3</text><text x="370" y="16" style="fill:#566273">col 4</text>
+        </g>
+        <rect x="20" y="24" width="400" height="30" fill="#0B1220"/>
+        <g font-size="11" font-weight="700" text-anchor="middle"><text x="70" y="44" style="fill:#fff">Subject</text><text x="170" y="44" style="fill:#fff">Internal</text><text x="270" y="44" style="fill:#fff">External</text><text x="370" y="44" style="fill:#fff">Total</text></g>
+        <rect x="20" y="54" width="400" height="60" fill="#fff" stroke="#B8C2CE"/>
+        <path d="M120 54 V114 M220 54 V114 M320 24 V144 M20 84 H420" stroke="#B8C2CE"/>
+        <path d="M120 24 V54 M220 24 V54" stroke="#3A475A"/>
+        <g font-size="11" text-anchor="middle"><text x="70" y="74">HTML</text><text x="170" y="74">18</text><text x="270" y="74">70</text><text x="370" y="74">88</text>
+        <text x="70" y="104">CSS</text><text x="170" y="104">17</text><text x="270" y="104">64</text><text x="370" y="104">81</text></g>
+        <rect x="20" y="114" width="300" height="30" fill="#E9F8FE" stroke="#0A7AA6" stroke-width="2"/>
+        <text x="170" y="134" text-anchor="middle" class="m" font-size="11" font-weight="700" style="fill:#0A7AA6">&lt;td colspan="3"&gt;Grand total</text>
+        <rect x="320" y="114" width="100" height="30" fill="#E9F8FE" stroke="#B8C2CE"/><text x="370" y="134" text-anchor="middle" font-size="11" font-weight="700">169</text>
+        <path d="M22 152 v6 h296 v-6 M170 158 v8" stroke="#0A7AA6" stroke-width="1.6" fill="none"/>
+        <text x="170" y="180" text-anchor="middle" font-size="11" font-weight="700" style="fill:#0A7AA6">one cell occupies 3 column slots</text>
+        <text x="220" y="206" text-anchor="middle" font-size="11">Slot count: 3 (spanned) + 1 = <tspan font-weight="700" style="fill:#2E7D4F">4 columns ✓</tspan> matches the header</text>
+        <text x="220" y="228" text-anchor="middle" font-size="11" style="fill:#B23A34">colspan="4" + 1 cell = 5 slots → a ragged extra column ✗</text>
+        <text x="220" y="250" text-anchor="middle" font-size="10" style="fill:#566273">Vertical merging uses rowspan (not part of this review).</text>
+      </svg>
+      <div class="fig"><b>FIG 11</b> Colspan — the cell stretches across columns 1–3 of the footer row.</div>
+    </div>
+  </div>
+
+  <div class="co mt" style="grid-template-columns:1.05fr 1fr">
+    <div><div class="lbl">HTML SOURCE · ACADEMIC RESULTS DASHBOARD</div>
+<textarea class="src" data-lang="html" data-size="sm"><table>
+  <caption>Semester 3 Results — Asha Rao</caption>
+  <thead>
+    <tr>
+      <th scope="col">Subject</th>
+      <th scope="col">Internal</th>
+      <th scope="col">External</th>
+      <th scope="col">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>HTML</td><td>18</td><td>70</td><td>88</td></tr>
+    <tr><td>CSS</td><td>17</td><td>64</td><td>81</td></tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">Grand total</td>
+      <td>169</td>
+    </tr>
+  </tfoot>
+</table></textarea></div>
+    <div><div class="lbl">EXPECTED BROWSER OUTPUT (WITH LIGHT CSS)</div>
+      <div class="browser"><div class="bar"><i></i><i></i><i></i><span>dashboard/results</span></div><div class="view">
+        <table><caption>Semester 3 Results — Asha Rao</caption>
+          <thead><tr><th scope="col">Subject</th><th scope="col">Internal</th><th scope="col">External</th><th scope="col">Total</th></tr></thead>
+          <tbody><tr><td>HTML</td><td>18</td><td>70</td><td>88</td></tr><tr><td>CSS</td><td>17</td><td>64</td><td>81</td></tr></tbody>
+          <tfoot><tr><td colspan="3">Grand total</td><td>169</td></tr></tfoot></table></div></div>
+      <div class="card mt1" style="font-size:7.3pt">
+        <h3>Why group rows semantically?</h3>
+        <ul class="tight">
+          <li><b>Meaning:</b> tools know which rows are headings, data and summary.</li>
+          <li><b>Styling hooks:</b> <code>thead th</code>, <code>tfoot td</code> — no extra classes.</li>
+          <li><b>Printing:</b> browsers can repeat <code>thead</code>/<code>tfoot</code> on every printed page of a long table.</li>
+          <li><b>Scripting:</b> sort or filter only <code>tbody</code> rows; header and totals stay put.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="g3 mt">
+    <div class="note"><b>Accessible header relationships.</b> <code>&lt;caption&gt;</code> gives the table its accessible name (“Semester 3 Results, table”). <code>&lt;th scope="col"&gt;</code> lets a screen reader say “External, 70” as you move across a row.</div>
+    <div class="warn"><b>Rules.</b> <code>caption</code> must be the <b>first</b> child of <code>table</code>. Only one <code>thead</code> and one <code>tfoot</code>; <code>tbody</code> can repeat to split data into sections.</div>
+    <div class="bad"><span class="bd x">WRONG</span>Putting totals in the last <code>tbody</code> row styled bold, or a <code>colspan</code> that makes row slot counts disagree.</div>
+  </div>
+
+  <div class="g2 mt">
+    <div class="card soft"><h3>Planning a colspan in three steps</h3>
+      <div class="flow"><div><b>1 · Count</b>columns in the header row (here 4)</div><span>→</span><div><b>2 · Decide</b>how many the merged cell covers (3)</div><span>→</span><div><b>3 · Remove</b>that many − 1 cells from the row (2)</div></div></div>
+    <div class="card"><h3><span class="bd pro">PRO NOTE</span> Several tbody sections</h3>
+<textarea class="src" data-lang="html" data-size="sm"><tbody><!-- Semester 1 rows --></tbody>
+<tbody><!-- Semester 2 rows --></tbody></textarea>
+      <p class="expl" style="margin-top:.8mm">One table, two logical blocks — each can be styled, sorted or collapsed separately.</p></div>
+  </div>
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b>Head, Body, Foot — like a letter: title on top (caption), greeting, content, signature.</div>
+    <div class="e"><b>EXAMPLE</b>Results table: <code>tfoot</code> row with <code>colspan="3"</code> “Grand total”.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Forgetting to count slots after adding <code>colspan</code>.</div>
+    <div class="q"><b>INTERVIEW</b>“Why use thead/tbody/tfoot if the table looks the same without them?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Advanced Table Structure</span><span class="pn"><b>08</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 9 : PROJECT ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>09 · MINI PROJECT</div><h1>Hotel Guest Registration &amp; Booking Management</h1></div><div class="chips"><span>form</span><span>fieldset</span><span>label</span><span>table</span><span>tfoot</span></div></header>
+<div class="pc">
+  <div class="co" style="grid-template-columns:1.18fr 1fr">
+    <div><div class="lbl">PART A · GUEST REGISTRATION FORM — HTML</div>
+<textarea class="src" data-lang="html" data-size="sm"><form action="/bookings" method="post">
+  <fieldset>
+    <legend>Guest details</legend>
+    <label for="fullname">Full name</label>
+    <input type="text" id="fullname" name="fullname"
+           placeholder="e.g. Asha Rao" minlength="2"
+           maxlength="60" required>
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email"
+           placeholder="you@example.com" required>
+    <label for="phone">Phone number</label>
+    <input type="tel" id="phone" name="phone" size="15"
+           minlength="10" maxlength="15" required>
+    <label for="checkin">Check-in date</label>
+    <input type="date" id="checkin" name="checkin" required>
+    <label for="guests">Number of guests</label>
+    <input type="number" id="guests" name="guests"
+           min="1" max="4" value="1" required>
+    <label for="hotel">Hotel</label>
+    <input type="text" id="hotel" name="hotel"
+           value="Harbour View" readonly>
+  </fieldset>
+  <fieldset>
+    <legend>Room selection</legend>
+    <label><input type="radio" name="room" value="standard"
+                  required> Standard</label>
+    <label><input type="radio" name="room" value="deluxe">
+           Deluxe</label>
+    <label><input type="radio" name="room" value="suite">
+           Suite</label>
+  </fieldset>
+  <fieldset>
+    <legend>Additional services</legend>
+    <label><input type="checkbox" name="services"
+                  value="breakfast"> Breakfast</label>
+    <label><input type="checkbox" name="services"
+                  value="airport"> Airport pickup</label>
+  </fieldset>
+  <button type="submit">Book room</button>
+  <button type="reset">Clear form</button>
+</form></textarea></div>
+    <div><div class="lbl">BROWSER PREVIEW</div>
+      <div class="browser"><div class="bar"><i></i><i></i><i></i><span>harbourview/register</span></div><div class="view">
+        <fieldset><legend>Guest details</legend>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 2mm">
+            <div class="f"><label for="p9-n">Full name</label><input type="text" id="p9-n" placeholder="e.g. Asha Rao"></div>
+            <div class="f"><label for="p9-e">Email</label><input type="email" id="p9-e" placeholder="you@example.com"></div>
+            <div class="f"><label for="p9-p">Phone number</label><input type="tel" id="p9-p" value="9876543210"></div>
+            <div class="f"><label for="p9-c">Check-in date</label><input type="text" id="p9-c" value="18 / 12 / 2026"></div>
+            <div class="f"><label for="p9-g">Number of guests</label><input type="number" id="p9-g" value="1"></div>
+            <div class="f"><label for="p9-h">Hotel</label><input type="text" id="p9-h" value="Harbour View" readonly></div>
+          </div></fieldset>
+        <fieldset><legend>Room selection</legend><label class="opt"><input type="radio" name="p9r"> Standard</label><label class="opt"><input type="radio" name="p9r" checked> Deluxe</label><label class="opt"><input type="radio" name="p9r"> Suite</label></fieldset>
+        <fieldset><legend>Additional services</legend><label class="opt"><input type="checkbox" checked> Breakfast</label><label class="opt"><input type="checkbox"> Airport pickup</label></fieldset>
+        <button type="button">Book room</button><button type="button" class="ghost">Clear form</button>
+      </div></div>
+      <div class="card mt1" style="font-size:7.1pt;line-height:1.33">
+        <h3>Key decisions in Part A</h3>
+        <ul class="tight">
+          <li><b>Explicit labels</b> (<code>for</code>/<code>id</code>) for text fields; <b>implicit</b> labels wrap radios and checkboxes.</li>
+          <li><b>Three fieldsets</b> = three questions a guest answers; each <code>legend</code> names it.</li>
+          <li><code>name="room"</code> on all radios → one choice; <code>required</code> on the first makes the group required.</li>
+          <li><code>min="1" max="4"</code> caps guests; <code>readonly</code> hotel is shown <i>and</i> submitted.</li>
+          <li><span class="bd pro">PRO NOTE</span><code>tel</code> and <code>date</code> are supplementary types beyond the source list.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="co mt" style="grid-template-columns:1.18fr 1fr">
+    <div><div class="lbl">PART B · GUEST BOOKINGS TABLE — HTML</div>
+<textarea class="src" data-lang="html" data-size="sm"><table>
+  <caption>Guest bookings — Harbour View</caption>
+  <thead>
+    <tr>
+      <th scope="col">Booking ID</th><th scope="col">Guest name</th>
+      <th scope="col">Room type</th><th scope="col">Check-in</th>
+      <th scope="col">Guests</th><th scope="col">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>HV-1042</td><td>Asha Rao</td><td>Deluxe</td>
+        <td>2026-12-18</td><td>2</td><td>Confirmed</td></tr>
+    <tr><td>HV-1043</td><td>Ravi Kumar</td><td>Suite</td>
+        <td>2026-12-20</td><td>3</td><td>Pending</td></tr>
+  </tbody>
+  <tfoot>
+    <tr><td colspan="4">Total guests</td><td>5</td><td></td></tr>
+  </tfoot>
+</table></textarea></div>
+    <div><div class="lbl">BROWSER PREVIEW</div>
+      <div class="browser"><div class="bar"><i></i><i></i><i></i><span>harbourview/bookings</span></div><div class="view">
+        <table style="font-size:6.9pt"><caption>Guest bookings — Harbour View</caption>
+          <thead><tr><th>Booking ID</th><th>Guest name</th><th>Room type</th><th>Check-in</th><th>Guests</th><th>Status</th></tr></thead>
+          <tbody><tr><td>HV-1042</td><td>Asha Rao</td><td>Deluxe</td><td>2026-12-18</td><td>2</td><td style="color:var(--green);font-weight:600">Confirmed</td></tr>
+          <tr><td>HV-1043</td><td>Ravi Kumar</td><td>Suite</td><td>2026-12-20</td><td>3</td><td style="color:var(--amber);font-weight:600">Pending</td></tr></tbody>
+          <tfoot><tr><td colspan="4">Total guests</td><td>5</td><td></td></tr></tfoot></table>
+      </div></div>
+      <div class="card soft mt1" style="font-size:7.1pt;line-height:1.33"><h3>How Part A connects to Part B</h3>
+        Form <code>name</code> keys become table columns: <code>fullname</code> → Guest name · <code>room</code> → Room type · <code>checkin</code> → Check-in · <code>guests</code> → Guests. A backend would receive the POST, assign a Booking ID and status, store the row, and generate this table.</div>
+      <div class="warn mt1" style="font-size:7.1pt"><b>Honest scope:</b> this is static HTML. Nothing is stored — <code>/bookings</code> needs a real server, and the server must re-validate every field.</div>
+    </div>
+  </div>
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b>Every form <code>name</code> becomes a table column — design both together.</div>
+    <div class="e"><b>EXAMPLE</b>Add “Nights” → new <code>&lt;input name="nights"&gt;</code> <i>and</i> a new <code>&lt;th&gt;</code> + <code>&lt;td&gt;</code>; bump <code>colspan</code>.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Adding a table column but forgetting to update the footer <code>colspan</code>.</div>
+    <div class="q"><b>INTERVIEW</b>“Walk me through what happens between clicking Book room and seeing the new row.”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Integrated Project</span><span class="pn"><b>09</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 10 : TOOLS ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>10 · TOOLING</div><h1>HTML Validator, DOM Inspector and DevTools</h1></div><div class="chips"><span>validator</span><span>DOM</span><span>Elements</span><span>Console</span><span>Network</span></div></header>
+<div class="pc">
+  <div class="srcdef"><span class="bd src">SOURCE</span>An <b>HTML validator</b> checks the syntax of HTML code to ensure it is valid. A <b>DOM inspector</b> lets you inspect and modify the HTML structure of a page. <b>DevTools</b> are web developer tools built into the browser that help you debug, profile and analyse pages.</div>
+  <div class="g2" style="grid-template-columns:1fr 1.15fr">
+    <div>
+      <h2>Source HTML ≠ the DOM</h2>
+      <p style="font-size:7.7pt">Your <b>source</b> is the text file you wrote. The <b>DOM</b> (Document Object Model) is the live <b>tree of objects</b> the browser builds after parsing it — like a builder turning a blueprint into a building, fixing small blueprint errors on the way. DevTools shows the DOM, not your file.</p>
+      <div class="co" style="grid-template-columns:1fr">
+<textarea class="src" data-lang="html" data-size="sm"><!-- your source file: no <tbody> written -->
+<form action="/book">
+  <label for="email">Email</label>
+  <input id="email" name="email">
+</form>
+<table>
+  <tr><td>HV-1042</td></tr>
+</table></textarea>
+      </div>
+      <p class="expl">The parser silently inserts <code>&lt;tbody&gt;</code> (and <code>html</code>/<code>head</code>/<code>body</code> if missing). That is why the Elements panel can show tags you never typed.</p>
+    </div>
+    <div>
+      <svg viewBox="0 0 440 280" role="img" aria-label="DOM tree diagram">
+        <g stroke="#94A3B8" stroke-width="1.4" fill="none">
+          <path d="M220 34 L110 64 M220 34 L320 64 M320 88 L250 114 M320 88 L390 114 M250 138 L200 164 M250 138 L300 164 M390 138 L390 164 M390 188 L390 210"/>
+        </g>
+        <g font-size="11" class="m" text-anchor="middle" font-weight="700">
+          <rect x="180" y="10" width="80" height="24" rx="5" fill="#0B1220"/><text x="220" y="26" style="fill:#fff">html</text>
+          <rect x="72" y="64" width="76" height="24" rx="5" fill="#fff" stroke="#0B1220"/><text x="110" y="80">head</text>
+          <rect x="282" y="64" width="76" height="24" rx="5" fill="#fff" stroke="#0B1220"/><text x="320" y="80">body</text>
+          
+          <rect x="212" y="114" width="76" height="24" rx="5" fill="#E9F8FE" stroke="#0A7AA6"/><text x="250" y="130">form</text>
+          <rect x="352" y="114" width="76" height="24" rx="5" fill="#fff" stroke="#0B1220"/><text x="390" y="130">table</text>
+          <rect x="162" y="164" width="76" height="24" rx="5" fill="#fff" stroke="#0A7AA6"/><text x="200" y="180">label</text>
+          <rect x="262" y="164" width="76" height="24" rx="5" fill="#fff" stroke="#0A7AA6"/><text x="300" y="180">input</text>
+          <rect x="352" y="164" width="76" height="24" rx="5" fill="#FBF3E3" stroke="#9A6210" stroke-dasharray="4 3"/><text x="390" y="180" style="fill:#9A6210">tbody</text>
+          <rect x="352" y="210" width="76" height="24" rx="5" fill="#fff" stroke="#0B1220"/><text x="390" y="226">tr</text>
+        </g>
+        <path d="M390 234 L390 252" stroke="#94A3B8" stroke-width="1.4"/>
+        <rect x="352" y="252" width="76" height="24" rx="5" fill="#fff" stroke="#0B1220"/>
+        <text x="390" y="268" text-anchor="middle" class="m" font-size="11" font-weight="700">td</text>
+        <text x="10" y="210" font-size="10.5" style="fill:#566273">Each box is a node.</text>
+        <text x="10" y="226" font-size="10.5" style="fill:#566273">Lines are parent → child.</text>
+        <rect x="10" y="240" width="14" height="10" rx="2" fill="#FBF3E3" stroke="#9A6210" stroke-dasharray="3 2"/>
+        <text x="30" y="249" font-size="10.5" style="fill:#9A6210">added by the browser</text>
+      </svg>
+      <div class="fig"><b>FIG 12</b> DOM tree built from the source on the left.</div>
+    </div>
+  </div>
+
+  <div class="mt">
+  <svg viewBox="0 0 920 250" role="img" aria-label="Browser DevTools illustration">
+    <rect x="1" y="1" width="918" height="248" rx="9" fill="#fff" stroke="#0B1220" stroke-width="1.5"/>
+    <path d="M1 24 H919" stroke="#DDE3EA"/><circle cx="16" cy="12" r="4" fill="#C9D1DB"/><circle cx="30" cy="12" r="4" fill="#C9D1DB"/><circle cx="44" cy="12" r="4" fill="#C9D1DB"/>
+    <text x="70" y="16" class="m" font-size="10" style="fill:#566273">localhost/book — page being inspected</text>
+    <text x="20" y="48" font-size="11" font-weight="600">Email</text>
+    <rect x="70" y="34" width="220" height="22" rx="3" fill="#CFEFFC" stroke="#0A7AA6" stroke-width="1.5"/>
+    <rect x="300" y="36" width="138" height="18" rx="3" fill="#0B1220"/><text x="308" y="49" class="m" font-size="9.5" style="fill:#fff">input#email  220 × 22</text>
+    <rect x="460" y="34" width="70" height="22" rx="4" fill="#0B1220"/><text x="495" y="49" text-anchor="middle" font-size="10" style="fill:#fff">Book</text>
+    <path d="M1 68 H919" stroke="#0B1220"/>
+    <rect x="1" y="68" width="918" height="22" fill="#F5F7FA"/>
+    <g font-size="10.5"><text x="16" y="83" font-weight="700">Elements</text><text x="90" y="83" style="fill:#566273">Console</text><text x="152" y="83" style="fill:#566273">Sources</text><text x="214" y="83" style="fill:#566273">Network</text><text x="292" y="83" style="fill:#566273">Application</text></g>
+    <path d="M12 89 H76" stroke="#43C7F4" stroke-width="2.6"/>
+    <g class="m" font-size="10.5">
+      <text x="16" y="110" style="fill:#0A6E96">&lt;form <tspan style="fill:#8A4B08">action</tspan>=<tspan style="fill:#2E7D4F">"/book"</tspan> <tspan style="fill:#8A4B08">method</tspan>=<tspan style="fill:#2E7D4F">"post"</tspan>&gt;</text>
+      <text x="16" y="127" style="fill:#0A6E96">  &lt;label <tspan style="fill:#8A4B08">for</tspan>=<tspan style="fill:#2E7D4F">"email"</tspan>&gt;<tspan style="fill:#0B1220">Email</tspan>&lt;/label&gt;</text>
+      <rect x="10" y="133" width="500" height="18" fill="#E9F8FE"/>
+      <text x="16" y="146" style="fill:#0A6E96">  &lt;input <tspan style="fill:#8A4B08">type</tspan>=<tspan style="fill:#2E7D4F">"email"</tspan> <tspan style="fill:#8A4B08">id</tspan>=<tspan style="fill:#2E7D4F">"email"</tspan> <tspan style="fill:#8A4B08">name</tspan>=<tspan style="fill:#2E7D4F">"email"</tspan>&gt; <tspan style="fill:#94A3B8">== $0</tspan></text>
+      <text x="16" y="163" style="fill:#0A6E96">  &lt;button <tspan style="fill:#8A4B08">type</tspan>=<tspan style="fill:#2E7D4F">"submit"</tspan>&gt;<tspan style="fill:#0B1220">Book</tspan>&lt;/button&gt;</text>
+      <text x="16" y="180" style="fill:#0A6E96">&lt;/form&gt;</text>
+    </g>
+    <path d="M530 90 V196" stroke="#DDE3EA"/>
+    <text x="544" y="108" font-size="10.5" font-weight="700">Styles</text><text x="590" y="108" class="m" font-size="9.5" style="fill:#566273">:hov  .cls  +</text>
+    <g class="m" font-size="10.5">
+      <text x="544" y="128">input:focus {</text>
+      <rect x="556" y="133" width="9" height="9" rx="1.5" fill="#0A7AA6"/><text x="570" y="142"><tspan style="fill:#8A4B08">outline</tspan>: 3px solid #43C7F4;</text>
+      <text x="544" y="156">}</text>
+      <text x="544" y="176">input {</text>
+      <rect x="556" y="181" width="9" height="9" rx="1.5" fill="#fff" stroke="#566273"/><text x="570" y="190" style="fill:#94A3B8;text-decoration:line-through"><tspan>border: 1px solid #94A3B8;</tspan></text>
+    </g>
+    <path d="M1 196 H919" stroke="#DDE3EA"/>
+    <text x="16" y="212" font-size="10.5" font-weight="700">Console</text>
+    <rect x="80" y="201" width="830" height="16" fill="#FBECEB"/><text x="88" y="213" class="m" font-size="10" style="fill:#B23A34">✖ Uncaught TypeError: Cannot read properties of null (reading 'value')   app.js:12</text>
+    <rect x="80" y="221" width="830" height="16" fill="#FBF3E3"/><text x="88" y="233" class="m" font-size="10" style="fill:#9A6210">⚠ [DOM] Found 2 elements with non-unique id #email</text>
+    <g font-size="10" font-weight="700" class="m" text-anchor="middle">
+      <circle cx="502" cy="142" r="9" fill="#43C7F4"/><text x="502" y="146">1</text>
+      <circle cx="900" cy="140" r="9" fill="#43C7F4"/><text x="900" y="144">2</text>
+      <circle cx="60" cy="226" r="9" fill="#43C7F4"/><text x="60" y="230">3</text>
+      <circle cx="274" cy="78" r="9" fill="#43C7F4"/><text x="274" y="82">4</text>
+    </g>
+  </svg>
+  <div class="fig"><b>FIG 13</b> DevTools: <b>1</b> Elements = DOM inspector (selected node) · <b>2</b> Styles — untick or edit rules live; changes are <i>temporary</i> and vanish on reload · <b>3</b> Console — JavaScript errors and DOM warnings · <b>4</b> Network — see the form request and its <span class="mono">name=value</span> payload.</div>
+  </div>
+
+  <div class="g2 mt" style="grid-template-columns:1fr 1fr">
+    <div class="card">
+      <h3>HTML validation workflow</h3>
+      <div class="flow"><div><b>Write</b>save .html</div><span>→</span><div><b>Check</b>validator.w3.org (paste, upload or URL)</div><span>→</span><div><b>Read</b>errors &amp; warnings with line numbers</div><span>→</span><div><b>Fix</b>source file, re-check</div></div>
+      <p class="expl" style="font-family:Consolas,monospace;font-size:6.7pt;color:var(--red)">Error: Duplicate ID “email”.<br>Error: Stray end tag “div”.<br>Error: Element “td” not allowed as child of “form” here.</p>
+      <p class="expl">Example messages of the kind the W3C Nu checker reports. The validator reads your <b>source</b>; it does not run the page.</p>
+    </div>
+    <div class="card">
+      <h3>Debugging workflow in DevTools</h3>
+      <div class="flow"><div><b>Reproduce</b>the bug</div><span>→</span><div><b>Inspect</b>Ctrl+Shift+C on the element</div><span>→</span><div><b>Styles</b>edit CSS live to test a fix</div><span>→</span><div><b>Console</b>read errors</div><span>→</span><div><b>Network</b>check payload</div></div>
+      <p class="expl">Open DevTools with <b>F12</b> or <b>Ctrl+Shift+I</b> (<b>Cmd+Opt+I</b> on macOS). Once a live edit works, copy it into your real source file — DevTools never saves to your project by default.</p>
+    </div>
+  </div>
+
+  <table class="ref tiny mt">
+    <tr><th>Tool</th><th>Looks at</th><th>Answers the question</th><th>Typical use</th></tr>
+    <tr><td>HTML Validator</td><td>Your source code (static)</td><td>“Is my markup valid HTML?”</td><td>Before shipping; when layout breaks mysteriously</td></tr>
+    <tr><td>DOM Inspector</td><td>The live DOM tree</td><td>“What did the browser actually build?”</td><td>Find hidden/duplicated elements, wrong nesting, test attribute edits</td></tr>
+    <tr><td>DevTools</td><td>Everything: DOM, CSS, JS, network, storage</td><td>“Why does the page behave like this?”</td><td>Debug styles, errors, form requests, performance</td></tr>
+  </table>
+  <div class="spacer"></div>
+  <div class="mem">
+    <div class="r"><b>MEMORY RULE</b>Validator checks the <i>blueprint</i>; the Inspector shows the <i>building</i>; DevTools is the whole <i>toolbox</i>.</div>
+    <div class="e"><b>EXAMPLE</b>Label not working → Inspector shows two <code>id="email"</code> nodes.</div>
+    <div class="m"><b>COMMON MISTAKE</b>Fixing CSS in DevTools and forgetting to copy it into the file.</div>
+    <div class="q"><b>INTERVIEW</b>“Why does DevTools show a <code>&lt;tbody&gt;</code> that is not in my file?”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Developer Tools</span><span class="pn"><b>10</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 11 : REFERENCE ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>11 · REFERENCE</div><h1>Professional Developer Reference</h1></div><div class="chips"><span>14 elements</span><span>16 attributes</span><span>3 tools</span></div></header>
+<div class="pc">
+  <div class="g2" style="grid-template-columns:1fr 1.08fr;align-items:start">
+    <table class="ref tiny fx"><colgroup><col style="width:17%"><col style="width:30%"><col style="width:53%"></colgroup>
+      <tr><th>Element</th><th>Purpose</th><th>Typical syntax</th></tr>
+      <tr><td>&lt;form&gt;</td><td>Container that sends input data</td><td><code>&lt;form action="/book" method="post"&gt;</code></td></tr>
+      <tr><td>&lt;input&gt;</td><td>Field for user input (void, no end tag)</td><td><code>&lt;input type="email" name="email"&gt;</code></td></tr>
+      <tr><td>&lt;label&gt;</td><td>Caption linked to one control</td><td><code>&lt;label for="email"&gt;Email&lt;/label&gt;</code></td></tr>
+      <tr><td>&lt;button&gt;</td><td>Clickable button</td><td><code>&lt;button type="submit"&gt;Book&lt;/button&gt;</code></td></tr>
+      <tr><td>&lt;fieldset&gt;</td><td>Groups related controls</td><td><code>&lt;fieldset&gt;…&lt;/fieldset&gt;</code></td></tr>
+      <tr><td>&lt;legend&gt;</td><td>Caption of a fieldset (first child)</td><td><code>&lt;legend&gt;Room type&lt;/legend&gt;</code></td></tr>
+      <tr><td>&lt;table&gt;</td><td>Container for tabular data</td><td><code>&lt;table&gt;…&lt;/table&gt;</code></td></tr>
+      <tr><td>&lt;caption&gt;</td><td>Table title (first child of table)</td><td><code>&lt;caption&gt;Results&lt;/caption&gt;</code></td></tr>
+      <tr><td>&lt;thead&gt;</td><td>Groups header rows</td><td><code>&lt;thead&gt;&lt;tr&gt;…&lt;/tr&gt;&lt;/thead&gt;</code></td></tr>
+      <tr><td>&lt;tbody&gt;</td><td>Groups data rows</td><td><code>&lt;tbody&gt;&lt;tr&gt;…&lt;/tr&gt;&lt;/tbody&gt;</code></td></tr>
+      <tr><td>&lt;tfoot&gt;</td><td>Groups footer / summary rows</td><td><code>&lt;tfoot&gt;&lt;tr&gt;…&lt;/tr&gt;&lt;/tfoot&gt;</code></td></tr>
+      <tr><td>&lt;tr&gt;</td><td>One table row</td><td><code>&lt;tr&gt;&lt;td&gt;88&lt;/td&gt;&lt;/tr&gt;</code></td></tr>
+      <tr><td>&lt;th&gt;</td><td>Header cell</td><td><code>&lt;th scope="col"&gt;Maths&lt;/th&gt;</code></td></tr>
+      <tr><td>&lt;td&gt;</td><td>Data cell</td><td><code>&lt;td&gt;88&lt;/td&gt;</code></td></tr>
+      <tr><th>Tool</th><th>Purpose</th><th>Open / use</th></tr>
+      <tr><td>Validator</td><td>Checks HTML syntax is valid</td><td>validator.w3.org</td></tr>
+      <tr><td>DOM inspector</td><td>Inspect / modify live structure</td><td>DevTools → Elements</td></tr>
+      <tr><td>DevTools</td><td>Debug, profile, analyse pages</td><td>F12 · Ctrl+Shift+I</td></tr>
+    </table>
+    <table class="ref tiny fx"><colgroup><col style="width:19%"><col style="width:19%"><col style="width:35%"><col style="width:27%"></colgroup>
+      <tr><th>Attribute</th><th>On</th><th>Purpose</th><th>Example</th></tr>
+      <tr><td>action</td><td>form</td><td>URL that receives the data</td><td><code>action="/book"</code></td></tr>
+      <tr><td>method</td><td>form</td><td>HTTP method: GET or POST</td><td><code>method="post"</code></td></tr>
+      <tr><td>type</td><td>input, button</td><td>Kind of control / button behaviour</td><td><code>type="number"</code></td></tr>
+      <tr><td>placeholder</td><td>input</td><td>Hint text, not submitted</td><td><code>placeholder="e.g. Asha"</code></td></tr>
+      <tr><td>value</td><td>input</td><td>Data / button text</td><td><code>value="deluxe"</code></td></tr>
+      <tr><td>name</td><td>input, button</td><td>Submission key; groups radios</td><td><code>name="room"</code></td></tr>
+      <tr><td>size</td><td>input</td><td>Visible width in characters</td><td><code>size="15"</code></td></tr>
+      <tr><td>min</td><td>input</td><td>Minimum value</td><td><code>min="1"</code></td></tr>
+      <tr><td>max</td><td>input</td><td>Maximum value</td><td><code>max="4"</code></td></tr>
+      <tr><td>minlength</td><td>input</td><td>Minimum characters</td><td><code>minlength="2"</code></td></tr>
+      <tr><td>maxlength</td><td>input</td><td>Maximum characters</td><td><code>maxlength="60"</code></td></tr>
+      <tr><td>required</td><td>input</td><td>Must be filled before submit</td><td><code>required</code></td></tr>
+      <tr><td>disabled</td><td>input, button, fieldset</td><td>Off: not editable, focusable or sent</td><td><code>disabled</code></td></tr>
+      <tr><td>readonly</td><td>input</td><td>Not editable, but focusable and sent</td><td><code>readonly</code></td></tr>
+      <tr><td>for</td><td>label</td><td>Links label to the input with that id</td><td><code>for="email"</code></td></tr>
+      <tr><td>colspan</td><td>th, td</td><td>Number of columns the cell spans</td><td><code>colspan="3"</code></td></tr>
+      <tr><td colspan="4" style="font-family:inherit;font-weight:400;color:var(--slate);white-space:normal"><span class="bd pro">PRO NOTE</span>Used alongside: <code>id</code> (unique hook), <code>scope</code> (header direction), <code>checked</code> (default radio/checkbox).</td></tr>
+    </table>
+  </div>
+
+  <h2 class="mt"><span class="n">CARDS</span>The nine distinctions interviewers love</h2>
+  <div class="g3">
+    <div class="cmp"><div class="h">GET vs POST</div><div class="b"><div><b>GET</b>Data in URL. Bookmarkable. For reading: search, filters.</div><div><b>POST</b>Data in body. For changing: bookings, logins. Use HTTPS.</div></div></div>
+    <div class="cmp"><div class="h">id vs name</div><div class="b"><div><b>id</b>Unique on the page. For labels, CSS, JS. Not sent.</div><div><b>name</b>Key sent to server. Can repeat (radio groups).</div></div></div>
+    <div class="cmp"><div class="h">placeholder vs value</div><div class="b"><div><b>placeholder</b>Grey hint. Disappears. Never sent.</div><div><b>value</b>Real data. Shown as text. Sent on submit.</div></div></div>
+    <div class="cmp"><div class="h">disabled vs readonly</div><div class="b"><div><b>disabled</b>Greyed, skipped by Tab, <b style="display:inline;color:var(--red)">not sent</b>.</div><div><b>readonly</b>Locked but focusable, copyable, <b style="display:inline;color:var(--green)">sent</b>.</div></div></div>
+    <div class="cmp"><div class="h">implicit vs explicit label</div><div class="b"><div><b>implicit</b>Input nested inside <code>&lt;label&gt;</code>. No id needed.</div><div><b>explicit</b><code>for</code> = input's <code>id</code>. Elements can be apart.</div></div></div>
+    <div class="cmp"><div class="h">submit vs reset vs button</div><div class="b three"><div><b>submit</b>Validates &amp; sends. Default.</div><div><b>reset</b>Restores initial values.</div><div><b>button</b>No action; for JS.</div></div></div>
+    <div class="cmp"><div class="h">th vs td</div><div class="b"><div><b>th</b>Header: describes a row/column. Bold, centred.</div><div><b>td</b>Data: one value, read with its header.</div></div></div>
+    <div class="cmp"><div class="h">thead vs tbody vs tfoot</div><div class="b three"><div><b>thead</b>Column headings.</div><div><b>tbody</b>Data rows; may repeat.</div><div><b>tfoot</b>Totals / summary.</div></div></div>
+    <div class="cmp"><div class="h">Validator vs Inspector vs DevTools</div><div class="b three"><div><b>Validator</b>Checks source syntax.</div><div><b>Inspector</b>Views live DOM.</div><div><b>DevTools</b>Full debug suite.</div></div></div>
+  </div>
+  <div class="note mt"><b>Security reminder.</b> <code>required</code>, <code>min</code>, <code>maxlength</code> and <code>type="email"</code> improve <i>user experience</i> only. Anyone can remove them in DevTools or send a request without a browser. The server must validate every value again.</div>
+  <div class="mem mt">
+    <div class="r"><b>MEMORY RULE</b>Elements give <i>structure</i>; attributes give <i>behaviour</i>; tools give <i>proof</i>.</div>
+    <div class="e"><b>EXAMPLE</b><code>&lt;input type="number" name="guests" min="1" max="4" required&gt;</code></div>
+    <div class="m"><b>COMMON MISTAKE</b>Memorising tags without their pairs — interviews ask for <i>differences</i>.</div>
+    <div class="q"><b>INTERVIEW</b>“Name the attribute that links a label to an input, and what it must match.”</div>
+  </div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Reference</span><span class="pn"><b>11</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 12 : INTERVIEW ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>12 · INTERVIEW PREP</div><h1>20 Technical Interview Questions</h1></div><div class="chips"><span>DEF</span><span>DIFF</span><span>PRACTICAL</span><span>DEBUG</span><span>A11Y</span><span>SCENARIO</span></div></header>
+<div class="pc">
+  <div class="qa">
+    <div class="q"><b><em>DEF</em>1. What do the <code>action</code> and <code>method</code> attributes of a form do?</b><code>action</code> is the URL that receives the submitted data; <code>method</code> is the HTTP method (GET or POST) used to send it. Defaults: current URL and GET.</div>
+    <div class="q"><b><em>DIFF</em>2. Explain GET vs POST with a real example.</b>GET appends <code>name=value</code> pairs to the URL — ideal for a hotel search you can bookmark. POST sends them in the request body — right for creating a booking or logging in. Neither encrypts; HTTPS does.</div>
+    <div class="q"><b><em>DEBUG</em>3. A field is filled in but the server never receives it. Why?</b>Most likely the input has no <code>name</code>, or it is <code>disabled</code>, or it is an unchecked checkbox/radio, or it sits outside the <code>&lt;form&gt;</code>.</div>
+    <div class="q"><b><em>DIFF</em>4. What is the difference between <code>id</code> and <code>name</code>?</b><code>id</code> must be unique and is used by labels, CSS and JavaScript; it is not submitted. <code>name</code> is the key in submitted data and may be shared, e.g. by a radio group.</div>
+    <div class="q"><b><em>DIFF</em>5. <code>placeholder</code> vs <code>value</code>?</b>A placeholder is a temporary hint that is never sent. A value is real data: it is displayed as content and submitted.</div>
+    <div class="q"><b><em>DIFF</em>6. <code>disabled</code> vs <code>readonly</code>?</b>Both block editing. Disabled controls cannot be focused and are <b>not submitted</b>; readonly controls can be focused and copied and <b>are submitted</b> — use readonly for a booking ID the server needs.</div>
+    <div class="q"><b><em>DEF</em>7. Does <code>size="4"</code> limit input to four characters?</b>No. <code>size</code> sets the visible width in characters. <code>maxlength</code> limits characters; <code>min</code>/<code>max</code> limit numeric values.</div>
+    <div class="q"><b><em>PRACTICAL</em>8. How do you make three radio buttons mutually exclusive?</b>Give them the same <code>name</code> (e.g. <code>name="room"</code>) and different <code>value</code>s. Wrap them in a fieldset with a legend.</div>
+    <div class="q"><b><em>DIFF</em>9. Implicit vs explicit label association?</b>Implicit nests the input inside <code>&lt;label&gt;</code>. Explicit uses <code>&lt;label for="x"&gt;</code> that matches <code>id="x"</code> on the input, so they can be separated in the markup.</div>
+    <div class="q"><b><em>DEBUG</em>10. Find the bug: <code>&lt;label for="Email"&gt;</code> … <code>&lt;input id="email"&gt;</code></b><code>for</code> and <code>id</code> are case-sensitive: “Email” ≠ “email”, so the label is not linked. Make them identical and check the id is unique.</div>
+    <div class="q"><b><em>A11Y</em>11. Why is a placeholder not a replacement for a label?</b>It disappears as soon as the user types, often has low contrast, and is not reliably announced as the field's name. Labels stay visible and are always announced.</div>
+    <div class="q"><b><em>DEF</em>12. What is a button's default type, and why specify it?</b><code>submit</code>. A “Show password” or “Add guest” button without <code>type="button"</code> would submit the form by accident.</div>
+    <div class="q"><b><em>PRACTICAL</em>13. Does a reset button empty the form?</b>Not necessarily — it restores each control to its <i>initial</i> HTML state. A field with <code>value="1"</code> goes back to 1.</div>
+    <div class="q"><b><em>A11Y</em>14. Why use <code>fieldset</code> and <code>legend</code> for a radio group?</b>The legend is announced as the group's name (“Room type, group”), giving context to short option labels like “Deluxe”. It also organises long forms visually.</div>
+    <div class="q"><b><em>A11Y</em>15. A designer asks you to remove the blue focus ring. What do you do?</b>Never remove it without a replacement: keyboard users would lose their place (WCAG 2.4.7). Restyle it with <code>:focus</code>/<code>:focus-visible</code> using a clear, high-contrast outline.</div>
+    <div class="q"><b><em>SCENARIO</em>16. The form has <code>required</code> and <code>maxlength</code>. Is server validation still needed?</b>Yes. Client-side rules can be bypassed by editing the DOM or sending a raw request. The server must re-validate, sanitise and authorise every value.</div>
+    <div class="q"><b><em>DIFF</em>17. <code>th</code> vs <code>td</code> — and what does <code>scope</code> add?</b><code>th</code> is a header cell that describes data; <code>td</code> holds the data. <code>scope="col"</code>/<code>"row"</code> tells assistive technology which cells a header describes.</div>
+    <div class="q"><b><em>DEF</em>18. Why use <code>thead</code>, <code>tbody</code> and <code>tfoot</code>?</b>They give rows meaning (headings, data, summary), provide CSS/JS hooks, let headers and footers repeat on printed pages, and help assistive technology.</div>
+    <div class="q"><b><em>DEBUG</em>19. A footer row with <code>colspan="4"</code> sticks out past a 4-column table. Why?</b>The row has the spanned cell <i>plus</i> another cell = 5 slots. Make the counts match: <code>colspan="3"</code> + 1 cell = 4.</div>
+    <div class="q"><b><em>SCENARIO</em>20. DevTools shows a <code>&lt;tbody&gt;</code> that isn't in your file. Explain.</b>DevTools shows the DOM, not the source. The HTML parser inserts <code>tbody</code> automatically. The validator checks source syntax; the inspector shows what the browser built.</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="note"><b>How to answer in an interview:</b> definition in one sentence → a concrete example (hotel, university, results) → the trap or accessibility/security consequence. That three-step answer signals real-world experience.</div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Interview Preparation</span><span class="pn"><b>12</b> / 13</span></footer>
+</section>
+
+<!-- ============================ PAGE 13 : MIND MAP + REVISION ============================ -->
+<section class="page">
+<header class="ph"><div><div class="sec"><i></i>13 · REVISION</div><h1>Mind Map and 5-Minute Revision Sheet</h1></div><div class="chips"><span>forms</span><span>tables</span><span>tools</span></div></header>
+<div class="pc">
+  <svg viewBox="0 0 920 420" role="img" aria-label="Mind map connecting forms, tables and developer tools">
+    <g stroke-width="1.6" fill="none">
+      <path d="M380 170 L270 170" stroke="#0B1220"/>
+      <path d="M540 170 L650 170" stroke="#0B1220"/>
+      <path d="M460 195 L460 300" stroke="#0B1220"/>
+      <g stroke="#0A7AA6">
+        <path d="M210 170 C180 170, 190 36, 184 36"/><path d="M210 170 C180 170, 190 88, 184 88"/><path d="M210 170 C180 170, 190 140, 184 140"/>
+        <path d="M210 170 C180 170, 190 192, 184 192"/><path d="M210 170 C180 170, 190 244, 184 244"/><path d="M210 170 C180 170, 190 296, 184 296"/>
+      </g>
+      <g stroke="#9A6210">
+        <path d="M710 170 C740 170, 720 36, 736 36"/><path d="M710 170 C740 170, 720 88, 736 88"/><path d="M710 170 C740 170, 720 140, 736 140"/>
+        <path d="M710 170 C740 170, 720 192, 736 192"/><path d="M710 170 C740 170, 720 244, 736 244"/><path d="M710 170 C740 170, 720 296, 736 296"/>
+      </g>
+      <g stroke="#2E7D4F">
+        <path d="M460 330 C460 350, 300 350, 300 368"/><path d="M460 330 L460 368"/><path d="M460 330 C460 350, 620 350, 620 368"/>
+      </g>
+    </g>
+    <rect x="380" y="145" width="160" height="50" rx="25" fill="#0B1220"/>
+    <text x="460" y="167" text-anchor="middle" font-size="13" font-weight="700" style="fill:#fff">HTML Tables</text>
+    <text x="460" y="184" text-anchor="middle" font-size="13" font-weight="700" style="fill:#43C7F4">&amp; Forms</text>
+    <rect x="210" y="152" width="80" height="36" rx="8" fill="#0A7AA6"/><text x="250" y="175" text-anchor="middle" font-size="12.5" font-weight="700" style="fill:#fff">FORMS</text>
+    <rect x="630" y="152" width="80" height="36" rx="8" fill="#9A6210"/><text x="670" y="175" text-anchor="middle" font-size="12.5" font-weight="700" style="fill:#fff">TABLES</text>
+    <rect x="380" y="300" width="160" height="30" rx="8" fill="#2E7D4F"/><text x="460" y="320" text-anchor="middle" font-size="12" font-weight="700" style="fill:#fff">DEVELOPER TOOLS</text>
+    <g font-size="11.5">
+      <g transform="translate(8,18)"><rect width="176" height="36" rx="6" fill="#E9F8FE" stroke="#0A7AA6"/><text x="10" y="15" font-weight="700">INPUTS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">text · email · number · radio · checkbox</text></g>
+      <g transform="translate(8,70)"><rect width="176" height="36" rx="6" fill="#E9F8FE" stroke="#0A7AA6"/><text x="10" y="15" font-weight="700">ATTRIBUTES</text><text x="10" y="29" font-size="9.5" style="fill:#566273">action · method · name · value · size …</text></g>
+      <g transform="translate(8,122)"><rect width="176" height="36" rx="6" fill="#E9F8FE" stroke="#0A7AA6"/><text x="10" y="15" font-weight="700">LABELS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">implicit · for → id</text></g>
+      <g transform="translate(8,174)"><rect width="176" height="36" rx="6" fill="#E9F8FE" stroke="#0A7AA6"/><text x="10" y="15" font-weight="700">BUTTONS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">submit · reset · button</text></g>
+      <g transform="translate(8,226)"><rect width="176" height="36" rx="6" fill="#E9F8FE" stroke="#0A7AA6"/><text x="10" y="15" font-weight="700">FIELDSET / LEGEND</text><text x="10" y="29" font-size="9.5" style="fill:#566273">group + caption</text></g>
+      <g transform="translate(8,278)"><rect width="176" height="36" rx="6" fill="#E9F8FE" stroke="#0A7AA6"/><text x="10" y="15" font-weight="700">FOCUS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">:focus · Tab · visible ring</text></g>
+      <g transform="translate(736,18)"><rect width="176" height="36" rx="6" fill="#FBF3E3" stroke="#9A6210"/><text x="10" y="15" font-weight="700">ROWS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">&lt;tr&gt; one line of cells</text></g>
+      <g transform="translate(736,70)"><rect width="176" height="36" rx="6" fill="#FBF3E3" stroke="#9A6210"/><text x="10" y="15" font-weight="700">HEADERS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">&lt;th&gt; describes · scope</text></g>
+      <g transform="translate(736,122)"><rect width="176" height="36" rx="6" fill="#FBF3E3" stroke="#9A6210"/><text x="10" y="15" font-weight="700">DATA CELLS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">&lt;td&gt; one value</text></g>
+      <g transform="translate(736,174)"><rect width="176" height="36" rx="6" fill="#FBF3E3" stroke="#9A6210"/><text x="10" y="15" font-weight="700">TABLE GROUPS</text><text x="10" y="29" font-size="9.5" style="fill:#566273">thead · tbody · tfoot</text></g>
+      <g transform="translate(736,226)"><rect width="176" height="36" rx="6" fill="#FBF3E3" stroke="#9A6210"/><text x="10" y="15" font-weight="700">CAPTION</text><text x="10" y="29" font-size="9.5" style="fill:#566273">first child · table title</text></g>
+      <g transform="translate(736,278)"><rect width="176" height="36" rx="6" fill="#FBF3E3" stroke="#9A6210"/><text x="10" y="15" font-weight="700">COLSPAN</text><text x="10" y="29" font-size="9.5" style="fill:#566273">span columns · count slots</text></g>
+      <g transform="translate(220,368)"><rect width="160" height="40" rx="6" fill="#EAF5EE" stroke="#2E7D4F"/><text x="10" y="16" font-weight="700">VALIDATOR</text><text x="10" y="31" font-size="9.5" style="fill:#566273">checks source syntax</text></g>
+      <g transform="translate(380,368)" ><rect x="2" width="156" height="40" rx="6" fill="#EAF5EE" stroke="#2E7D4F"/><text x="12" y="16" font-weight="700">DOM INSPECTOR</text><text x="12" y="31" font-size="9.5" style="fill:#566273">views the live tree</text></g>
+      <g transform="translate(540,368)"><rect width="160" height="40" rx="6" fill="#EAF5EE" stroke="#2E7D4F"/><text x="10" y="16" font-weight="700">DEVTOOLS</text><text x="10" y="31" font-size="9.5" style="fill:#566273">debug · CSS · console</text></g>
+    </g>
+    <text x="460" y="70" text-anchor="middle" font-size="10.5" style="fill:#566273">Forms COLLECT data  →  server stores it  →  tables DISPLAY it</text>
+    <text x="460" y="88" text-anchor="middle" font-size="10.5" style="fill:#566273">Tools VERIFY and DEBUG both</text>
+  </svg>
+  <div class="fig"><b>FIG 14</b> Complete HTML Tables &amp; Forms mind map.</div>
+
+  <h2 class="mt"><span class="n">5 MIN</span>Revision sheet — read top-left to bottom-right</h2>
+  <div class="rev">
+    <div><b>FORM</b><code>action</code> = where, <code>method</code> = how. GET → URL (read), POST → body (change). HTML sends; servers store.</div>
+    <div><b>INPUT TYPES</b>text · email (format check) · number (min/max) · radio (one per name) · checkbox (many; unchecked not sent).</div>
+    <div><b>NAME / ID / VALUE</b>name → server key. id → label/CSS/JS, unique. value → data. placeholder → hint only.</div>
+    <div><b>LENGTH &amp; RANGE</b><code>size</code> = visible width. <code>minlength</code>/<code>maxlength</code> = characters. <code>min</code>/<code>max</code> = values.</div>
+    <div><b>STATES</b><code>required</code> must fill. <code>disabled</code> off &amp; not sent. <code>readonly</code> locked but sent.</div>
+    <div><b>LABELS</b>Nest it (implicit) or <code>for</code> = <code>id</code> (explicit, case-sensitive). Click label → focus/toggle.</div>
+    <div><b>BUTTONS</b>submit (default) sends · reset restores initial · button does nothing without JS. Always write <code>type</code>.</div>
+    <div><b>FIELDSET / LEGEND</b>Box related controls; legend names the group and is announced by screen readers.</div>
+    <div><b>FOCUS</b>One element at a time receives keys. Click, Tab, Shift+Tab, label. Style <code>:focus</code>; never just remove it.</div>
+    <div><b>TABLE CORE</b>table → tr → th | td. th describes, td delivers. Every row covers the same number of columns.</div>
+    <div><b>TABLE GROUPS</b>caption (first) → thead → tbody → tfoot. Add <code>scope</code> to headers for accessibility.</div>
+    <div><b>COLSPAN</b>One cell takes N column slots. Re-count: spans + other cells = total columns.</div>
+    <div><b>VALIDATOR</b>Checks your source file for invalid markup: duplicate ids, stray tags, bad nesting.</div>
+    <div><b>DOM INSPECTOR</b>Shows the tree the browser built (may differ from source, e.g. auto <code>tbody</code>).</div>
+    <div><b>DEVTOOLS</b>Elements · Styles (temporary edits) · Console (errors) · Network (form payload).</div>
+  </div>
+
+  <h3 class="mt">Final pre-submit checklist for any form or table you build</h3>
+  <div class="g4" style="gap:1.6mm;font-size:7.3pt">
+    <div class="good">Every control has a <code>name</code></div>
+    <div class="good">Every control has a label</div>
+    <div class="good"><code>for</code> matches a unique <code>id</code></div>
+    <div class="good">Every button has a <code>type</code></div>
+    <div class="good">Radios share one <code>name</code></div>
+    <div class="good">Focus ring visible on Tab</div>
+    <div class="good">Table has <code>caption</code> + <code>th</code></div>
+    <div class="good">Validator shows 0 errors</div>
+  </div>
+  <h3 class="mt">What this handbook covers</h3>
+  <div class="stats">
+    <div><b>14</b>HTML elements</div>
+    <div><b>16</b>source attributes</div>
+    <div><b>5</b>source input types</div>
+    <div><b>3</b>developer tools</div>
+    <div><b>16</b>original SVG diagrams</div>
+    <div><b>20</b>interview Q&amp;As</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="note"><b>Next step as a developer:</b> rebuild the page-9 project from memory, run it through the validator, then open DevTools → Network, submit the form and read your own <span class="mono">name=value</span> payload. If you can explain every line of that request, you have mastered this topic.</div>
+</div>
+<footer class="pf"><span>HTML Tables &amp; Forms · Mind Map &amp; Revision</span><span class="pn"><b>13</b> / 13</span></footer>
+</section>
+
+<script>
+(function(){
+  var esc=function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+  function hlHtml(src){
+    var out='',last=0,m,re=/<!--[\s\S]*?-->|<\/?[a-zA-Z][^>]*>/g;
+    while((m=re.exec(src))){
+      out+=esc(src.slice(last,m.index));var s=m[0];
+      if(s.indexOf('<!--')===0){out+='<span class="c">'+esc(s)+'</span>';}
+      else{
+        var mm=s.match(/^<(\/?)([a-zA-Z0-9]+)([\s\S]*?)(\/?)>$/);
+        var attrs=esc(mm[3]).replace(/([a-zA-Z-]+)(=("[^"]*"))?/g,function(x,n,_e,v){return '<span class="a">'+n+'</span>'+(v?'=<span class="v">'+v+'</span>':'');});
+        out+='<span class="t">&lt;'+mm[1]+mm[2]+'</span>'+attrs+'<span class="t">'+mm[4]+'&gt;</span>';
+      }
+      last=re.lastIndex;
+    }
+    return out+esc(src.slice(last));
+  }
+  function hlCss(src){
+    return esc(src)
+      .replace(/^([^\s{}][^{\n]*)\{/gm,function(m,sel){return '<span class="t">'+sel+'</span>{';})
+      .replace(/^(\s+)([a-z-]+)(\s*:)/gm,'$1<span class="a">$2</span>$3');
+  }
+  var list=document.querySelectorAll('textarea.src');
+  for(var i=0;i<list.length;i++){
+    var ta=list[i],src=ta.value.replace(/\s+$/,'');
+    var pre=document.createElement('pre');
+    pre.className='code'+(ta.getAttribute('data-size')==='sm'?' sm':'');
+    pre.innerHTML=ta.getAttribute('data-lang')==='css'?hlCss(src):hlHtml(src);
+    ta.parentNode.replaceChild(pre,ta);
+  }
+  document.querySelectorAll('.view form, .view button, .view input').forEach(function(el){el.tabIndex=-1;});
+})();
+</script>
+</body>
+</html>

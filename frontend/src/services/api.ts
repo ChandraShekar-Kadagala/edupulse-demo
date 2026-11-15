@@ -95,6 +95,14 @@ export const academicApi = {
   getStudents: () => api.get<Student[]>('/students'),
   getRiskAssessment: (studentId: number | string) => api.get<RiskAssessment>(`/students/${studentId}/risk`),
   getInterventions: () => api.get<Intervention[]>('/interventions'),
+  createIntervention: (payload: {
+    studentId: number;
+    assignedFacultyId: number;
+    type: string;
+    description: string;
+    priority: string;
+    dueDate?: string | null;
+  }) => api.post<Intervention>('/interventions', payload),
   getInterventionEffectiveness: () => api.get<EffectivenessReport>('/analytics/interventions/effectiveness'),
   previewImport: (payload: unknown) => api.post<ImportPreviewResponse>('/students/me/imports/preview', payload),
   confirmImport: (payload: unknown) => api.post<ImportConfirmResult>('/students/me/imports/confirm', payload),
