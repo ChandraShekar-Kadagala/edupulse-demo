@@ -230,7 +230,7 @@ public class DataSeeder implements CommandLineRunner {
                 encodedPassword
         );
 
-        Student studentA = syncDemoStudent(studentAUser, "STU-1001", "Computer Science & Engineering", 5, 9.1);
+        Student studentA = syncDemoStudent(studentAUser, "STU-1001", "Computer Science & Engineering", 3, 9.1);
         if (attendanceRepository.findByStudentId(studentA.getId()).size() != 276 || markRepository.findByStudentId(studentA.getId()).isEmpty()) {
             clearDemoAcademicRecords(studentA);
         }
@@ -285,7 +285,7 @@ public class DataSeeder implements CommandLineRunner {
                 encodedPassword
         );
 
-        Student studentB = syncDemoStudent(studentBUser, "STU-1002", "Computer Science & Engineering", 5, 9.4);
+        Student studentB = syncDemoStudent(studentBUser, "STU-1002", "Computer Science & Engineering", 3, 9.4);
         if (attendanceRepository.findByStudentId(studentB.getId()).size() != 276 || markRepository.findByStudentId(studentB.getId()).isEmpty()) {
             clearDemoAcademicRecords(studentB);
         }
@@ -340,7 +340,7 @@ public class DataSeeder implements CommandLineRunner {
                 encodedPassword
         );
 
-        Student studentC = syncDemoStudent(studentCUser, "STU-1003", "Computer Science & Engineering", 5, 7.2);
+        Student studentC = syncDemoStudent(studentCUser, "STU-1003", "Computer Science & Engineering", 3, 7.2);
         if (attendanceRepository.findByStudentId(studentC.getId()).size() != 276 || markRepository.findByStudentId(studentC.getId()).isEmpty()) {
             clearDemoAcademicRecords(studentC);
         }
@@ -397,7 +397,7 @@ public class DataSeeder implements CommandLineRunner {
                 encodedPassword
         );
 
-        Student studentD = syncDemoStudent(studentDUser, "STU-1004", "Computer Science & Engineering", 5, 5.1);
+        Student studentD = syncDemoStudent(studentDUser, "STU-1004", "Computer Science & Engineering", 3, 5.1);
         long studentDAbsent = attendanceRepository.findByStudentId(studentD.getId()).stream()
                 .filter(a -> a.getStatus() == AttendanceStatus.ABSENT).count();
         if (studentDAbsent != 111L || markRepository.findByStudentId(studentD.getId()).isEmpty()) {
@@ -443,7 +443,7 @@ public class DataSeeder implements CommandLineRunner {
         for (Student s : List.of(studentA, studentB, studentC, studentD)) {
             for (Course c : List.of(cse203, cse204, cse207, cse213, fic120, mce272, sec203)) {
                 if (!enrollmentRepository.existsByStudentIdAndCourseId(s.getId(), c.getId())) {
-                    enrollmentRepository.save(Enrollment.builder().student(s).course(c).semester(5).status("ACTIVE").build());
+                    enrollmentRepository.save(Enrollment.builder().student(s).course(c).semester(3).status("ACTIVE").build());
                 }
             }
         }
