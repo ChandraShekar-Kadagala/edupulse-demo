@@ -158,7 +158,8 @@ public class DataSeeder implements CommandLineRunner {
         Course mce272 = courseRepository.findByCode("MCE 272").orElseGet(() ->
                 courseRepository.save(Course.builder().code("MCE 272").name("INTRODUCTION TO ROCKET AND JET TECHNOLOGY").credits(2).build()));
         Course sec203 = courseRepository.findByCode("SEC 203").orElseGet(() ->
-                courseRepository.save(Course.builder().code("SEC 203").name("QUANTITATIVE APTITUDE AND LOGICAL REASONING").credits(2).build()));
+                courseRepository.save(Course.builder().code("SEC 203").name("APTITUDE FOR ENGINEERS - III").credits(2).build()));
+        sec203.setName("APTITUDE FOR ENGINEERS - III"); courseRepository.save(sec203); // keep existing course names current
 
         // 4b. Explicit teaching assignments (drive faculty dashboards; no username guessing)
         ensureCourseAssignment(faculty1, cse204);
@@ -481,6 +482,28 @@ public class DataSeeder implements CommandLineRunner {
                     .startDate(LocalDate.now().minusDays(10))
                     .dueDate(LocalDate.now().minusDays(1))
                     .build());
+        }
+
+        // 7b. Remove any stray (non-canonical) academic data on the demo students — e.g. courses left over
+        //     from earlier portal-fixture syncs or import testing — so the showcase stays coherent (the
+        //     seven SRM AP subjects only). Scoped to the four DEMO showcase students; never real accounts.
+        java.util.Set<Long> canonicalCourseIds = java.util.stream.Stream.of(cse203, cse204, cse207, cse213, fic120, mce272, sec203)
+                .map(Course::getId).collect(java.util.stream.Collectors.toSet());
+        for (Student s : List.of(studentA, studentB, studentC, studentD)) {
+            attendanceRepository.findByStudentId(s.getId()).stream()
+                    .filter(a -> a.getCourse() == null || !canonicalCourseIds.contains(a.getCourse().getId()))
+                    .forEach(attendanceRepository::delete);
+            markRepository.findByStudentId(s.getId()).stream()
+                    .filter(m -> m.getAssessment() == null || m.getAssessment().getCourse() == null
+                            || !canonicalCourseIds.contains(m.getAssessment().getCourse().getId()))
+                    .forEach(markRepository::delete);
+            submissionRepository.findByStudentId(s.getId()).stream()
+                    .filter(sub -> sub.getAssignment() != null && sub.getAssignment().getCourse() != null
+                            && !canonicalCourseIds.contains(sub.getAssignment().getCourse().getId()))
+                    .forEach(submissionRepository::delete);
+            enrollmentRepository.findByStudentId(s.getId()).stream()
+                    .filter(e -> e.getCourse() == null || !canonicalCourseIds.contains(e.getCourse().getId()))
+                    .forEach(enrollmentRepository::delete);
         }
 
         // 8. Calculate Risk Assessments for all 4 students
