@@ -56,48 +56,124 @@ function text(el: Element | null | undefined): string {
   return (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
 }
 
-/** Subject-wise attendance: SRM `table#tblSubjectWiseAttendance`, data rows have 9 `<td>`. */
-export function parseAttendance(doc: Document): RawAttendanceRow[] {
-  const table = doc.querySelector('#tblSubjectWiseAttendance, #attendanceTable');
-  if (!table) return [];
-  const rows: RawAttendanceRow[] = [];
-  table.querySelectorAll('tr').forEach((tr) => {
-    const td = tr.querySelectorAll('td');
-    if (td.length !== 9) return; // header rows use <th>; skip anything that isn't a 9-column data row
-    rows.push({
-      subjectCode: text(td[0]),
-      subjectName: text(td[1]),
-      classesConducted: text(td[2]),
-      present: text(td[3]),
-      absent: text(td[4]),
-      odMlTaken: text(td[5]),
-      presentPercentage: text(td[6]),
-      odMlPercentage: text(td[7]),
-      attendancePercentage: text(td[8]),
-    });
-  });
-  return rows;
+const COURSE_CODE_RE = /\b[A-Z]{2,5}\s?\d{3}[A-Z]?\b/;
+
+/** Lower-cased header labels of a table (the first row that has <th>, else the first row). */
+function headerLabels(table: Element): string[] {
+  const headerRow = table.querySelector('tr:has(th)') ?? table.querySelector('tr');
+  if (!headerRow) return [];
+  return Array.from(headerRow.querySelectorAll('th, td')).map((c) => text(c).toLowerCase());
 }
 
-/** Exam ledger / semester results: SRM `div.subTable table`, data rows have >= 9 `<td>`. */
+/** Index of the first header matching any pattern, or -1. */
+function col(headers: string[], ...patterns: RegExp[]): number {
+  return headers.findIndex((h) => patterns.some((p) => p.test(h)));
+}
+
+/** Data rows of a table: <tr> that contain <td> (skips header-only rows). */
+function dataRows(table: Element): Element[] {
+  return Array.from(table.querySelectorAll('tr')).filter((tr) => tr.querySelector('td'));
+}
+
+/**
+ * Subject-wise attendance. Finds the attendance table by its HEADERS (not a fixed id or column count),
+ * so it works across portal layouts, and maps the columns it needs by header position. Missing columns
+ * are derived where safe (absent = conducted - present) or left blank for the server to judge.
+ */
+export function parseAttendance(doc: Document): RawAttendanceRow[] {
+  for (const table of Array.from(doc.querySelectorAll('table'))) {
+    const h = headerLabels(table);
+    const codeIdx = col(h, /subject\s*code/, /course\s*code/, /sub\s*code/, /^code$/);
+    const presentIdx = col(h, /present/, /attended/);
+    if (codeIdx < 0 || presentIdx < 0) continue; // not an attendance table
+
+    const conductedIdx = col(h, /conducted/, /total.*(class|hour|conducted)/, /^total$/);
+    const absentIdx = col(h, /absent/);
+    const odIdx = col(h, /od.?ml/, /od\s*\/\s*ml/);
+    const nameIdx = col(h, /subject\s*name/, /course\s*(title|name)/, /title/);
+    const presentPctIdx = col(h, /present\s*%/, /present percentage/);
+    const attPctIdx = col(h, /attendance\s*%/, /total\s*%/, /percentage/);
+
+    const cell = (tr: Element, i: number) => (i >= 0 ? text(tr.querySelectorAll('td')[i]) : '');
+    const rows: RawAttendanceRow[] = [];
+    for (const tr of dataRows(table)) {
+      const code = cell(tr, codeIdx);
+      if (!COURSE_CODE_RE.test(code)) continue; // skip totals / stray rows
+      const conducted = cell(tr, conductedIdx);
+      const present = cell(tr, presentIdx);
+      let absent = cell(tr, absentIdx);
+      if (!absent && conducted && present) {
+        const d = Number(conducted) - Number(present);
+        if (Number.isFinite(d)) absent = String(d);
+      }
+      rows.push({
+        subjectCode: code,
+        subjectName: cell(tr, nameIdx),
+        classesConducted: conducted,
+        present,
+        absent,
+        odMlTaken: cell(tr, odIdx),
+        presentPercentage: cell(tr, presentPctIdx),
+        odMlPercentage: '',
+        attendancePercentage: cell(tr, attPctIdx),
+      });
+    }
+    if (rows.length > 0) return rows;
+  }
+  // Fallback for the known SRM table with no usable header row: fixed 9-column order.
+  const known = doc.querySelector('#tblSubjectWiseAttendance, #attendanceTable');
+  if (known) {
+    const rows: RawAttendanceRow[] = [];
+    for (const tr of dataRows(known)) {
+      const td = tr.querySelectorAll('td');
+      if (td.length !== 9 || !COURSE_CODE_RE.test(text(td[0]))) continue;
+      rows.push({
+        subjectCode: text(td[0]), subjectName: text(td[1]), classesConducted: text(td[2]),
+        present: text(td[3]), absent: text(td[4]), odMlTaken: text(td[5]),
+        presentPercentage: text(td[6]), odMlPercentage: text(td[7]), attendancePercentage: text(td[8]),
+      });
+    }
+    if (rows.length > 0) return rows;
+  }
+  return [];
+}
+
+/** Exam ledger / semester results. Found by headers (grade + credit/semester), columns mapped by header. */
 export function parseExamLedger(doc: Document): RawLedgerRow[] {
-  const rows: RawLedgerRow[] = [];
-  doc.querySelectorAll('div.subTable table tr, #examLedger tr').forEach((tr) => {
-    const td = tr.querySelectorAll('td');
-    if (td.length < 9) return;
-    rows.push({
-      semester: text(td[0]),
-      monthYear: text(td[1]),
-      subjectCode: text(td[2]),
-      subjectDescription: text(td[3]),
-      credit: text(td[4]),
-      grade: text(td[5]),
-      gradePoints: text(td[6]),
-      result: text(td[7]),
-      attempt: text(td[8]),
-    });
-  });
-  return rows;
+  for (const table of Array.from(doc.querySelectorAll('table'))) {
+    const h = headerLabels(table);
+    const codeIdx = col(h, /subject\s*code/, /course\s*code/, /^code$/);
+    const gradeIdx = col(h, /^grade$/, /grade$/);
+    if (codeIdx < 0 || gradeIdx < 0) continue;
+
+    const semIdx = col(h, /sem/);
+    const myIdx = col(h, /month.*year/, /month\s*\/\s*year/);
+    const descIdx = col(h, /description/, /subject\s*(name|title)/, /title/);
+    const creditIdx = col(h, /credit/);
+    const gpIdx = col(h, /grade\s*point/, /^gp$/);
+    const resultIdx = col(h, /result/, /status/);
+    const attemptIdx = col(h, /attempt/);
+
+    const cell = (tr: Element, i: number) => (i >= 0 ? text(tr.querySelectorAll('td')[i]) : '');
+    const rows: RawLedgerRow[] = [];
+    for (const tr of dataRows(table)) {
+      const code = cell(tr, codeIdx);
+      if (!COURSE_CODE_RE.test(code)) continue;
+      rows.push({
+        semester: cell(tr, semIdx),
+        monthYear: cell(tr, myIdx),
+        subjectCode: code,
+        subjectDescription: cell(tr, descIdx),
+        credit: cell(tr, creditIdx),
+        grade: cell(tr, gradeIdx),
+        gradePoints: cell(tr, gpIdx),
+        result: cell(tr, resultIdx),
+        attempt: cell(tr, attemptIdx),
+      });
+    }
+    if (rows.length > 0) return rows;
+  }
+  return [];
 }
 
 /** CGPA from the exam ledger, e.g. "Cumulative Grade Point Average (CGPA) : 8.85". Null if absent. */

@@ -10,17 +10,25 @@ function doc(html: string): Document {
 
 const ATTENDANCE_HTML = `
 <table id="tblSubjectWiseAttendance">
-  <tr><th>Code</th><th>Name</th><th>Conducted</th><th>Present</th><th>Absent</th><th>OD/ML</th><th>P%</th><th>OD%</th><th>Tot%</th></tr>
+  <tr><th>Subject Code</th><th>Subject Name</th><th>Classes Conducted</th><th>Present</th><th>Absent</th><th>OD/ML</th><th>Present %</th><th>OD/ML %</th><th>Attendance %</th></tr>
   <tr><td>SYN 101</td><td>Synthetic One</td><td>40</td><td>34</td><td>6</td><td>0</td><td>85.00</td><td>0.00</td><td>85.00</td></tr>
   <tr><td>SYN 102</td><td>Synthetic Two</td><td>30</td><td>15</td><td>15</td><td>2</td><td>50.00</td><td>6.67</td><td>56.67</td></tr>
 </table>`;
 
 const LEDGER_HTML = `
 <div class="subTable"><table>
-  <tr><th>Sem</th><th>M/Y</th><th>Code</th><th>Desc</th><th>Cr</th><th>Gr</th><th>GP</th><th>Res</th><th>At</th></tr>
+  <tr><th>Semester</th><th>Month/Year</th><th>Subject Code</th><th>Subject Description</th><th>Credit</th><th>Grade</th><th>Grade Points</th><th>Result</th><th>Attempt</th></tr>
   <tr><td>Semester 1</td><td>DEC-2099</td><td>SYN 101</td><td>Synthetic One</td><td>4.0</td><td>A+</td><td>10.0</td><td>PASS</td><td>1</td></tr>
 </table></div>
 <div>Cumulative Grade Point Average (CGPA) : 8.85</div>`;
+
+// A different real-world layout: no table id, columns in a different order, no explicit Absent column.
+const ALT_ATTENDANCE_HTML = `
+<table class="report">
+  <tr><th>Attendance %</th><th>Present</th><th>Total Conducted</th><th>Course Code</th><th>Course Title</th></tr>
+  <tr><td>66.67</td><td>20</td><td>30</td><td>SYN 201</td><td>Alt Course</td></tr>
+  <tr><td colspan="5">Grand Total</td></tr>
+</table>`;
 
 const PROFILE_HTML = `
 <table>
@@ -41,7 +49,17 @@ describe('attendance extraction', () => {
   });
 
   it('returns nothing when the attendance table is absent', () => {
-    expect(parseAttendance(doc('<table id="other"><tr><td>x</td></tr></table>'))).toEqual([]);
+    expect(parseAttendance(doc('<table id="other"><tr><th>Name</th></tr><tr><td>x</td></tr></table>'))).toEqual([]);
+  });
+
+  it('reads a different layout (no id, reordered columns, derived absent) and skips total rows', () => {
+    const rows = parseAttendance(doc(ALT_ATTENDANCE_HTML));
+    expect(rows).toHaveLength(1);
+    expect(rows[0].subjectCode).toBe('SYN 201');
+    expect(rows[0].present).toBe('20');
+    expect(rows[0].classesConducted).toBe('30');
+    expect(rows[0].absent).toBe('10'); // derived: conducted - present
+    expect(rows[0].attendancePercentage).toBe('66.67');
   });
 });
 
