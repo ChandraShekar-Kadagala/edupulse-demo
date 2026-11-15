@@ -283,7 +283,7 @@ export default function StudentProfile() {
           {/* Risk Badge & Recalculate */}
           <div className="flex flex-col md:items-end bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-200 dark:border-gray-800 min-w-[200px]">
             <span className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold mb-1">
-              Deterministic Academic Risk
+              Academic Risk Score
             </span>
             <div className="flex items-center space-x-3">
               <span className={`text-4xl font-extrabold ${riskColor}`}>
@@ -312,7 +312,7 @@ export default function StudentProfile() {
         <Card className="hover:shadow-sm transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">
-              Aggregate Attendance
+              Overall Attendance
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -320,7 +320,7 @@ export default function StudentProfile() {
               {analytics?.overallAttendancePercentage != null ? `${analytics.overallAttendancePercentage}%` : 'N/A'}
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              <strong className="text-emerald-600 dark:text-emerald-400">{analytics?.presentClasses}</strong> present of <strong>{analytics?.totalClasses}</strong> conducted sessions
+              <strong className="text-emerald-600 dark:text-emerald-400">{analytics?.presentClasses}</strong> present out of <strong>{analytics?.totalClasses}</strong> classes held
             </p>
             <div className="w-full bg-gray-200 dark:bg-gray-800 h-1.5 rounded-full mt-2 overflow-hidden">
               <div 
@@ -357,7 +357,7 @@ export default function StudentProfile() {
         <Card className="hover:shadow-sm transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">
-              Graded Evaluations Avg
+              Average Mark
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -365,10 +365,10 @@ export default function StudentProfile() {
               {analytics?.overallAverageMarksPercentage != null ? `${analytics.overallAverageMarksPercentage}%` : 'N/A'}
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Threshold standard: <strong className="text-gray-700 dark:text-gray-300">50.0%</strong> passing grade
+              Pass mark: <strong className="text-gray-700 dark:text-gray-300">50%</strong>
             </p>
             <p className={`text-[11px] font-semibold mt-1 ${ (analytics?.overallAverageMarksPercentage || 0) >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
-              {analytics?.overallAverageMarksPercentage == null ? 'No evaluated marks yet' : analytics.overallAverageMarksPercentage >= 75 ? 'Exemplary Performance' : analytics.overallAverageMarksPercentage >= 50 ? 'Good Academic Standing' : 'Remedial Support Required'}
+              {analytics?.overallAverageMarksPercentage == null ? 'No marks yet' : analytics.overallAverageMarksPercentage >= 75 ? 'Doing great' : analytics.overallAverageMarksPercentage >= 50 ? 'On track' : 'Needs support'}
             </p>
           </CardContent>
         </Card>
@@ -377,7 +377,7 @@ export default function StudentProfile() {
         <Card className="hover:shadow-sm transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">
-              Coursework Submissions
+              Assignments
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -385,10 +385,10 @@ export default function StudentProfile() {
               {analytics?.submittedAssignments ?? 0} <span className="text-sm font-normal text-gray-500">/ {analytics?.totalAssignments ?? 0}</span>
             </div>
             <p className={`text-xs mt-1 font-semibold ${ (analytics?.missingAssignments || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-              {(analytics?.missingAssignments || 0) > 0 ? `${analytics?.missingAssignments} overdue deliverables` : 'All coursework submitted on time'}
+              {(analytics?.missingAssignments || 0) > 0 ? `${analytics?.missingAssignments} still to submit` : 'All submitted on time'}
             </p>
             <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-              5.0 pts friction penalty per missing item
+              Each missing one adds 5 pts to your risk
             </p>
           </CardContent>
         </Card>
@@ -401,10 +401,10 @@ export default function StudentProfile() {
             <div>
               <CardTitle className="text-base font-bold text-gray-900 dark:text-white flex items-center">
                 <BookOpen className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" />
-                Subject-Wise Attendance Details (Period: {analytics?.attendancePeriod || '03-Aug-2026 to 29-Oct-2026'})
+                Attendance — by Subject ({analytics?.attendancePeriod || '03-Aug-2026 to 29-Oct-2026'})
               </CardTitle>
               <CardDescription className="text-xs">
-                Conducted, present, absent, OD/ML counts and individual course compliance
+                Classes held, present, absent and OD/ML for each subject. 75% is the minimum required.
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-xs self-start sm:self-auto font-mono">
@@ -416,15 +416,15 @@ export default function StudentProfile() {
           <table className="w-full text-xs text-left">
             <thead className="text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-950 uppercase border-b border-gray-200 dark:border-gray-800">
               <tr>
-                <th className="px-4 py-3">Subject Code & Name</th>
-                <th className="px-4 py-3">Faculty Instructor</th>
-                <th className="px-4 py-3">Classroom</th>
-                <th className="px-4 py-3 text-center">Conducted</th>
+                <th className="px-4 py-3">Subject Code &amp; Name</th>
+                <th className="px-4 py-3">Faculty</th>
+                <th className="px-4 py-3">Room</th>
+                <th className="px-4 py-3 text-center">Held</th>
                 <th className="px-4 py-3 text-center">Present</th>
                 <th className="px-4 py-3 text-center">Absent</th>
                 <th className="px-4 py-3 text-center">OD/ML</th>
                 <th className="px-4 py-3 text-center">Attendance %</th>
-                <th className="px-4 py-3 text-right">Statutory Status</th>
+                <th className="px-4 py-3 text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -448,7 +448,7 @@ export default function StudentProfile() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Badge variant={isShort ? 'destructive' : 'outline'} className="text-[10px]">
-                        {isShort ? 'SHORTAGE (<75%)' : 'REGULAR'}
+                        {isShort ? 'Below 75%' : 'OK'}
                       </Badge>
                     </td>
                   </tr>
@@ -574,23 +574,23 @@ export default function StudentProfile() {
             <div>
               <CardTitle className="text-base font-bold text-gray-900 dark:text-white flex items-center">
                 <Calculator className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
-                Transparent Risk Engine Calculation Breakdown
+                How your risk score is worked out
               </CardTitle>
               <CardDescription className="text-xs">
-                Audited deterministic model: attendance shortfall + marks deficiency + overdue coursework friction
+                Three things add up: low attendance, low marks, and assignments you haven&apos;t submitted.
               </CardDescription>
             </div>
             <Badge variant="outline" className="font-mono text-xs border-indigo-300 text-indigo-700 dark:text-indigo-300">
-              Deterministic Rule Engine v2.0
+              Rule-based · v2.0
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="pt-4 space-y-4">
           {/* Formula Callout */}
           <div className="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 text-xs">
-            <span className="font-bold text-gray-700 dark:text-gray-300">Configured Risk Formula:</span>
+            <span className="font-bold text-gray-700 dark:text-gray-300">How it adds up:</span>
             <code className="block mt-1 font-mono text-indigo-700 dark:text-indigo-300 bg-gray-50 dark:bg-gray-950 p-2 rounded border border-gray-100 dark:border-gray-800 select-all">
-              Total Risk Score = min(Attendance Penalty + Marks Penalty + Missing Coursework Penalty, 100.0)
+              Risk = Low attendance + Low marks + Missing assignments (capped at 100)
             </code>
           </div>
 
@@ -599,7 +599,7 @@ export default function StudentProfile() {
             {/* Attendance Component */}
             <div className="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">1. Attendance Penalty</span>
+                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">1. Low attendance</span>
                 <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
                   +{fmt(analytics?.riskEngineExplanation?.attendanceComponent?.pointsContributed)} pts
                 </span>
@@ -612,7 +612,7 @@ export default function StudentProfile() {
             {/* Marks Component */}
             <div className="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">2. Evaluated Marks Penalty</span>
+                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">2. Low marks</span>
                 <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
                   +{fmt(analytics?.riskEngineExplanation?.marksComponent?.pointsContributed)} pts
                 </span>
@@ -625,7 +625,7 @@ export default function StudentProfile() {
             {/* Coursework Component */}
             <div className="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">3. Overdue Coursework Penalty</span>
+                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">3. Missing assignments</span>
                 <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
                   +{fmt(analytics?.riskEngineExplanation?.missingAssignmentsComponent?.pointsContributed)} pts
                 </span>
@@ -644,9 +644,9 @@ export default function StudentProfile() {
                   <tr>
                     <th className="px-3 py-2">Subject</th>
                     <th className="px-3 py-2 text-center">Attendance %</th>
-                    <th className="px-3 py-2 text-center">Evaluated Marks %</th>
-                    <th className="px-3 py-2 text-center">Subject Risk Level</th>
-                    <th className="px-3 py-2">Contributing Factors</th>
+                    <th className="px-3 py-2 text-center">Marks %</th>
+                    <th className="px-3 py-2 text-center">Risk</th>
+                    <th className="px-3 py-2">Why</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900">
