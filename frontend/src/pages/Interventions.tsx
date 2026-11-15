@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { User, CheckCircle2, RefreshCw, Calendar, Plus, X } from 'lucide-react';
+import { User, RefreshCw, Calendar, Plus, X } from 'lucide-react';
 import { academicApi, getSafeErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { EmptyState, ErrorState, LoadingState } from '../components/common/StateViews';
-import type { Intervention, Student, Faculty, User } from '../types';
+import type { Intervention, Student, Faculty, User as AuthUser } from '../types';
 
 const INTERVENTION_TYPES = [
   'Mentoring Meeting',
@@ -136,7 +136,7 @@ function NewInterventionModal({
   onClose,
   onCreated,
 }: {
-  user: User | null;
+  user: AuthUser | null;
   onClose: () => void;
   onCreated: () => void;
 }) {
