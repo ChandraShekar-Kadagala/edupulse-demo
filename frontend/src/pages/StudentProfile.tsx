@@ -24,6 +24,16 @@ import api, { getSafeErrorMessage } from '../services/api';
 import { fmt, riskBadgeVariant } from '../components/common/StateViews';
 import type { StudentAcademicAnalytics, TimetableSlot } from '../types';
 
+const TABS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'attendance', label: 'Attendance' },
+  { id: 'marks', label: 'Internal Marks' },
+  { id: 'risk', label: 'Risk' },
+  { id: 'planner', label: 'Planner' },
+  { id: 'timetable', label: 'Timetable' },
+  { id: 'support', label: 'Support' },
+];
+
 export default function StudentProfile() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -37,6 +47,7 @@ export default function StudentProfile() {
   const [isForbidden, setIsForbidden] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [targetScenario, setTargetScenario] = useState<'min' | 'rec' | 'stretch'>('rec');
+  const [tab, setTab] = useState('overview');
 
   const fetchStudentData = async () => {
     try {
@@ -306,7 +317,26 @@ export default function StudentProfile() {
         </div>
       </div>
 
+      {/* Section navigation — keeps the profile scannable, especially on mobile */}
+      <div className="sticky top-0 z-10 -mx-2 sm:mx-0 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+        <nav className="flex gap-1 overflow-x-auto px-2 py-2" role="tablist" aria-label="Profile sections">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${tab === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
       {/* 2. Key Metrics Row (Attendance, Converted Marks, Assignments) */}
+      {tab === 'overview' && (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Attendance Card */}
         <Card className="hover:shadow-sm transition-shadow">
@@ -393,8 +423,10 @@ export default function StudentProfile() {
           </CardContent>
         </Card>
       </div>
+      )}
 
       {/* 3. Subject-Wise Attendance Breakdown (7 SRM AP Subjects) */}
+      {tab === 'attendance' && (
       <Card className="overflow-hidden border border-gray-200 dark:border-gray-800">
         <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -458,8 +490,10 @@ export default function StudentProfile() {
           </table>
         </div>
       </Card>
+      )}
 
       {/* 4. Internal Assessment Details (Raw Marks, Converted Marks & Status) */}
+      {tab === 'marks' && (
       <Card className="overflow-hidden border border-gray-200 dark:border-gray-800">
         <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -566,8 +600,10 @@ export default function StudentProfile() {
           </table>
         </div>
       </Card>
+      )}
 
       {/* 5. Explainable Risk Engine Breakdown (Audited & Transparent) */}
+      {tab === 'risk' && (
       <Card className="border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/20 dark:bg-indigo-950/10">
         <CardHeader className="py-4 border-b border-indigo-100 dark:border-indigo-900/30">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -680,8 +716,10 @@ export default function StudentProfile() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {/* 6. Next CLA / NTM Performance Target Planner */}
+      {tab === 'planner' && (
       <Card className="overflow-hidden border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/10 dark:bg-emerald-950/10">
         <CardHeader className="bg-emerald-50/40 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900/30 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -801,8 +839,10 @@ export default function StudentProfile() {
           </table>
         </div>
       </Card>
+      )}
 
       {/* 7. Weekly Timetable Cohort Schedule */}
+      {tab === 'timetable' && (
       <Card className="overflow-hidden border border-gray-200 dark:border-gray-800">
         <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -857,8 +897,10 @@ export default function StudentProfile() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* 8. Interventions & Recommendations */}
+      {tab === 'support' && (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Actionable Recommendations */}
         <Card>
@@ -921,6 +963,7 @@ export default function StudentProfile() {
           </CardContent>
         </Card>
       </div>
+      )}
 
     </div>
   );
