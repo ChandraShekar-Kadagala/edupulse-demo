@@ -59,36 +59,58 @@ export default function ImportMyRecords() {
     }
   };
 
-  const handleFile = async (file: File) => {
+  const parseOne = async (file: File): Promise<AcademicExport> => {
+    const content = await file.text();
+    if (/\.json$/i.test(file.name) || content.trimStart().startsWith('{')) {
+      // Already-extracted export from the EduPulse Chrome extension.
+      const parsed = JSON.parse(content) as Partial<AcademicExport>;
+      return {
+        sourceType: 'STUDENT_MANUAL_IMPORT',
+        exportedAt: parsed.exportedAt ?? new Date().toISOString(),
+        reportDate: parsed.reportDate ?? null,
+        attendance: parsed.attendance ?? [],
+        ledger: parsed.ledger ?? [],
+        internals: parsed.internals ?? [],
+        cgpa: parsed.cgpa ?? null,
+        profile: parsed.profile ?? {},
+      };
+    }
+    return buildExport(content, { reportDate: reportDate || null });
+  };
+
+  /** Merge several files (e.g. an attendance export + an internal-marks export) into one import. */
+  const mergeExports = (parts: AcademicExport[]): AcademicExport => {
+    const out: AcademicExport = {
+      sourceType: 'STUDENT_MANUAL_IMPORT', exportedAt: new Date().toISOString(),
+      reportDate: reportDate || null, attendance: [], ledger: [], internals: [], cgpa: null, profile: {},
+    };
+    const seenAtt = new Set<string>(), seenLed = new Set<string>(), seenInt = new Set<string>();
+    for (const p of parts) {
+      p.attendance.forEach((r) => { if (!seenAtt.has(r.subjectCode)) { seenAtt.add(r.subjectCode); out.attendance.push(r); } });
+      p.ledger.forEach((r) => { const k = `${r.subjectCode}|${r.semester}|${r.attempt}`; if (!seenLed.has(k)) { seenLed.add(k); out.ledger.push(r); } });
+      p.internals.forEach((r) => { if (!seenInt.has(r.subjectCode)) { seenInt.add(r.subjectCode); out.internals.push(r); } });
+      if (out.cgpa == null && p.cgpa) out.cgpa = p.cgpa;
+      out.profile = { ...p.profile, ...out.profile };
+    }
+    return out;
+  };
+
+  const handleFiles = async (files: FileList) => {
     setError(null);
     setResult(null);
-    if (file.size > 3 * 1024 * 1024) {
-      setError('That file is larger than 3 MB. Please select a single saved report page.');
+    setSaved(null);
+    setServerCheck(null);
+    const list = Array.from(files);
+    if (list.some((f) => f.size > 3 * 1024 * 1024)) {
+      setError('One of those files is larger than 3 MB. Please select your report export files.');
       return;
     }
     try {
-      const content = await file.text();
-      setFileName(file.name);
-      setSaved(null);
-      setServerCheck(null);
-      if (/\.json$/i.test(file.name) || content.trimStart().startsWith('{')) {
-        // Already-extracted export from the EduPulse Chrome extension.
-        const parsed = JSON.parse(content) as AcademicExport;
-        setResult({
-          sourceType: 'STUDENT_MANUAL_IMPORT',
-          exportedAt: parsed.exportedAt ?? new Date().toISOString(),
-          reportDate: reportDate || parsed.reportDate || null,
-          attendance: parsed.attendance ?? [],
-          ledger: parsed.ledger ?? [],
-          internals: parsed.internals ?? [],
-          cgpa: parsed.cgpa ?? null,
-          profile: parsed.profile ?? {},
-        });
-      } else {
-        setResult(buildExport(content, { reportDate: reportDate || null }));
-      }
+      const parts = await Promise.all(list.map(parseOne));
+      setFileName(list.map((f) => f.name).join(', '));
+      setResult(mergeExports(parts));
     } catch {
-      setError('Could not read that file. Use the saved report page (.html) or the extension export (.json).');
+      setError('Could not read those files. Use the saved report page (.html) or the extension export (.json).');
     }
   };
 
@@ -119,7 +141,7 @@ export default function ImportMyRecords() {
         <CardContent className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
           <ol className="list-decimal pl-5 space-y-1">
             <li>Log into the SRM AP Student Corner <strong>yourself</strong>, in your own browser, and open your report page.</li>
-            <li>Save that page (Ctrl+S), <strong>or</strong> use the EduPulse Chrome extension to export a .json in one click (best if the saved page comes out empty).</li>
+            <li>Best: use the EduPulse Chrome extension on each report (attendance, internal marks) and export a .json each. You can select <strong>both files together</strong> below and they are merged. (A saved .html page also works.)</li>
             <li>Load the saved file below. It is read on <strong>your device</strong>; your password and the CAPTCHA never reach EduPulse.</li>
           </ol>
           <p className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -140,10 +162,10 @@ export default function ImportMyRecords() {
             <input type="date" value={reportDate} onChange={(e) => setReportDate(e.target.value)}
               className="mt-1 block rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-1.5 text-sm" />
           </label>
-          <input ref={fileInput} type="file" accept=".html,.htm,.json,text/html,application/json" className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+          <input ref={fileInput} type="file" multiple accept=".html,.htm,.json,text/html,application/json" className="hidden"
+            onChange={(e) => e.target.files && e.target.files.length > 0 && handleFiles(e.target.files)} />
           <Button onClick={() => fileInput.current?.click()}>
-            <FileUp className="w-4 h-4 mr-2" aria-hidden="true" /> Choose report file (.html or .json)
+            <FileUp className="w-4 h-4 mr-2" aria-hidden="true" /> Choose report file(s) — you can pick both
           </Button>
           {fileName && <p className="text-xs text-gray-500">Loaded: {fileName}</p>}
           {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
