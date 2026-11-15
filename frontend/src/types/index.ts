@@ -460,6 +460,7 @@ export interface ImportPreviewResponse {
   sourceLabel: string;
   live: boolean;
   acceptedAttendance: number;
+  acceptedInternals: number;
   acceptedLedger: number;
   cgpa: number | null;
   rejected: number;
@@ -472,6 +473,7 @@ export interface ImportConfirmResult {
   batchId: number;
   duplicate: boolean;
   acceptedAttendance: number;
+  acceptedInternals: number;
   acceptedLedger: number;
   cgpa: number | null;
   riskScore: number | null;

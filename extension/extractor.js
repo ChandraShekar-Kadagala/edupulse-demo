@@ -24,6 +24,19 @@ export function extractAcademicExport(rootDoc) {
   const cell = (tr, i) => (i >= 0 ? text(tr.querySelectorAll('td')[i]) : '');
 
   function parseAttendance(doc) {
+    // 1. Fixed 9-column SRM layout, course code first (robust to the nested 2-row header).
+    for (const table of Array.from(doc.querySelectorAll('table'))) {
+      const rows = dataRows(table).filter((tr) => tr.querySelectorAll('td').length === 9 && COURSE_CODE_RE.test(text(tr.querySelectorAll('td')[0])));
+      if (rows.length) {
+        return rows.map((tr) => {
+          const td = tr.querySelectorAll('td');
+          return { subjectCode: text(td[0]), subjectName: text(td[1]), classesConducted: text(td[2]),
+            present: text(td[3]), absent: text(td[4]), odMlTaken: text(td[5]), presentPercentage: text(td[6]),
+            odMlPercentage: text(td[7]), attendancePercentage: text(td[8]) };
+        });
+      }
+    }
+    // 2. Other layouts: detect columns by header.
     for (const table of Array.from(doc.querySelectorAll('table'))) {
       const h = headerLabels(table);
       const codeIdx = col(h, /subject\s*code/, /course\s*code/, /sub\s*code/, /^code$/);
@@ -52,19 +65,32 @@ export function extractAcademicExport(rootDoc) {
       }
       if (rows.length) return rows;
     }
-    const known = doc.querySelector('#tblSubjectWiseAttendance, #attendanceTable');
-    if (known) {
-      const rows = [];
-      for (const tr of dataRows(known)) {
-        const td = tr.querySelectorAll('td');
-        if (td.length !== 9 || !COURSE_CODE_RE.test(text(td[0]))) continue;
-        rows.push({ subjectCode: text(td[0]), subjectName: text(td[1]), classesConducted: text(td[2]),
-          present: text(td[3]), absent: text(td[4]), odMlTaken: text(td[5]), presentPercentage: text(td[6]),
-          odMlPercentage: text(td[7]), attendancePercentage: text(td[8]) });
-      }
-      if (rows.length) return rows;
-    }
     return [];
+  }
+
+  function parseInternals(doc) {
+    const table = Array.from(doc.querySelectorAll('table')).find((t) => {
+      const txt = text(t).toLowerCase();
+      return txt.includes('mark secured') || /max\.?\s*marks/.test(headerLabels(t).join('|'));
+    });
+    if (!table) return [];
+    const split = (raw) => { const p = raw.split('/').map((x) => x.trim()); return { left: p[0] || '', right: p[1] || '' }; };
+    const subjects = [];
+    let current = null;
+    for (const tr of Array.from(table.querySelectorAll('tr'))) {
+      const td = tr.querySelectorAll('td');
+      if (td.length === 4 && COURSE_CODE_RE.test(text(td[0]))) {
+        current = { subjectCode: text(td[0]), subjectName: text(td[1]), marksObtained: text(td[2]), maxMarks: text(td[3]), components: [] };
+        subjects.push(current);
+      } else if (td.length === 3 && current) {
+        const name = text(td[0]);
+        if (!name || /^name$/i.test(name)) continue;
+        const cond = split(text(td[1]));
+        const conv = split(text(td[2]));
+        current.components.push({ name, conductedObtained: cond.left, conductedMax: cond.right, convertedObtained: conv.left, convertedMax: conv.right });
+      }
+    }
+    return subjects.filter((s) => s.marksObtained !== '' || s.components.length > 0);
   }
 
   function parseLedger(doc) {
@@ -130,14 +156,17 @@ export function extractAcademicExport(rootDoc) {
 
   const attendance = [];
   const ledger = [];
+  const internals = [];
   let cgpa = null;
   let profile = {};
   const seenAtt = new Set();
   const seenLed = new Set();
+  const seenInt = new Set();
   for (const d of docs) {
     try {
       parseAttendance(d).forEach((r) => { if (!seenAtt.has(r.subjectCode)) { seenAtt.add(r.subjectCode); attendance.push(r); } });
       parseLedger(d).forEach((r) => { const k = r.subjectCode + '|' + r.semester + '|' + r.attempt; if (!seenLed.has(k)) { seenLed.add(k); ledger.push(r); } });
+      parseInternals(d).forEach((r) => { if (!seenInt.has(r.subjectCode)) { seenInt.add(r.subjectCode); internals.push(r); } });
       if (cgpa == null) cgpa = parseCgpa(d);
       profile = Object.assign({}, stripProfile(d), profile);
     } catch (e) { /* skip a bad frame */ }
@@ -149,6 +178,7 @@ export function extractAcademicExport(rootDoc) {
     reportDate: null,
     attendance,
     ledger,
+    internals,
     cgpa,
     profile,
   };

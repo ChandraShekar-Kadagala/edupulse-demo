@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { buildExport, isEmptyExport, parseAttendance, parseCgpa, parseExamLedger, stripProfile } from './parseReport';
+import { buildExport, isEmptyExport, parseAttendance, parseCgpa, parseExamLedger, parseInternals, stripProfile } from './parseReport';
 
 // All HTML below is synthetic (SYN* codes, placeholder names). No real student or portal data.
 
@@ -52,6 +52,25 @@ describe('attendance extraction', () => {
     expect(parseAttendance(doc('<table id="other"><tr><th>Name</th></tr><tr><td>x</td></tr></table>'))).toEqual([]);
   });
 
+  it('reads the real SRM table with a nested 2-row header, by column position', () => {
+    const REAL = `
+      <table>
+        <tr><th rowspan="2">Subject Code</th><th rowspan="2">Subject Description</th><th rowspan="2">Classes Conducted</th>
+            <th colspan="2">Attendance Entered (Slots)</th><th rowspan="2">OD/ML Taken</th><th rowspan="2">Present %</th>
+            <th rowspan="2">OD ML % approved</th><th rowspan="2">Attendance %</th></tr>
+        <tr><th>Present(P)</th><th>Absent(A)</th></tr>
+        <tr><td>CSE 204</td><td>DESIGN AND ANALYSIS OF ALGORITHMS</td><td>61</td><td>57</td><td>4</td><td>0</td><td>93.44</td><td>0.00</td><td>93.44</td></tr>
+        <tr><td colspan="9">For any discrepancy contact the course teacher.</td></tr>
+      </table>`;
+    const rows = parseAttendance(doc(REAL));
+    expect(rows).toHaveLength(1);
+    expect(rows[0].subjectCode).toBe('CSE 204');
+    expect(rows[0].classesConducted).toBe('61');
+    expect(rows[0].present).toBe('57');
+    expect(rows[0].absent).toBe('4');
+    expect(rows[0].attendancePercentage).toBe('93.44');
+  });
+
   it('reads a different layout (no id, reordered columns, derived absent) and skips total rows', () => {
     const rows = parseAttendance(doc(ALT_ATTENDANCE_HTML));
     expect(rows).toHaveLength(1);
@@ -75,6 +94,44 @@ describe('exam ledger extraction', () => {
 
   it('CGPA is null when the page does not contain it', () => {
     expect(parseCgpa(doc('<div>no grades here</div>'))).toBeNull();
+  });
+});
+
+describe('internal marks (expandable subject totals + CLA/Mid breakdown)', () => {
+  const INTERNALS = `
+    <table class="table table-striped table-bordered">
+      <tr><th>Subject Code</th><th>Subject Description</th><th>Marks Obtained</th><th>Max.Marks</th></tr>
+      <tr><td>CSE 203</td><td>DISCRETE MATHEMATICS</td><td>38.25</td><td>50</td></tr>
+      <tr><td colspan="4">
+        <table>
+          <tr><th>Name</th><th>Mark Secured(Conducted)</th><th>Mark Secured(Converted)</th></tr>
+          <tr><td>Mid Semester Exam I</td><td>18.25 / 20</td><td>18.25 / 20</td></tr>
+          <tr><td>CLA 1</td><td>10.00 / 10</td><td>10.00 / 10</td></tr>
+          <tr><td>CLA 3</td><td></td><td></td></tr>
+        </table>
+      </td></tr>
+      <tr><td>SEC 203</td><td>APTITUDE FOR ENGINEERS - III</td><td>8.40</td><td>40</td></tr>
+    </table>`;
+
+  it('reads each subject total and its components, with per-subject max marks', () => {
+    const subs = parseInternals(doc(INTERNALS));
+    expect(subs).toHaveLength(2);
+    expect(subs[0].subjectCode).toBe('CSE 203');
+    expect(subs[0].marksObtained).toBe('38.25');
+    expect(subs[0].maxMarks).toBe('50');
+    expect(subs[0].components).toHaveLength(3);
+    expect(subs[0].components[0].name).toBe('Mid Semester Exam I');
+    expect(subs[0].components[0].conductedObtained).toBe('18.25');
+    expect(subs[0].components[0].conductedMax).toBe('20');
+    expect(subs[0].components[2].name).toBe('CLA 3'); // pending: empty marks kept
+    expect(subs[0].components[2].conductedObtained).toBe('');
+    // Max marks are NOT assumed to be 50 — SEC 203 is out of 40.
+    expect(subs[1].subjectCode).toBe('SEC 203');
+    expect(subs[1].maxMarks).toBe('40');
+  });
+
+  it('returns nothing when there is no internal-marks table', () => {
+    expect(parseInternals(doc('<table><tr><th>Other</th></tr><tr><td>x</td></tr></table>'))).toEqual([]);
   });
 });
 

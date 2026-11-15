@@ -4,6 +4,7 @@ export interface ExtractedAcademicExport {
   reportDate: string | null;
   attendance: Array<Record<string, string>>;
   ledger: Array<Record<string, string>>;
+  internals: Array<{ subjectCode: string; subjectName: string; marksObtained: string; maxMarks: string; components: Array<Record<string, string>> }>;
   cgpa: string | null;
   profile: Record<string, string>;
 }

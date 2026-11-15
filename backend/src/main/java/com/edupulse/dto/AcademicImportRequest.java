@@ -17,8 +17,27 @@ public class AcademicImportRequest {
     private String reportDate;
     private List<AttendanceRow> attendance;
     private List<LedgerRow> ledger;
+    private List<InternalSubject> internals;
     private String cgpa;
     private Map<String, String> profile;
+
+    @Data
+    public static class InternalSubject {
+        private String subjectCode;
+        private String subjectName;
+        private String marksObtained;
+        private String maxMarks;
+        private List<Component> components;
+
+        @Data
+        public static class Component {
+            private String name;
+            private String conductedObtained;
+            private String conductedMax;
+            private String convertedObtained;
+            private String convertedMax;
+        }
+    }
 
     @Data
     public static class AttendanceRow {

@@ -38,6 +38,7 @@ class ImportPersistenceTest {
         {"reportDate":"2099-02-01",
          "attendance":[{"subjectCode":"SYN 301","subjectName":"Imported One","classesConducted":"40","present":"20","absent":"20","odMlTaken":"0","presentPercentage":"50","odMlPercentage":"0","attendancePercentage":"50"}],
          "ledger":[{"semester":"Semester 1","monthYear":"DEC-2099","subjectCode":"SYN 301","subjectDescription":"Imported One","credit":"4.0","grade":"B","gradePoints":"8.0","result":"PASS","attempt":"1"}],
+         "internals":[{"subjectCode":"SYN 301","subjectName":"Imported One","marksObtained":"38.25","maxMarks":"50","components":[]}],
          "cgpa":"8.0","profile":{"registerNo":"STU-1001"}}
         """;
 
@@ -49,6 +50,8 @@ class ImportPersistenceTest {
     @Autowired private AttendanceSnapshotRepository snapshotRepository;
     @Autowired private ExamResultRepository examResultRepository;
     @Autowired private AcademicImportBatchRepository batchRepository;
+    @Autowired private AssessmentRepository assessmentRepository;
+    @Autowired private MarkRepository markRepository;
     @Autowired private CourseRepository courseRepository;
     @Autowired private RiskAssessmentService riskAssessmentService;
     @Autowired private TransactionTemplate tx;
@@ -95,6 +98,9 @@ class ImportPersistenceTest {
         assertEquals(20, snap.getPresent());
         assertEquals(40, snap.getConducted());
         assertEquals(1, examResultRepository.findByStudentId(studentId).stream().filter(e -> e.getGrade().equals("B")).count());
+        var impAssessment = assessmentRepository.findByCourseIdAndName(courseId, "Internal Assessment (imported)").orElseThrow();
+        assertEquals(50.0, impAssessment.getMaxMarks());
+        assertEquals(38.25, markRepository.findByStudentIdAndAssessmentId(studentId, impAssessment.getId()).orElseThrow().getMarksObtained());
 
         // Same upload again -> idempotent (duplicate, still one batch).
         JsonNode c2 = om.readTree(mockMvc.perform(post("/api/students/me/imports/confirm").header("Authorization", "Bearer " + t)

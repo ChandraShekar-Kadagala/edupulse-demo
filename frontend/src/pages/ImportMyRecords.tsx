@@ -80,6 +80,7 @@ export default function ImportMyRecords() {
           reportDate: reportDate || parsed.reportDate || null,
           attendance: parsed.attendance ?? [],
           ledger: parsed.ledger ?? [],
+          internals: parsed.internals ?? [],
           cgpa: parsed.cgpa ?? null,
           profile: parsed.profile ?? {},
         });
@@ -168,9 +169,9 @@ export default function ImportMyRecords() {
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
                     ['Attendance rows', String(result.attendance.length)],
+                    ['Subjects with marks', String(result.internals.length)],
                     ['Ledger rows', String(result.ledger.length)],
                     ['CGPA', result.cgpa ?? '—'],
-                    ['Profile fields', String(Object.keys(result.profile).length)],
                   ].map(([label, value]) => (
                     <div key={label} className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800">
                       <dt className="text-xs text-gray-500 dark:text-gray-400">{label}</dt>
@@ -200,7 +201,7 @@ export default function ImportMyRecords() {
                       {saved.duplicate ? 'Already imported — your profile is up to date.' : 'Saved to your profile.'}
                     </p>
                     <p className="text-gray-700 dark:text-gray-300">
-                      {saved.acceptedAttendance} attendance + {saved.acceptedLedger} result rows
+                      {saved.acceptedAttendance} attendance + {saved.acceptedInternals} subject marks + {saved.acceptedLedger} result rows
                       {saved.riskScore != null && <> · your risk is now <strong>{saved.riskScore}/100 ({saved.riskLevel})</strong></>}
                     </p>
                     <a href="/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:underline">View my profile →</a>
@@ -212,7 +213,7 @@ export default function ImportMyRecords() {
                       Server check — {serverCheck.sourceLabel}
                     </p>
                     <p className="text-gray-700 dark:text-gray-300">
-                      {serverCheck.acceptedAttendance} attendance + {serverCheck.acceptedLedger} result rows accepted
+                      {serverCheck.acceptedAttendance} attendance + {serverCheck.acceptedInternals} marks + {serverCheck.acceptedLedger} result rows accepted
                       {serverCheck.rejected > 0 && <span className="text-red-600 dark:text-red-400"> · {serverCheck.rejected} rejected</span>}
                       {serverCheck.warnings > 0 && <span className="text-amber-600 dark:text-amber-400"> · {serverCheck.warnings} warnings</span>}
                     </p>

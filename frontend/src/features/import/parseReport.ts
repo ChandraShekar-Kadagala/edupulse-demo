@@ -35,6 +35,24 @@ export interface RawLedgerRow {
   attempt: string;
 }
 
+/** One internal-assessment component of a subject (e.g. "CLA 1", "Mid Semester Exam I"). */
+export interface RawInternalComponent {
+  name: string;
+  conductedObtained: string;
+  conductedMax: string;
+  convertedObtained: string;
+  convertedMax: string;
+}
+
+/** A subject's internal marks: the total (obtained / max) plus the component breakdown. */
+export interface RawInternalSubject {
+  subjectCode: string;
+  subjectName: string;
+  marksObtained: string;
+  maxMarks: string;
+  components: RawInternalComponent[];
+}
+
 export interface AcademicExport {
   /** Always a manual import. Never presented as a live/official connection. */
   sourceType: 'STUDENT_MANUAL_IMPORT';
@@ -44,6 +62,7 @@ export interface AcademicExport {
   reportDate: string | null;
   attendance: RawAttendanceRow[];
   ledger: RawLedgerRow[];
+  internals: RawInternalSubject[];
   cgpa: string | null;
   /** Allowlisted academic profile fields only (see PROFILE_ALLOWLIST). */
   profile: Record<string, string>;
@@ -75,12 +94,31 @@ function dataRows(table: Element): Element[] {
   return Array.from(table.querySelectorAll('tr')).filter((tr) => tr.querySelector('td'));
 }
 
+/** SRM attendance data rows have 9 columns in a fixed order, course code first. */
+function positionalAttendance(tr: Element): RawAttendanceRow {
+  const td = tr.querySelectorAll('td');
+  return {
+    subjectCode: text(td[0]), subjectName: text(td[1]), classesConducted: text(td[2]),
+    present: text(td[3]), absent: text(td[4]), odMlTaken: text(td[5]),
+    presentPercentage: text(td[6]), odMlPercentage: text(td[7]), attendancePercentage: text(td[8]),
+  };
+}
+
 /**
- * Subject-wise attendance. Finds the attendance table by its HEADERS (not a fixed id or column count),
- * so it works across portal layouts, and maps the columns it needs by header position. Missing columns
- * are derived where safe (absent = conducted - present) or left blank for the server to judge.
+ * Subject-wise attendance. The real SRM table has a nested 2-row header (Present/Absent under
+ * "Attendance Entered (Slots)"), so header-by-name mapping is unreliable; its columns are a fixed
+ * 9-wide order (code, name, conducted, present, absent, OD/ML, present%, OD/ML%, attendance%) with the
+ * course code first — which also distinguishes it from the exam ledger (code is not its first column).
+ * Falls back to header-based mapping for other layouts.
  */
 export function parseAttendance(doc: Document): RawAttendanceRow[] {
+  // 1. Fixed 9-column SRM layout (robust to nested headers).
+  for (const table of Array.from(doc.querySelectorAll('table'))) {
+    const rows = dataRows(table).filter(
+      (tr) => tr.querySelectorAll('td').length === 9 && COURSE_CODE_RE.test(text(tr.querySelectorAll('td')[0])));
+    if (rows.length > 0) return rows.map(positionalAttendance);
+  }
+  // 2. Other layouts: detect columns by header.
   for (const table of Array.from(doc.querySelectorAll('table'))) {
     const h = headerLabels(table);
     const codeIdx = col(h, /subject\s*code/, /course\s*code/, /sub\s*code/, /^code$/);
@@ -116,21 +154,6 @@ export function parseAttendance(doc: Document): RawAttendanceRow[] {
         presentPercentage: cell(tr, presentPctIdx),
         odMlPercentage: '',
         attendancePercentage: cell(tr, attPctIdx),
-      });
-    }
-    if (rows.length > 0) return rows;
-  }
-  // Fallback for the known SRM table with no usable header row: fixed 9-column order.
-  const known = doc.querySelector('#tblSubjectWiseAttendance, #attendanceTable');
-  if (known) {
-    const rows: RawAttendanceRow[] = [];
-    for (const tr of dataRows(known)) {
-      const td = tr.querySelectorAll('td');
-      if (td.length !== 9 || !COURSE_CODE_RE.test(text(td[0]))) continue;
-      rows.push({
-        subjectCode: text(td[0]), subjectName: text(td[1]), classesConducted: text(td[2]),
-        present: text(td[3]), absent: text(td[4]), odMlTaken: text(td[5]),
-        presentPercentage: text(td[6]), odMlPercentage: text(td[7]), attendancePercentage: text(td[8]),
       });
     }
     if (rows.length > 0) return rows;
@@ -174,6 +197,42 @@ export function parseExamLedger(doc: Document): RawLedgerRow[] {
     if (rows.length > 0) return rows;
   }
   return [];
+}
+
+function splitPair(raw: string): { left: string; right: string } {
+  const [left, right] = raw.split('/').map((x) => x.trim());
+  return { left: left ?? '', right: right ?? '' };
+}
+
+/**
+ * Internal assessment marks. The real "Internal Mark Details" page is a subject row (code, description,
+ * Marks Obtained, Max.Marks) followed by an expandable detail table of components (Name,
+ * Mark Secured(Conducted) "a / b", Mark Secured(Converted) "a / b"). The detail rows live in the DOM even
+ * when collapsed, so this reads them. Max marks are taken from the page (they vary, e.g. 40 vs 50).
+ */
+export function parseInternals(doc: Document): RawInternalSubject[] {
+  const table = Array.from(doc.querySelectorAll('table')).find((t) => {
+    const txt = text(t).toLowerCase();
+    return txt.includes('mark secured') || /max\.?\s*marks/.test(headerLabels(t).join('|'));
+  });
+  if (!table) return [];
+
+  const subjects: RawInternalSubject[] = [];
+  let current: RawInternalSubject | null = null;
+  for (const tr of Array.from(table.querySelectorAll('tr'))) {
+    const td = tr.querySelectorAll('td');
+    if (td.length === 4 && COURSE_CODE_RE.test(text(td[0]))) {
+      current = { subjectCode: text(td[0]), subjectName: text(td[1]), marksObtained: text(td[2]), maxMarks: text(td[3]), components: [] };
+      subjects.push(current);
+    } else if (td.length === 3 && current) {
+      const name = text(td[0]);
+      if (!name || /^name$/i.test(name)) continue;
+      const cond = splitPair(text(td[1]));
+      const conv = splitPair(text(td[2]));
+      current.components.push({ name, conductedObtained: cond.left, conductedMax: cond.right, convertedObtained: conv.left, convertedMax: conv.right });
+    }
+  }
+  return subjects.filter((s) => s.marksObtained !== '' || s.components.length > 0);
 }
 
 /** CGPA from the exam ledger, e.g. "Cumulative Grade Point Average (CGPA) : 8.85". Null if absent. */
@@ -229,6 +288,7 @@ export function buildExport(html: string, options: { reportDate?: string | null 
     reportDate: options.reportDate ?? null,
     attendance: safe(() => parseAttendance(doc), []),
     ledger: safe(() => parseExamLedger(doc), []),
+    internals: safe(() => parseInternals(doc), []),
     cgpa: safe(() => parseCgpa(doc), null),
     profile: safe(() => stripProfile(doc), {}),
   };
@@ -236,5 +296,6 @@ export function buildExport(html: string, options: { reportDate?: string | null 
 
 /** True when nothing academic was found — the UI shows a "couldn't read this page" state instead of a false success. */
 export function isEmptyExport(e: AcademicExport): boolean {
-  return e.attendance.length === 0 && e.ledger.length === 0 && e.cgpa === null && Object.keys(e.profile).length === 0;
+  return e.attendance.length === 0 && e.ledger.length === 0 && e.internals.length === 0
+    && e.cgpa === null && Object.keys(e.profile).length === 0;
 }

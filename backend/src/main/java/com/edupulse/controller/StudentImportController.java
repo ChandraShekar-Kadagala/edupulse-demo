@@ -31,7 +31,7 @@ public class StudentImportController {
     private final ImportedDataDeletionService deletionService;
 
     public record ImportPreviewResponse(
-            String sourceLabel, boolean live, int acceptedAttendance, int acceptedLedger,
+            String sourceLabel, boolean live, int acceptedAttendance, int acceptedInternals, int acceptedLedger,
             Double cgpa, long rejected, long warnings, List<Issue> issues,
             List<AttendanceSummary> attendance, List<LedgerEntry> ledger) {
     }
@@ -41,11 +41,14 @@ public class StudentImportController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ImportPreviewResponse> preview(@RequestBody AcademicImportRequest req) {
         ValidationReport r = importService.validate(req);
-        long warnings = r.issues().stream().filter(i -> Issue.WARNING.equals(i.severity())).count();
+        List<Issue> issues = new java.util.ArrayList<>(r.issues());
+        int acceptedInternals = importService.acceptInternals(req.getInternals(), issues).size();
+        long warnings = issues.stream().filter(i -> Issue.WARNING.equals(i.severity())).count();
+        long rejected = issues.stream().filter(i -> Issue.REJECTED.equals(i.severity())).count();
         return ResponseEntity.ok(new ImportPreviewResponse(
                 AcademicDataSourceType.STUDENT_MANUAL_IMPORT.label(), false,
-                r.acceptedAttendance().size(), r.acceptedLedger().size(), r.cgpa(),
-                r.rejectedCount(), warnings, r.issues(), r.acceptedAttendance(), r.acceptedLedger()));
+                r.acceptedAttendance().size(), acceptedInternals, r.acceptedLedger().size(), r.cgpa(),
+                rejected, warnings, issues, r.acceptedAttendance(), r.acceptedLedger()));
     }
 
     /** Save a validated upload into the student's own records (consent required). */

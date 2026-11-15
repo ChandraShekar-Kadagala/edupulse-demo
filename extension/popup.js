@@ -23,14 +23,14 @@ extractBtn.addEventListener('click', async () => {
     }
     const [res] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: extractAcademicExport });
     const data = res && res.result;
-    const total = data ? data.attendance.length + data.ledger.length : 0;
+    const total = data ? data.attendance.length + data.ledger.length + (data.internals ? data.internals.length : 0) : 0;
     if (!data || (total === 0 && !data.cgpa)) {
       show('No academic data found on this page. Open the actual attendance or marks report (not the dashboard) and try again.', 'warn');
       return;
     }
     latest = data;
     downloadBtn.disabled = false;
-    show(`Found <b>${data.attendance.length}</b> attendance + <b>${data.ledger.length}</b> result rows${data.cgpa ? `, CGPA ${data.cgpa}` : ''}. Personal details removed. Download it, then upload the file in EduPulse → “Import my records”.`, 'ok');
+    show(`Found <b>${data.attendance.length}</b> attendance, <b>${data.internals ? data.internals.length : 0}</b> subjects with marks, <b>${data.ledger.length}</b> results${data.cgpa ? `, CGPA ${data.cgpa}` : ''}. Personal details removed. Download it, then upload the file in EduPulse → “Import my records”.`, 'ok');
   } catch (e) {
     show('Could not read this page. Make sure you are on the SRM portal report and try again.', 'err');
   }
