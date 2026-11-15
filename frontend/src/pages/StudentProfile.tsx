@@ -260,7 +260,7 @@ export default function StudentProfile() {
               </div>
 
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 font-medium">
-                <span className="font-mono text-gray-900 dark:text-gray-200 font-bold">{student.studentNumber}</span> • {student.department || 'Computer Science & Engineering'} • Semester {student.currentSemester || 5}
+                <span className="font-mono text-gray-900 dark:text-gray-200 font-bold">{student.studentNumber}</span> • {student.department || 'Computer Science & Engineering'} • Semester {student.currentSemester || 3}
               </p>
 
               <div className="flex items-center mt-2.5 gap-2 flex-wrap text-xs">
@@ -331,22 +331,24 @@ export default function StudentProfile() {
           </CardContent>
         </Card>
 
-        {/* Converted Internals Score Card */}
+        {/* Internal Marks Card */}
         <Card className="hover:shadow-sm transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">
-              Converted Internals Score
+              Internal Marks (so far)
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">
-              {totalConvertedObtained.toFixed(2)} <span className="text-sm font-normal text-gray-500">/ {totalMaxConvertedEvaluated.toFixed(0)}</span>
+              {totalConvertedObtained.toFixed(1)} <span className="text-sm font-normal text-gray-500">/ {totalMaxConvertedEvaluated.toFixed(0)}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Overall available total: <strong>{totalConvertedObtained.toFixed(2)} / {totalMaxConvertedSemester}</strong>
+              {totalMaxConvertedEvaluated > 0
+                ? <><strong className="text-indigo-600 dark:text-indigo-400">{((totalConvertedObtained / totalMaxConvertedEvaluated) * 100).toFixed(0)}%</strong> of what&apos;s been graded</>
+                : 'Nothing graded yet'}
             </p>
-            <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold mt-1">
-              {analytics?.evaluatedAssessmentsCount} conducted internal evaluations
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+              Full semester total: <strong>{totalMaxConvertedSemester}</strong> · {analytics?.evaluatedAssessmentsCount} components graded
             </p>
           </CardContent>
         </Card>
@@ -464,14 +466,14 @@ export default function StudentProfile() {
             <div>
               <CardTitle className="text-base font-bold text-gray-900 dark:text-white flex items-center">
                 <FileText className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" />
-                Internal Mark Details & Evaluated Components
+                Internal Marks — by Subject & Component
               </CardTitle>
               <CardDescription className="text-xs">
-                Preserving raw obtained marks vs converted internal marks weightages. Unconducted components remain pending (never zero).
+                Your marks in each graded component. Components not yet conducted show as pending — never counted as zero.
               </CardDescription>
             </div>
             <div className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 rounded-md border border-indigo-200 dark:border-indigo-800">
-              Evaluated Converted: {totalConvertedObtained.toFixed(2)} / {totalMaxConvertedEvaluated.toFixed(0)}
+              Graded so far: {totalConvertedObtained.toFixed(1)} / {totalMaxConvertedEvaluated.toFixed(0)}
             </div>
           </div>
         </CardHeader>
@@ -480,12 +482,12 @@ export default function StudentProfile() {
             <thead className="text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-950 uppercase border-b border-gray-200 dark:border-gray-800">
               <tr>
                 <th className="px-4 py-3">Course</th>
-                <th className="px-4 py-3">Assessment Name</th>
-                <th className="px-4 py-3">Faculty & Room</th>
-                <th className="px-4 py-3 text-center">Raw Marks (Obt / Max)</th>
-                <th className="px-4 py-3 text-center">Converted Marks (Obt / Max)</th>
-                <th className="px-4 py-3 text-center">Percentage</th>
-                <th className="px-4 py-3 text-right">Evaluation Status</th>
+                <th className="px-4 py-3">Component</th>
+                <th className="px-4 py-3">Faculty &amp; Room</th>
+                <th className="px-4 py-3 text-center">Marks obtained</th>
+                <th className="px-4 py-3 text-center">Counts toward total</th>
+                <th className="px-4 py-3 text-center">%</th>
+                <th className="px-4 py-3 text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -543,20 +545,20 @@ export default function StudentProfile() {
             <tfoot className="bg-gray-100 dark:bg-gray-950 font-bold border-t-2 border-gray-300 dark:border-gray-700">
               <tr>
                 <td colSpan={3} className="px-4 py-3 text-gray-900 dark:text-white">
-                  Evaluated Total Marks Summary
+                  Totals (graded components)
                 </td>
-                <td className="px-4 py-3 text-center font-mono text-gray-700 dark:text-gray-300">
-                  Evaluated Raw Total
+                <td className="px-4 py-3 text-center font-mono text-gray-500 dark:text-gray-400 text-[11px]">
+                  {analytics?.evaluatedAssessmentsCount} graded
                 </td>
                 <td className="px-4 py-3 text-center font-mono text-indigo-600 dark:text-indigo-400 text-sm">
-                  {totalConvertedObtained.toFixed(2)} / {totalMaxConvertedSemester} Max Internals
+                  {totalConvertedObtained.toFixed(1)} <span className="text-gray-500">/ {totalMaxConvertedSemester} this sem</span>
                 </td>
                 <td className="px-4 py-3 text-center font-semibold text-emerald-600 dark:text-emerald-400">
-                  {analytics?.overallAverageMarksPercentage}% Evaluated Avg
+                  {analytics?.overallAverageMarksPercentage}% avg
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Badge variant="default" className="bg-indigo-600 text-white text-[10px]">
-                    VERIFIED ACCURACY
+                    GRADED SO FAR
                   </Badge>
                 </td>
               </tr>
