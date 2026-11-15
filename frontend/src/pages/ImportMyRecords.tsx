@@ -67,11 +67,27 @@ export default function ImportMyRecords() {
       return;
     }
     try {
-      const html = await file.text();
+      const content = await file.text();
       setFileName(file.name);
-      setResult(buildExport(html, { reportDate: reportDate || null }));
+      setSaved(null);
+      setServerCheck(null);
+      if (/\.json$/i.test(file.name) || content.trimStart().startsWith('{')) {
+        // Already-extracted export from the EduPulse Chrome extension.
+        const parsed = JSON.parse(content) as AcademicExport;
+        setResult({
+          sourceType: 'STUDENT_MANUAL_IMPORT',
+          exportedAt: parsed.exportedAt ?? new Date().toISOString(),
+          reportDate: reportDate || parsed.reportDate || null,
+          attendance: parsed.attendance ?? [],
+          ledger: parsed.ledger ?? [],
+          cgpa: parsed.cgpa ?? null,
+          profile: parsed.profile ?? {},
+        });
+      } else {
+        setResult(buildExport(content, { reportDate: reportDate || null }));
+      }
     } catch {
-      setError('Could not read that file. Save the report page as HTML and try again.');
+      setError('Could not read that file. Use the saved report page (.html) or the extension export (.json).');
     }
   };
 
@@ -102,7 +118,7 @@ export default function ImportMyRecords() {
         <CardContent className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
           <ol className="list-decimal pl-5 space-y-1">
             <li>Log into the SRM AP Student Corner <strong>yourself</strong>, in your own browser, and open your report page.</li>
-            <li>Save that page (Ctrl+S → "Webpage, HTML only").</li>
+            <li>Save that page (Ctrl+S), <strong>or</strong> use the EduPulse Chrome extension to export a .json in one click (best if the saved page comes out empty).</li>
             <li>Load the saved file below. It is read on <strong>your device</strong>; your password and the CAPTCHA never reach EduPulse.</li>
           </ol>
           <p className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -123,10 +139,10 @@ export default function ImportMyRecords() {
             <input type="date" value={reportDate} onChange={(e) => setReportDate(e.target.value)}
               className="mt-1 block rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-1.5 text-sm" />
           </label>
-          <input ref={fileInput} type="file" accept=".html,.htm,text/html" className="hidden"
+          <input ref={fileInput} type="file" accept=".html,.htm,.json,text/html,application/json" className="hidden"
             onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
           <Button onClick={() => fileInput.current?.click()}>
-            <FileUp className="w-4 h-4 mr-2" aria-hidden="true" /> Choose saved report file
+            <FileUp className="w-4 h-4 mr-2" aria-hidden="true" /> Choose report file (.html or .json)
           </Button>
           {fileName && <p className="text-xs text-gray-500">Loaded: {fileName}</p>}
           {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}

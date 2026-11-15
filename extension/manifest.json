@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "EduPulse Record Importer",
+  "version": "0.1.0",
+  "description": "Export your own SRM AP academic records to EduPulse. Runs only in your own logged-in tab; never handles your password or the CAPTCHA.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["https://student.srmap.edu.in/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "EduPulse Record Importer"
+  }
+}
